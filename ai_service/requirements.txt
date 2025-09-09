@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+opencv-python-headless
+numpy
+tensorflow==2.15.*
+python-multipart

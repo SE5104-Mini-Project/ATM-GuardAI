@@ -1,0 +1,29 @@
+services:
+  mongo:
+    image: mongo:7
+    ports: [ "27017:27017" ]
+    volumes: [ "mongo-data:/data/db" ]
+
+  ai_service:
+    build: ../ai_service
+    env_file: ../ai_service/.env
+    ports: [ "9000:9000" ]
+
+  api:
+    build: ../api
+    env_file: ../api/.env
+    environment:
+      AI_URL: http://ai_service:9000
+    depends_on: [ mongo, ai_service ]
+    ports: [ "8080:8080" ]
+
+  web:
+    build: ../web
+    environment:
+      VITE_API_URL: http://localhost:8080
+      VITE_WS_URL: ws://localhost:8080
+    depends_on: [ api ]
+    ports: [ "5173:80" ]
+
+volumes:
+  mongo-data:
