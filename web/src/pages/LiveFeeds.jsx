@@ -1,0 +1,1 @@
+export default function LiveFeeds(){ return <h2 className="text-black text-2xl font-semibold p-6">Live Camera Feeds</h2>; }
