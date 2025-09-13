@@ -1,3 +1,4 @@
+// src/components/Dashboard.jsx
 import { useState } from "react";
 
 const icon = {
@@ -106,7 +107,7 @@ const Dashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 pr-2 sm:pr-4">
         <div className="px-3 sm:px-6 pt-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Security Dashboard</h2>
 
@@ -165,14 +166,16 @@ const Dashboard = () => {
             </div>
           </section>
 
-          {/* ATM Locations */}
-          <section className="bg-white rounded-xl shadow-sm">
-            <div className="flex items-center justify-between p-6 pb-3">
+          {/* ATM Locations — FULL BLEED */}
+          <section className="bg-white shadow-sm -mx-3 sm:-mx-6 rounded-none sm:rounded-xl">
+            {/* header */}
+            <div className="flex items-center justify-between px-3 sm:px-6 pt-6 pb-3">
               <h3 className="text-lg font-semibold text-gray-900">ATM Locations</h3>
               <a href="#" className="text-sm text-blue-600 hover:underline">View Map</a>
             </div>
 
-            <div className="px-6 pb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+            {/* grid spans full width; cards auto-fit to fill row */}
+            <div className="px-3 sm:px-6 pb-6 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
               {atmLocations.map((atm) => (
                 <div key={atm.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition">
                   <div className="flex items-start justify-between gap-3">
