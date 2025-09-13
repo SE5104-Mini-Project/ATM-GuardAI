@@ -59,8 +59,48 @@ const icon = {
   ),
 };
 
+const EyeIcon = () => (
+  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+  </svg>
+);
+
+const HistoryIcon = () => (
+  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M13 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3zm-1 4h2v5h4v2h-6V7z" />
+  </svg>
+);
+
+/** Shared card style with MEDIUM shadow */
+const cardBase =
+  "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
+
+/** Navy header location card */
+function LocationCard({ name, status, address, cameras, lastAlert }) {
+  const pill = status === "Alert" ? "bg-red-500 text-white" : "bg-green-500 text-white";
+  return (
+    <div className={`overflow-hidden ring-1 ring-gray-200 ${cardBase}`}>
+      <div className="bg-[#0f2a56] text-white px-5 py-4 flex items-center justify-between">
+        <h4 className="text-lg font-semibold">{name}</h4>
+        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${pill}`}>{status}</span>
+      </div>
+      <div className="px-5 py-4">
+        <p className="text-gray-900 font-semibold mb-1">{address}</p>
+        <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gray-200 pt-3 text-sm text-gray-600">
+          <div className="flex items-center gap-1"><span className="font-medium">{cameras}</span> Cameras</div>
+          <div className="text-right"><span className="text-gray-500">Last alert:</span> <span className="font-medium">{lastAlert}</span></div>
+        </div>
+      </div>
+      <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between text-sm">
+        <button className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800"><EyeIcon /><span className="font-medium">View Live</span></button>
+        <button className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800"><HistoryIcon /><span className="font-medium">History</span></button>
+      </div>
+    </div>
+  );
+}
+
 const Dashboard = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen] = useState(true);
 
   const stats = { totalATMs: 24, activeAlerts: 5, camerasOnline: 22, pendingReviews: 12 };
 
@@ -77,18 +117,17 @@ const Dashboard = () => {
   ];
 
   const alertAccent = (type) =>
-    type === "resolved"
-      ? "border-green-300 bg-green-50 text-green-700"
-      : "border-red-300 bg-red-50 text-red-700";
+    type === "resolved" ? "border-green-400 bg-green-100 text-green-800" : "border-red-400 bg-red-100 text-red-800";
 
   return (
     <div className="flex min-h-screen w-screen overflow-x-hidden bg-gray-100">
       {/* Sidebar */}
-      <aside className={`bg-blue-900 text-white w-64 flex-shrink-0 ${isSidebarOpen ? "block" : "hidden"} md:block`}>
-        <div className="px-5 py-4 border-b border-blue-800">
-          <h1 className="text-xl font-extrabold tracking-tight">ATM GuardAI</h1>
+      <aside className="fixed inset-y-0 left-0 bg-[#0f2a56] text-white w-64 h-screen shadow-lg">
+        <div className="px-5 py-6 flex items-center gap-2 border-b border-blue-800">
+          <svg className="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7v6c0 5.25 3.66 10.74 10 13 6.34-2.26 10-7.75 10-13V7l-10-5z" /></svg>
+          <h1 className="text-lg font-bold tracking-wide text-blue-200">ATM GuardAI</h1>
         </div>
-        <nav className="px-2 py-4">
+        <nav className="mt-4 px-2">
           {[
             { label: "Dashboard", icon: icon.dashboards, active: true },
             { label: "Live Feeds", icon: icon.camera },
@@ -98,8 +137,9 @@ const Dashboard = () => {
             { label: "Settings", icon: icon.settings },
             { label: "Users", icon: icon.users },
           ].map((item) => (
-            <a key={item.label} href="#" className={`flex items-center gap-3 px-3 py-3 rounded-lg mb-1 text-sm ${item.active ? "bg-blue-800" : "hover:bg-blue-800/60"}`}>
-              <span className="text-blue-200">{item.icon}</span>
+            <a key={item.label} href="#" className={`flex items-center gap-3 px-3 py-3 rounded-lg mb-1 text-sm font-medium transition-colors
+              ${item.active ? "bg-blue-600 text-white shadow-md" : "text-blue-200 hover:bg-blue-700 hover:text-white"}`}>
+              <span className="w-5 h-5">{item.icon}</span>
               <span>{item.label}</span>
             </a>
           ))}
@@ -107,9 +147,26 @@ const Dashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 min-w-0 pr-2 sm:pr-4">
+      <main className="flex-1 min-w-0 ml-64 pr-2 sm:pr-4">
         <div className="px-3 sm:px-6 pt-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Security Dashboard</h2>
+
+          {/* Header */}
+          <div className={`px-5 py-4 mb-6 flex items-center justify-between ${cardBase}`}>
+            <h2 className="text-2xl font-bold text-gray-900">Security Dashboard</h2>
+            <div className="flex items-center gap-5">
+              <div className="relative">
+                <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" /></svg>
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">3</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">JS</div>
+                <div className="leading-tight">
+                  <div className="font-medium text-gray-900">John Smith</div>
+                  <div className="text-sm text-gray-500">Security Officer</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -119,13 +176,11 @@ const Dashboard = () => {
               { label: "Cameras Online", value: stats.camerasOnline, color: "green", icon: icon.camera },
               { label: "Pending Reviews", value: stats.pendingReviews, color: "yellow", icon: icon.clock },
             ].map((c) => (
-              <div key={c.label} className="bg-white rounded-xl shadow-sm p-5 flex items-center gap-4">
+              <div key={c.label} className={`p-5 flex items-center gap-4 ${cardBase}`}>
                 <div className={`rounded-xl p-3 text-${c.color}-700 bg-${c.color}-100`}>{c.icon}</div>
                 <div>
                   <p className="text-sm text-gray-500">{c.label}</p>
-                  <p className={`text-3xl font-bold ${c.color === "red" ? "text-red-600" : c.color === "green" ? "text-green-600" : c.color === "yellow" ? "text-yellow-600" : "text-gray-900"}`}>
-                    {c.value}
-                  </p>
+                  <p className={`text-3xl font-bold ${c.color === "red" ? "text-red-600" : c.color === "green" ? "text-green-600" : c.color === "yellow" ? "text-yellow-600" : "text-gray-900"}`}>{c.value}</p>
                 </div>
               </div>
             ))}
@@ -135,7 +190,7 @@ const Dashboard = () => {
         {/* Content */}
         <div className="px-3 sm:px-6 py-6">
           {/* Recent Alerts */}
-          <section className="bg-white rounded-xl shadow-sm mb-6">
+          <section className={`${cardBase} mb-6`}>
             <div className="flex items-center justify-between p-6 pb-3">
               <h3 className="text-lg font-semibold text-gray-900">Recent Alerts</h3>
               <a href="#" className="text-sm text-blue-600 hover:underline">View All</a>
@@ -143,11 +198,11 @@ const Dashboard = () => {
 
             <div className="px-6 pb-6 space-y-3">
               {recentAlerts.map((a) => (
-                <div key={a.id} className={`rounded-lg border pl-4 pr-3 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${alertAccent(a.type)}`}>
+                <div key={a.id} className={`rounded-xl border pl-4 pr-3 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${alertAccent(a.type)} shadow hover:shadow-md transition-shadow duration-300`}>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900">{a.title}</p>
-                    <p className="text-sm text-gray-600">{a.description}</p>
-                    <div className="mt-1 text-xs text-gray-500 flex flex-wrap items-center gap-3">
+                    <p className="text-sm text-gray-700">{a.description}</p>
+                    <div className="mt-1 text-xs text-gray-600 flex flex-wrap items-center gap-3">
                       <span className="truncate">{a.location}</span>
                       <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -158,7 +213,7 @@ const Dashboard = () => {
                       </span>
                     </div>
                   </div>
-                  <button className="sm:ml-3 shrink-0 bg-blue-600 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-700">
+                  <button className="sm:ml-3 shrink-0 bg-blue-700 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-900 transition-colors">
                     {a.action}
                   </button>
                 </div>
@@ -166,34 +221,16 @@ const Dashboard = () => {
             </div>
           </section>
 
-          {/* ATM Locations — FULL BLEED */}
-          <section className="bg-white shadow-sm -mx-3 sm:-mx-6 rounded-none sm:rounded-xl">
-            {/* header */}
+          {/* ATM Locations */}
+          <section className={`-mx-3 sm:-mx-6 rounded-none sm:rounded-2xl ${cardBase}`}>
             <div className="flex items-center justify-between px-3 sm:px-6 pt-6 pb-3">
               <h3 className="text-lg font-semibold text-gray-900">ATM Locations</h3>
               <a href="#" className="text-sm text-blue-600 hover:underline">View Map</a>
             </div>
 
-            {/* grid spans full width; cards auto-fit to fill row */}
-            <div className="px-3 sm:px-6 pb-6 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+            <div className="px-3 sm:px-6 pb-6 grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
               {atmLocations.map((atm) => (
-                <div key={atm.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition">
-                  <div className="flex items-start justify-between gap-3">
-                    <h4 className="font-semibold text-gray-900">{atm.name}</h4>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${atm.status === "Alert" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
-                      {atm.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">{atm.address}</p>
-                  <div className="text-xs text-gray-500 mt-2 flex items-center justify-between">
-                    <span>{atm.cameras} Cameras</span>
-                    <span>Last alert: {atm.lastAlert}</span>
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <button className="flex-1 bg-blue-600 text-white text-xs py-2 rounded-md hover:bg-blue-700">View Live</button>
-                    <button className="flex-1 bg-gray-200 text-gray-800 text-xs py-2 rounded-md hover:bg-gray-300">History</button>
-                  </div>
-                </div>
+                <LocationCard key={atm.id} {...atm} />
               ))}
             </div>
           </section>
