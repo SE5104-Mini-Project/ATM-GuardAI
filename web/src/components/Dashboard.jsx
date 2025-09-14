@@ -236,11 +236,21 @@ export default function Dashboard() {
             {recentAlerts.map((a) => (
               <div
                 key={a.id}
-                className={`rounded-xl border pl-4 pr-3 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${alertAccent(
-                  a.type
-                )} shadow hover:shadow-md transition-shadow duration-300`}
+                className={`relative rounded-xl border pl-4 pr-3 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow hover:shadow-md transition-shadow duration-300
+                  ${a.type === "resolved"
+                    ? "border-green-400 bg-green-50"
+                    : a.type === "helmet"
+                    ? "border-amber-400 bg-amber-50"
+                    : "border-rose-400 bg-rose-50"}`}
               >
-                <div className="flex-1 min-w-0">
+                {/* Colored strip */}
+                <div
+                  className={`absolute top-0 left-0 h-full w-2 rounded-l-xl
+                    ${a.type === "resolved" ? "bg-green-500" : a.type === "helmet" ? "bg-amber-500" : "bg-rose-500"}`}
+                ></div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0 pl-3">
                   <p className="font-semibold text-gray-900">{a.title}</p>
                   <p className="text-sm text-gray-700">{a.description}</p>
                   <div className="mt-1 text-xs text-gray-600 flex flex-wrap items-center gap-3">
@@ -254,12 +264,14 @@ export default function Dashboard() {
                     </span>
                   </div>
                 </div>
+
                 <button className="sm:ml-3 shrink-0 bg-blue-700 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-900 transition-colors">
                   {a.action}
                 </button>
               </div>
             ))}
           </div>
+
         </section>
 
         {/* ATM Locations */}
