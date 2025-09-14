@@ -1,5 +1,5 @@
 // src/pages/LiveFeeds.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function LiveFeeds() {
   const cardBase =
@@ -30,6 +30,12 @@ export default function LiveFeeds() {
     </svg>
   );
 
+  const ExitFullscreenIcon = () => (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 4H4v5M20 9V4h-5M4 15v5h5M15 20h5v-5" />
+    </svg>
+  );
+
   const RecordDot = ({ active }) => (
     <span
       className={`inline-block w-2.5 h-2.5 rounded-full ${
@@ -41,13 +47,13 @@ export default function LiveFeeds() {
   function CameraCard({ name, camLabel }) {
     const [recording, setRecording] = useState(false);
     const [seconds, setSeconds] = useState(0);
+    const [isFs, setIsFs] = useState(false);
+    const videoRef = useRef(null);
 
     // timer effect
     useEffect(() => {
       let interval;
-      if (recording) {
-        interval = setInterval(() => setSeconds((s) => s + 1), 1000);
-      }
+      if (recording) interval = setInterval(() => setSeconds((s) => s + 1), 1000);
       return () => clearInterval(interval);
     }, [recording]);
 
@@ -67,6 +73,50 @@ export default function LiveFeeds() {
       }
     };
 
+    // Fullscreen helpers (with Safari fallbacks)
+    const reqFs = async (el) => {
+      try {
+        if (el.requestFullscreen) return await el.requestFullscreen();
+        if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); // Safari
+        if (el.msRequestFullscreen) return el.msRequestFullscreen(); // old Edge
+      } catch {}
+    };
+
+    const exitFs = async () => {
+      try {
+        if (document.exitFullscreen) return await document.exitFullscreen();
+        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        if (document.msExitFullscreen) return document.msExitFullscreen();
+      } catch {}
+    };
+
+    const handleToggleFullscreen = async () => {
+      if (!isFs && videoRef.current) {
+        await reqFs(videoRef.current);
+      } else {
+        await exitFs();
+      }
+    };
+
+    // Keep local state in sync with browser FS changes
+    useEffect(() => {
+      const onChange = () => {
+        const fsEl =
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.msFullscreenElement;
+        setIsFs(fsEl === videoRef.current);
+      };
+      document.addEventListener("fullscreenchange", onChange);
+      document.addEventListener("webkitfullscreenchange", onChange);
+      document.addEventListener("MSFullscreenChange", onChange);
+      return () => {
+        document.removeEventListener("fullscreenchange", onChange);
+        document.removeEventListener("webkitfullscreenchange", onChange);
+        document.removeEventListener("MSFullscreenChange", onChange);
+      };
+    }, []);
+
     return (
       <div className={`${cardBase}`}>
         {/* Card header */}
@@ -76,7 +126,21 @@ export default function LiveFeeds() {
         </div>
 
         {/* Video area */}
-        <div className="relative bg-[#0f1a2b] h-56 sm:h-64 rounded-b-2xl">
+        <div
+          ref={videoRef}
+          className="relative bg-[#0f1a2b] h-56 sm:h-64 rounded-b-2xl overflow-hidden"
+        >
+          {/* Example placeholder; swap with your <video> or stream component */}
+          <div className="absolute inset-0 grid place-items-center text-white/30 text-sm">
+            Video Stream
+          </div>
+
+          {/* FS-specific helper class to fill screen nicely (optional) */}
+          <style>{`
+            :fullscreen .fs-fill, :-webkit-full-screen .fs-fill { width: 100%; height: 100%; }
+          `}</style>
+
+          {/* Bottom-left chip */}
           <span className="absolute left-4 bottom-4 text-xs px-2 py-1 rounded bg-black text-white/90">
             {camLabel}
           </span>
@@ -84,9 +148,13 @@ export default function LiveFeeds() {
 
         {/* Footer actions */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
-          <button className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900">
-            <FullscreenIcon />
-            Fullscreen
+          <button
+            onClick={handleToggleFullscreen}
+            className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900"
+            aria-label={isFs ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFs ? <ExitFullscreenIcon /> : <FullscreenIcon />}
+            {isFs ? "Exit Fullscreen" : "Fullscreen"}
           </button>
 
           <button
@@ -96,6 +164,8 @@ export default function LiveFeeds() {
                 ? "bg-red-600 text-white hover:bg-red-700"
                 : "text-blue-700 hover:text-blue-900"
             }`}
+            aria-pressed={recording}
+            aria-label={recording ? "Stop recording" : "Start recording"}
           >
             <RecordDot active={recording} />
             {recording ? `Recording ${formatTime(seconds)}` : "Record"}
@@ -121,7 +191,9 @@ export default function LiveFeeds() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">JS</div>
+            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">
+              JS
+            </div>
             <div className="leading-tight">
               <div className="font-medium text-gray-900">John Smith</div>
               <div className="text-sm text-gray-500">Security Officer</div>
