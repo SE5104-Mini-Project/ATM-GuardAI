@@ -1,5 +1,9 @@
+import { useState } from "react";
+
+
 export default function Settings() {
     const cardBase = "rounded-2xl bg-white shadow-lg p-5";
+    const inputBase = "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
 
     // Reusable Bell component
     const Bell = () => (
@@ -7,6 +11,28 @@ export default function Settings() {
             <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
         </svg>
     );
+
+    // Settings State
+    const [alertSettings, setAlertSettings] = useState({
+        sensitivity: "medium",
+        dashboardAlerts: true,
+        emailNotifications: true,
+        smsAlerts: false,
+    });
+
+    // Handlers 
+    const handleAlertSettingChange = (key, value) => {
+        setAlertSettings((prev) => ({ ...prev, [key]: value }));
+    };
+
+    // Settings
+    const saveSettings = (section) => {
+        console.log(`Saving ${section} settings`);
+        alert(
+            `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`
+        );
+    };
+
 
     return (
         <div className="px-3 sm:px-6 pt-6 pb-10">
@@ -41,8 +67,84 @@ export default function Settings() {
                 </div>
             </div>
 
-            {/* Section title */}
+
+            {/* --------------------- Section title --------------------- */}
             <h3 className="text-xl font-semibold text-gray-900 mb-3">System Settings</h3>
+
+
+            {/* --------------------- Settings Grid --------------------- */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+                {/* Alert Preferences Card */}
+                <div className={cardBase}>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Alert Preferences</h3>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Alert Sensitivity</label>
+                            <select
+                                className={inputBase}
+                                value={alertSettings.sensitivity}
+                                onChange={(e) => handleAlertSettingChange("sensitivity", e.target.value)}
+                            >
+                                <option value="high">High</option>
+                                <option value="medium">Medium (Recommended)</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Notification Methods</label>
+                            <div className="space-y-2">
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="notify-dashboard"
+                                        checked={alertSettings.dashboardAlerts}
+                                        onChange={(e) => handleAlertSettingChange("dashboardAlerts", e.target.checked)}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    />
+                                    <label htmlFor="notify-dashboard" className="ml-2 block text-sm text-gray-700">
+                                        Dashboard Alerts
+                                    </label>
+                                </div>
+
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="notify-email"
+                                        checked={alertSettings.emailNotifications}
+                                        onChange={(e) => handleAlertSettingChange("emailNotifications", e.target.checked)}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    />
+                                    <label htmlFor="notify-email" className="ml-2 block text-sm text-gray-700">
+                                        Email Notifications
+                                    </label>
+                                </div>
+
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="notify-sms"
+                                        checked={alertSettings.smsAlerts}
+                                        onChange={(e) => handleAlertSettingChange("smsAlerts", e.target.checked)}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    />
+                                    <label htmlFor="notify-sms" className="ml-2 block text-sm text-gray-700">
+                                        SMS Alerts
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => saveSettings("alert")}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                        >
+                            Save Preferences
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
