@@ -1,7 +1,10 @@
 // web/src/pages/ATMLocations.jsx
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ATMLocations() {
+  const navigate = useNavigate();
+
   const cardBase =
     "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
 
@@ -44,12 +47,13 @@ export default function ATMLocations() {
     ),
   };
 
-  /* ---------- Example data ---------- */
+  /* ---------- Example data (added region for filters) ---------- */
   const locations = [
     {
       id: 12,
       name: "ATM #12 - City Branch",
-      status: "alert",
+      status: "alert", // alert | online | offline
+      region: "North",
       address: "123 Main Street, City Center",
       cameras: 2,
       lastAlert: "Today, 10:23 AM",
@@ -58,6 +62,7 @@ export default function ATMLocations() {
       id: 7,
       name: "ATM #07 - Main Street",
       status: "alert",
+      region: "East",
       address: "456 Oak Avenue, Downtown",
       cameras: 2,
       lastAlert: "Today, 09:45 AM",
@@ -66,20 +71,56 @@ export default function ATMLocations() {
       id: 15,
       name: "ATM #15 - Hospital Branch",
       status: "online",
+      region: "South",
       address: "789 Medical Plaza, Health District",
       cameras: 3,
       lastAlert: "Today, 08:30 AM",
     },
+    {
+      id: 9,
+      name: "ATM #09 - Shopping Mall",
+      status: "offline",
+      region: "West",
+      address: "Mall Blvd, Level 2 – Atrium",
+      cameras: 2,
+      lastAlert: "Yesterday",
+    },
   ];
 
-  const [statusFilter, setStatusFilter] = useState("All ATMs");
+  /* ---------- Filters ---------- */
+  const [statusFilterTop, setStatusFilterTop] = useState("All ATMs"); // top select
+  const [statusFilterMap, setStatusFilterMap] = useState("All ATMs"); // map controls
   const [regionFilter, setRegionFilter] = useState("All Regions");
-  const [topFilter, setTopFilter] = useState("All ATMs");
 
-  const openAlertsCount = useMemo(() => 5, []);
-  const totalATMs = useMemo(() => 24, []);
+  const toStatus = (x) =>
+    x === "All ATMs" ? "all" : x.toLowerCase(); // "alert" | "online" | "offline" | "all"
 
-  const pill = (status) => {
+  const effectiveStatus = useMemo(() => {
+    const a = toStatus(statusFilterTop);
+    const b = toStatus(statusFilterMap);
+    if (a === "all" && b === "all") return "all";
+    if (a === "all") return b;
+    if (b === "all") return a;
+    // both specific: intersect -> must match both (i.e., same value); else impossible -> none
+    return a === b ? a : "__none__";
+  }, [statusFilterTop, statusFilterMap]);
+
+  const filtered = useMemo(() => {
+    return locations.filter((loc) => {
+      const statusOK =
+        effectiveStatus === "all"
+          ? true
+          : effectiveStatus === "__none__"
+          ? false
+          : loc.status === effectiveStatus;
+      const regionOK = regionFilter === "All Regions" ? true : loc.region === regionFilter;
+      return statusOK && regionOK;
+    });
+  }, [locations, effectiveStatus, regionFilter]);
+
+  const openAlertsCount = useMemo(() => locations.filter((l) => l.status === "alert").length, [locations]);
+
+  const statusPill = (status) => {
     const map = {
       alert: "bg-red-600 text-white",
       online: "bg-emerald-600 text-white",
@@ -95,7 +136,7 @@ export default function ATMLocations() {
         {/* top strip */}
         <div className="flex items-center justify-between px-5 py-3 rounded-t-2xl bg-[#102a56] text-white">
           <h4 className="font-semibold">{loc.name}</h4>
-          {pill(loc.status)}
+          {statusPill(loc.status)}
         </div>
 
         {/* body */}
@@ -113,10 +154,16 @@ export default function ATMLocations() {
 
         {/* actions */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
-          <button className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900">
+          <button
+            onClick={() => navigate("/live-feeds")}
+            className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900"
+          >
             {Icon.live} View Live
           </button>
-          <button className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900">
+          <button
+            onClick={() => navigate("/reports", { state: { from: "atm-locations", atmId: loc.id } })}
+            className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900"
+          >
             {Icon.history} History
           </button>
         </div>
@@ -126,7 +173,7 @@ export default function ATMLocations() {
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
-      {/* Header card (like other pages) */}
+      {/* Header */}
       <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
         <h2 className="text-2xl font-bold text-gray-900">ATM Locations</h2>
         <div className="flex items-center gap-6">
@@ -149,26 +196,24 @@ export default function ATMLocations() {
         </div>
       </div>
 
-      {/* Section title + top filter (matches screenshot) */}
-      <div className="mb-2">
-        <div className="flex items-center gap-3">
-          <h3 className="text-xl font-semibold">ATM Locations</h3>
-          <select
-            value={topFilter}
-            onChange={(e) => setTopFilter(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option>All ATMs</option>
-            <option>Alert</option>
-            <option>Online</option>
-            <option>Offline</option>
-          </select>
-        </div>
+      {/* Section title + top filter */}
+      <div className="mb-2 flex items-center gap-3">
+        <h3 className="text-xl font-semibold">ATM Locations</h3>
+        <select
+          value={statusFilterTop}
+          onChange={(e) => setStatusFilterTop(e.target.value)}
+          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option>All ATMs</option>
+          <option>Alert</option>
+          <option>Online</option>
+          <option>Offline</option>
+        </select>
       </div>
 
-      {/* Map area with controls panel */}
+      {/* Map placeholder with controls */}
       <div className="relative rounded-2xl border border-slate-200 bg-slate-100/60 shadow-inner min-h-[420px]">
-        {/* Placeholder center message */}
+        {/* Placeholder */}
         <div className="absolute inset-0 grid place-items-center text-slate-500">
           <div className="flex flex-col items-center gap-2">
             <div className="opacity-70">{Icon.mapPin}</div>
@@ -176,15 +221,15 @@ export default function ATMLocations() {
           </div>
         </div>
 
-        {/* Floating controls (right side) */}
+        {/* Floating controls */}
         <div className="absolute right-4 top-4 w-64 rounded-xl bg-white shadow-lg border border-slate-200">
           <div className="px-4 py-3 border-b border-slate-100 font-semibold">Map Controls</div>
           <div className="p-4 space-y-3 text-sm">
             <label className="block">
               <span className="text-slate-600">Filter by Status:</span>
               <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                value={statusFilterMap}
+                onChange={(e) => setStatusFilterMap(e.target.value)}
                 className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All ATMs</option>
@@ -212,15 +257,16 @@ export default function ATMLocations() {
         </div>
       </div>
 
-      {/* ATM list header */}
+      {/* List */}
       <div className="mt-6 mb-3 flex items-center justify-between">
         <h3 className="text-xl font-semibold">ATM List</h3>
-        <button className="text-sm text-blue-700 hover:text-blue-900">{totalATMs} ATMs</button>
+        <button className="text-sm text-blue-700 hover:text-blue-900">
+          {filtered.length} ATMs
+        </button>
       </div>
 
-      {/* Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {locations.map((loc) => (
+        {filtered.map((loc) => (
           <LocationCard key={loc.id} loc={loc} />
         ))}
       </div>
