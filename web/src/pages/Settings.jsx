@@ -1,8 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Settings() {
-    const cardBase = "rounded-2xl bg-white shadow-lg p-5";
+    const cardBase = "rounded-2xl bg-white shadow-lg p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
     const inputBase = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm font-normal";
+
+    // Add loading animation state
+    const [entered, setEntered] = useState(false);
+
+    useEffect(() => {
+        const t = setTimeout(() => setEntered(true), 40);
+        return () => clearTimeout(t);
+    }, []);
 
     // Reusable Bell component
     const Bell = () => (
@@ -60,10 +68,12 @@ export default function Settings() {
     };
 
     return (
-        <div className="px-3 sm:px-6 pt-6 pb-10">
+        <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
 
             {/* --------------------- Header Section --------------------- */}
-            <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
+            <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between
+                ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                style={{ transitionDelay: "0ms" }}>
                 <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
                 <div className="flex items-center gap-6">
                     <span className="text-sm text-blue-700">
@@ -92,7 +102,11 @@ export default function Settings() {
 
 
             {/* --------------------- Section title --------------------- */}
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">System Settings</h3>
+            <h3 className={`text-xl font-semibold text-gray-900 mb-3 transition-all
+                ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                style={{ transitionDelay: "30ms" }}>
+                System Settings
+            </h3>
 
 
 
@@ -100,7 +114,9 @@ export default function Settings() {
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
 
                 {/* ------------ Alert Preferences Card ------------ */}
-                <div className={cardBase}>
+                <div className={`${cardBase} transition-all
+                    ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                    style={{ transitionDelay: "60ms" }}>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">Alert Preferences</h3>
 
                     <div className="space-y-4">
@@ -175,7 +191,9 @@ export default function Settings() {
 
 
                 {/* ------------ System Configuration ------------ */}
-                <div className={cardBase}>
+                <div className={`${cardBase} transition-all
+                    ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                    style={{ transitionDelay: "90ms" }}>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">System Configuration</h3>
 
                     <div className="space-y-4">
@@ -235,7 +253,9 @@ export default function Settings() {
 
 
                 {/* ------------ AI Model Settings Card ------------ */}
-                <div className={cardBase}>
+                <div className={`${cardBase} transition-all
+                    ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                    style={{ transitionDelay: "120ms" }}>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">AI Model Settings</h3>
 
                     <div className="space-y-4">
