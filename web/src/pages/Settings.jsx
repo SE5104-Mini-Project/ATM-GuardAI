@@ -26,6 +26,15 @@ export default function Settings() {
         videoQuality: "high"
     });
 
+    // AI Setting State
+    const [aiSettings, setAiSettings] = useState({
+        confidenceThreshold: 85,
+        updateFrequency: "monthly",
+        autoLearning: true
+    });
+
+
+
     // Handlers Alert Change
     const handleAlertSettingChange = (key, value) => {
         setAlertSettings((prev) => ({ ...prev, [key]: value }));
@@ -35,6 +44,12 @@ export default function Settings() {
     const handleSystemSettingChange = (key, value) => {
         setSystemSettings(prev => ({ ...prev, [key]: value }));
     };
+
+    // handle Ai Setting Change
+    const handleAiSettingChange = (key, value) => {
+        setAiSettings(prev => ({ ...prev, [key]: value }));
+    };
+
 
     // Save Settings
     const saveSettings = (section) => {
@@ -83,7 +98,7 @@ export default function Settings() {
 
             {/* --------------------- Settings Grid --------------------- */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-               
+
                 {/* ------------ Alert Preferences Card ------------ */}
                 <div className={cardBase}>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">Alert Preferences</h3>
@@ -214,6 +229,68 @@ export default function Settings() {
                             className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                         >
                             Save Configuration
+                        </button>
+                    </div>
+                </div>
+
+
+                {/* ------------ AI Model Settings Card ------------ */}
+                <div className={cardBase}>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">AI Model Settings</h3>
+
+                    <div className="space-y-4">
+                        {/* Detection Confidence Threshold */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">
+                                Detection Confidence Threshold: {aiSettings.confidenceThreshold}%
+                            </label>
+                            <input
+                                type="range"
+                                min="50"
+                                max="99"
+                                value={aiSettings.confidenceThreshold}
+                                onChange={(e) => handleAiSettingChange("confidenceThreshold", parseInt(e.target.value))}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>50%</span>
+                                <span>75%</span>
+                                <span>99%</span>
+                            </div>
+                        </div>
+
+                        {/* Model Update Frequency */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">Model Update Frequency</label>
+                            <select
+                                className={inputBase}
+                                value={aiSettings.updateFrequency}
+                                onChange={(e) => handleAiSettingChange("updateFrequency", e.target.value)}
+                            >
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly (Recommended)</option>
+                                <option value="quarterly">Quarterly</option>
+                            </select>
+                        </div>
+
+                        {/* Auto-Learning Mode */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">Auto-Learning Mode</label>
+                            <select
+                                className={inputBase}
+                                value={aiSettings.autoLearning ? "enabled" : "disabled"}
+                                onChange={(e) => handleAiSettingChange("autoLearning", e.target.value === "enabled")}
+                            >
+                                <option value="enabled">Enabled (Recommended)</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </div>
+
+                        <button
+                            onClick={() => saveSettings("AI model")}
+                            className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                        >
+                            Save Model Settings
                         </button>
                     </div>
                 </div>
