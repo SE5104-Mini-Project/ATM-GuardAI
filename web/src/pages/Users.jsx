@@ -1,5 +1,15 @@
+import { useState, useEffect } from "react";
+
 export default function Users() {
     const cardBase = "rounded-2xl bg-white shadow-lg p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
+
+    // Add loading animation state
+    const [entered, setEntered] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => setEntered(true), 40);
+        return () => clearTimeout(t);
+    }, []);
+
 
     // Bell component
     const Bell = () => (
@@ -37,6 +47,15 @@ export default function Users() {
                     </div>
                 </div>
             </div>
+
+
+            {/* --------------------- Section title --------------------- */}
+            <h3 className={`text-xl font-semibold text-gray-900 mb-3 transition-all
+                ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                style={{ transitionDelay: "30ms" }}>
+                User Management
+            </h3>
+
         </div>
     );
 }
