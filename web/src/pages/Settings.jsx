@@ -1,9 +1,8 @@
 import { useState } from "react";
 
-
 export default function Settings() {
     const cardBase = "rounded-2xl bg-white shadow-lg p-5";
-    const inputBase = "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
+    const inputBase = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm font-normal";
 
     // Reusable Bell component
     const Bell = () => (
@@ -12,7 +11,7 @@ export default function Settings() {
         </svg>
     );
 
-    // Settings State
+    // Alert State
     const [alertSettings, setAlertSettings] = useState({
         sensitivity: "medium",
         dashboardAlerts: true,
@@ -20,19 +19,30 @@ export default function Settings() {
         smsAlerts: false,
     });
 
-    // Handlers 
+    // System State
+    const [systemSettings, setSystemSettings] = useState({
+        retentionPeriod: "90",
+        autoLogout: "60",
+        videoQuality: "high"
+    });
+
+    // Handlers Alert Change
     const handleAlertSettingChange = (key, value) => {
         setAlertSettings((prev) => ({ ...prev, [key]: value }));
     };
 
-    // Settings
+    // handle System Change
+    const handleSystemSettingChange = (key, value) => {
+        setSystemSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    // Save Settings
     const saveSettings = (section) => {
         console.log(`Saving ${section} settings`);
         alert(
             `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`
         );
     };
-
 
     return (
         <div className="px-3 sm:px-6 pt-6 pb-10">
@@ -41,12 +51,10 @@ export default function Settings() {
             <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
                 <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
                 <div className="flex items-center gap-6">
-                    {/* Last updated info */}
                     <span className="text-sm text-blue-700">
                         Last updated: <span className="underline">Just now</span>
                     </span>
 
-                    {/* Notification bell */}
                     <div className="relative">
                         <Bell />
                         <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
@@ -54,7 +62,6 @@ export default function Settings() {
                         </span>
                     </div>
 
-                    {/* User profile info */}
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">
                             JS
@@ -68,13 +75,16 @@ export default function Settings() {
             </div>
 
 
+
             {/* --------------------- Section title --------------------- */}
             <h3 className="text-xl font-semibold text-gray-900 mb-3">System Settings</h3>
 
 
+
             {/* --------------------- Settings Grid --------------------- */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-                {/* Alert Preferences Card */}
+               
+                {/* ------------ Alert Preferences Card ------------ */}
                 <div className={cardBase}>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">Alert Preferences</h3>
 
@@ -83,7 +93,7 @@ export default function Settings() {
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Alert Sensitivity</label>
                             <select
-                                className={` ${inputBase} bg-transparent text-gray-900`}
+                                className={`${inputBase} bg-transparent text-gray-900`}
                                 value={alertSettings.sensitivity}
                                 onChange={(e) => handleAlertSettingChange("sensitivity", e.target.value)}
                             >
@@ -97,7 +107,7 @@ export default function Settings() {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Notification Methods</label>
                             <div className="space-y-2">
-                                <div className="flex items-center">
+                                <div className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
                                         id="notify-dashboard"
@@ -105,12 +115,12 @@ export default function Settings() {
                                         onChange={(e) => handleAlertSettingChange("dashboardAlerts", e.target.checked)}
                                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                     />
-                                    <label htmlFor="notify-dashboard" className="ml-2 block text-sm text-gray-700">
+                                    <label htmlFor="notify-dashboard" className="text-sm text-gray-900">
                                         Dashboard Alerts
                                     </label>
                                 </div>
 
-                                <div className="flex items-center">
+                                <div className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
                                         id="notify-email"
@@ -118,12 +128,12 @@ export default function Settings() {
                                         onChange={(e) => handleAlertSettingChange("emailNotifications", e.target.checked)}
                                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                     />
-                                    <label htmlFor="notify-email" className="ml-2 block text-sm text-gray-700">
+                                    <label htmlFor="notify-email" className="text-sm text-gray-900">
                                         Email Notifications
                                     </label>
                                 </div>
 
-                                <div className="flex items-center">
+                                <div className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
                                         id="notify-sms"
@@ -131,7 +141,7 @@ export default function Settings() {
                                         onChange={(e) => handleAlertSettingChange("smsAlerts", e.target.checked)}
                                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                     />
-                                    <label htmlFor="notify-sms" className="ml-2 block text-sm text-gray-700">
+                                    <label htmlFor="notify-sms" className="text-sm text-gray-900">
                                         SMS Alerts
                                     </label>
                                 </div>
@@ -140,9 +150,70 @@ export default function Settings() {
 
                         <button
                             onClick={() => saveSettings("alert")}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                            className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                         >
                             Save Preferences
+                        </button>
+                    </div>
+                </div>
+
+
+
+                {/* ------------ System Configuration ------------ */}
+                <div className={cardBase}>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">System Configuration</h3>
+
+                    <div className="space-y-4">
+
+                        {/* Data Retention Period */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">Data Retention Period</label>
+                            <select
+                                className={inputBase}
+                                value={systemSettings.retentionPeriod}
+                                onChange={(e) => handleSystemSettingChange("retentionPeriod", e.target.value)}
+                            >
+                                <option className="text-gray-900 font-medium" value="30">30 Days</option>
+                                <option className="text-gray-900 font-medium" value="60">60 Days</option>
+                                <option className="text-gray-900 font-medium" value="90">90 Days (Recommended)</option>
+                                <option className="text-gray-900 font-medium" value="365">1 Year</option>
+                            </select>
+                        </div>
+
+                        {/* Auto Logout After */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">Auto Logout After</label>
+                            <select
+                                className={inputBase}
+                                value={systemSettings.autoLogout}
+                                onChange={(e) => handleSystemSettingChange("autoLogout", e.target.value)}
+                            >
+                                <option className="text-gray-900 font-medium" value="15">15 minutes</option>
+                                <option className="text-gray-900 font-medium" value="30">30 minutes</option>
+                                <option className="text-gray-900 font-medium" value="60">1 hour (Recommended)</option>
+                                <option className="text-gray-900 font-medium" value="120">2 hours</option>
+                            </select>
+                        </div>
+
+                        {/* Video Quality */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">Video Quality</label>
+                            <select
+                                className={inputBase}
+                                value={systemSettings.videoQuality}
+                                onChange={(e) => handleSystemSettingChange("videoQuality", e.target.value)}
+                            >
+                                <option className="text-gray-900 font-medium" value="low">Low (Faster Processing)</option>
+                                <option className="text-gray-900 font-medium" value="medium">Medium</option>
+                                <option className="text-gray-900 font-medium" value="high">High (Recommended)</option>
+                            </select>
+                        </div>
+
+                        <button
+                            onClick={() => saveSettings("system")}
+                            className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                        >
+                            Save Configuration
                         </button>
                     </div>
                 </div>
