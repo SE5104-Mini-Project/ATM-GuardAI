@@ -76,22 +76,24 @@ export default function Settings() {
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
                 {/* Alert Preferences Card */}
                 <div className={cardBase}>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Alert Preferences</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-300">Alert Preferences</h3>
 
                     <div className="space-y-4">
+                        {/* Alert Sensitivity */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Alert Sensitivity</label>
+                            <label className="block text-gray-700 font-medium mb-2">Alert Sensitivity</label>
                             <select
-                                className={inputBase}
+                                className={` ${inputBase} bg-transparent text-gray-900`}
                                 value={alertSettings.sensitivity}
                                 onChange={(e) => handleAlertSettingChange("sensitivity", e.target.value)}
                             >
-                                <option value="high">High</option>
-                                <option value="medium">Medium (Recommended)</option>
-                                <option value="low">Low</option>
+                                <option className="text-gray-900 font-medium" value="high">High</option>
+                                <option className="text-gray-900 font-medium" value="medium">Medium (Recommended)</option>
+                                <option className="text-gray-900 font-medium" value="low">Low</option>
                             </select>
                         </div>
 
+                        {/* Notification Methods */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Notification Methods</label>
                             <div className="space-y-2">
