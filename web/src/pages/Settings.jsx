@@ -40,6 +40,9 @@ export default function Settings() {
                     </div>
                 </div>
             </div>
+
+            {/* Section title */}
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">System Settings</h3>
         </div>
     );
 }
