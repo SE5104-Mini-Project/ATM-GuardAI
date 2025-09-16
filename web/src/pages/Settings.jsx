@@ -71,8 +71,7 @@ export default function Settings() {
         <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
 
             {/* --------------------- Header Section --------------------- */}
-            <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between
-                ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+            <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}
                 style={{ transitionDelay: "0ms" }}>
                 <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
                 <div className="flex items-center gap-6">
