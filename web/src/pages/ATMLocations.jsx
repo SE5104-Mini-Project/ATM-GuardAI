@@ -1,6 +1,6 @@
-// web/src/pages/ATMLocations.jsx
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LogoutButton from "../components/LogoutButton";
 
 export default function ATMLocations() {
   const navigate = useNavigate();
@@ -49,42 +49,10 @@ export default function ATMLocations() {
 
   /* ---------- Example data (added region for filters) ---------- */
   const locations = [
-    {
-      id: 12,
-      name: "ATM #12 - City Branch",
-      status: "alert", // alert | online | offline
-      region: "North",
-      address: "123 Main Street, City Center",
-      cameras: 2,
-      lastAlert: "Today, 10:23 AM",
-    },
-    {
-      id: 7,
-      name: "ATM #07 - Main Street",
-      status: "alert",
-      region: "East",
-      address: "456 Oak Avenue, Downtown",
-      cameras: 2,
-      lastAlert: "Today, 09:45 AM",
-    },
-    {
-      id: 15,
-      name: "ATM #15 - Hospital Branch",
-      status: "online",
-      region: "South",
-      address: "789 Medical Plaza, Health District",
-      cameras: 3,
-      lastAlert: "Today, 08:30 AM",
-    },
-    {
-      id: 9,
-      name: "ATM #09 - Shopping Mall",
-      status: "offline",
-      region: "West",
-      address: "Mall Blvd, Level 2 – Atrium",
-      cameras: 2,
-      lastAlert: "Yesterday",
-    },
+    { id: 12, name: "ATM #12 - City Branch", status: "alert",  region: "North", address: "123 Main Street, City Center", cameras: 2, lastAlert: "Today, 10:23 AM" },
+    { id: 7,  name: "ATM #07 - Main Street",  status: "alert",  region: "East",  address: "456 Oak Avenue, Downtown",     cameras: 2, lastAlert: "Today, 09:45 AM" },
+    { id: 15, name: "ATM #15 - Hospital Branch", status: "online", region: "South", address: "789 Medical Plaza, Health District", cameras: 3, lastAlert: "Today, 08:30 AM" },
+    { id: 9,  name: "ATM #09 - Shopping Mall", status: "offline", region: "West",  address: "Mall Blvd, Level 2 – Atrium", cameras: 2, lastAlert: "Yesterday" },
   ];
 
   /* ---------- Filters ---------- */
@@ -92,8 +60,7 @@ export default function ATMLocations() {
   const [statusFilterMap, setStatusFilterMap] = useState("All ATMs"); // map controls
   const [regionFilter, setRegionFilter] = useState("All Regions");
 
-  const toStatus = (x) =>
-    x === "All ATMs" ? "all" : x.toLowerCase(); // "alert" | "online" | "offline" | "all"
+  const toStatus = (x) => (x === "All ATMs" ? "all" : x.toLowerCase());
 
   const effectiveStatus = useMemo(() => {
     const a = toStatus(statusFilterTop);
@@ -101,7 +68,6 @@ export default function ATMLocations() {
     if (a === "all" && b === "all") return "all";
     if (a === "all") return b;
     if (b === "all") return a;
-    // both specific: intersect -> must match both (i.e., same value); else impossible -> none
     return a === b ? a : "__none__";
   }, [statusFilterTop, statusFilterMap]);
 
@@ -121,11 +87,7 @@ export default function ATMLocations() {
   const openAlertsCount = useMemo(() => locations.filter((l) => l.status === "alert").length, [locations]);
 
   const statusPill = (status) => {
-    const map = {
-      alert: "bg-red-600 text-white",
-      online: "bg-emerald-600 text-white",
-      offline: "bg-slate-400 text-white",
-    };
+    const map = { alert: "bg-red-600 text-white", online: "bg-emerald-600 text-white", offline: "bg-slate-400 text-white" };
     const label = status === "alert" ? "Alert" : status === "online" ? "Online" : "Offline";
     return <span className={`px-2 py-0.5 text-xs rounded-full ${map[status]}`}>{label}</span>;
   };
@@ -133,31 +95,21 @@ export default function ATMLocations() {
   function LocationCard({ loc }) {
     return (
       <div className="rounded-2xl bg-white shadow-lg">
-        {/* top strip */}
         <div className="flex items-center justify-between px-5 py-3 rounded-t-2xl bg-[#102a56] text-white">
           <h4 className="font-semibold">{loc.name}</h4>
           {statusPill(loc.status)}
         </div>
 
-        {/* body */}
         <div className="px-5 py-4">
           <div className="text-sm text-slate-800">{loc.address}</div>
           <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
-            <span className="inline-flex items-center gap-2">
-              {Icon.cam} {loc.cameras} Cameras
-            </span>
-            <span className="inline-flex items-center gap-2">
-              {Icon.clock} Last alert: {loc.lastAlert}
-            </span>
+            <span className="inline-flex items-center gap-2">{Icon.cam} {loc.cameras} Cameras</span>
+            <span className="inline-flex items-center gap-2">{Icon.clock} Last alert: {loc.lastAlert}</span>
           </div>
         </div>
 
-        {/* actions */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
-          <button
-            onClick={() => navigate("/live-feeds")}
-            className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900"
-          >
+          <button onClick={() => navigate("/live-feeds")} className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900">
             {Icon.live} View Live
           </button>
           <button
@@ -186,13 +138,9 @@ export default function ATMLocations() {
               {openAlertsCount}
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">JS</div>
-            <div className="leading-tight">
-              <div className="font-medium text-gray-900">John Smith</div>
-              <div className="text-sm text-gray-500">Security Officer</div>
-            </div>
-          </div>
+
+          {/* Admin badge + compact icon-only Logout */}
+          <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
         </div>
       </div>
 
@@ -213,7 +161,6 @@ export default function ATMLocations() {
 
       {/* Map placeholder with controls */}
       <div className="relative rounded-2xl border border-slate-200 bg-slate-100/60 shadow-inner min-h-[420px]">
-        {/* Placeholder */}
         <div className="absolute inset-0 grid place-items-center text-slate-500">
           <div className="flex flex-col items-center gap-2">
             <div className="opacity-70">{Icon.mapPin}</div>
@@ -221,7 +168,6 @@ export default function ATMLocations() {
           </div>
         </div>
 
-        {/* Floating controls */}
         <div className="absolute right-4 top-4 w-64 rounded-xl bg-white shadow-lg border border-slate-200">
           <div className="px-4 py-3 border-b border-slate-100 font-semibold">Map Controls</div>
           <div className="p-4 space-y-3 text-sm">
