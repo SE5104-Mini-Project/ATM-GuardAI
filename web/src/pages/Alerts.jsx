@@ -1,5 +1,6 @@
 // src/pages/Alerts.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import LogoutButton from "../components/LogoutButton";
 
 /* ========== Tiny inline icons (kept only small ones for details row) ========== */
 const Icon = {
@@ -94,7 +95,6 @@ export default function Alerts() {
   }, []);
 
   const openCount = useMemo(() => ALERTS.filter((a) => a.status === "open").length, []);
-
   const filtered = useMemo(() => {
     let arr = ALERTS;
     if (filter === "Mask Detections") arr = ALERTS.filter((a) => a.type.toLowerCase().includes("mask"));
@@ -105,7 +105,7 @@ export default function Alerts() {
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
-      {/* ===== Top header (LiveFeeds style) ===== */}
+      {/* ===== Top header (updated with Admin badge + compact logout) ===== */}
       <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
         <h2 className="text-2xl font-bold text-gray-900">Alerts</h2>
         <div className="flex items-center gap-6">
@@ -118,15 +118,16 @@ export default function Alerts() {
               {openCount}
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">
-              JS
-            </div>
-            <div className="leading-tight">
-              <div className="font-medium text-gray-900">John Smith</div>
-              <div className="text-sm text-gray-500">Security Officer</div>
-            </div>
-          </div>
+
+          {/* Admin badge + compact icon-only Logout (matches global header style) */}
+          <LogoutButton
+            showEmail={false}
+            showIcon
+            label="Admin"
+            compact
+            iconOnly
+            className="px-0"
+          />
         </div>
       </div>
 
@@ -170,7 +171,7 @@ export default function Alerts() {
         </div>
       </div>
 
-      {/* ===== Alerts list (NO left icons now) ===== */}
+      {/* ===== Alerts list ===== */}
       <div className="space-y-4">
         {filtered.map((a, idx) => {
           const s = STYLE[a.severity];

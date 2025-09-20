@@ -1,6 +1,8 @@
 // src/components/Dashboard.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import LogoutButton from "./LogoutButton"; // adjust path if this file isn't in src/components
+
 
 const icon = {
   // Outline, color inherited from parent via currentColor
@@ -167,17 +169,20 @@ export default function Dashboard() {
               3
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">
-              JS
-            </div>
-            <div className="leading-tight">
-              <div className="font-medium text-gray-900">John Smith</div>
-              <div className="text-sm text-gray-500">Security Officer</div>
-            </div>
-          </div>
+
+          {/* Admin badge + Logout */}
+          <LogoutButton
+            showEmail={false}
+            showIcon
+            label="Admin"
+            compact      // small outlined round button
+            iconOnly     // icon-only logout
+            className="px-0"
+          />
+
         </div>
       </div>
+
 
       {/* Stats (updated with tinted icon pills & matching colors) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

@@ -1,5 +1,6 @@
 // src/pages/LiveFeeds.jsx
 import { useState, useEffect, useRef } from "react";
+import LogoutButton from "../components/LogoutButton";
 
 export default function LiveFeeds() {
   const cardBase =
@@ -130,17 +131,14 @@ export default function LiveFeeds() {
           ref={videoRef}
           className="relative bg-[#0f1a2b] h-56 sm:h-64 rounded-b-2xl overflow-hidden"
         >
-          {/* Example placeholder; swap with your <video> or stream component */}
           <div className="absolute inset-0 grid place-items-center text-white/30 text-sm">
             Video Stream
           </div>
 
-          {/* FS-specific helper class to fill screen nicely (optional) */}
           <style>{`
             :fullscreen .fs-fill, :-webkit-full-screen .fs-fill { width: 100%; height: 100%; }
           `}</style>
 
-          {/* Bottom-left chip */}
           <span className="absolute left-4 bottom-4 text-xs px-2 py-1 rounded bg-black text-white/90">
             {camLabel}
           </span>
@@ -177,7 +175,7 @@ export default function LiveFeeds() {
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10">
-      {/* Top header card */}
+      {/* Top header card (updated) */}
       <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
         <h2 className="text-2xl font-bold text-gray-900">Live Feeds</h2>
         <div className="flex items-center gap-6">
@@ -190,15 +188,16 @@ export default function LiveFeeds() {
               3
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">
-              JS
-            </div>
-            <div className="leading-tight">
-              <div className="font-medium text-gray-900">John Smith</div>
-              <div className="text-sm text-gray-500">Security Officer</div>
-            </div>
-          </div>
+
+          {/* Admin badge + compact icon-only Logout */}
+          <LogoutButton
+            showEmail={false}
+            showIcon
+            label="Admin"
+            compact
+            iconOnly
+            className="px-0"
+          />
         </div>
       </div>
 
