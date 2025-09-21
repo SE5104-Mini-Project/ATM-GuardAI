@@ -47,7 +47,7 @@ export default function Sidebar() {
           <img
             src="/logo3-tight.png"
             alt="ATM Guard AI Logo"
-            className="w-48 h-auto object-contain transition duration-300 ease-in-out hover:scale-105 hover:drop-shadow-[0_0_20px_rgba(0,70,255,0.9)]"
+            className="w-48 h-auto object-contain cursor-pointer transition duration-300 ease-in-out hover:scale-105 hover:drop-shadow-[0_0_20px_rgba(0,70,255,0.9)]"
             draggable="false"
           />
         </NavLink>
