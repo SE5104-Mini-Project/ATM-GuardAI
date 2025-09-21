@@ -1,3 +1,4 @@
+// src/components/Sidebar.jsx
 import { NavLink } from "react-router-dom";
 
 const icon = {
@@ -43,7 +44,8 @@ export default function Sidebar() {
     <aside className="fixed inset-y-0 left-0 bg-[#0f2a56] text-white w-64 h-screen shadow-lg">
       {/* Logo section */}
       <div className="px-5 py-6 flex items-center justify-center border-b border-blue-800">
-        <NavLink to="/" end>
+        {/* 🔹 Make logo go to /dashboard instead of / */}
+        <NavLink to="/dashboard" end>
           <img
             src="/logo3-tight.png"
             alt="ATM Guard AI Logo"
@@ -53,15 +55,16 @@ export default function Sidebar() {
         </NavLink>
       </div>
 
+      {/* Navigation links */}
       <nav className="mt-4 px-2">
         {[
-          { label: "Dashboard", icon: icon.dashboards, to: "/" },
-          { label: "Live Feeds", icon: icon.camera, to: "/live-feeds" },
-          { label: "Alerts", icon: icon.alerts, to: "/alerts" },
-          { label: "ATM Locations", icon: icon.map, to: "/locations" },
-          { label: "Reports", icon: icon.reports, to: "/reports" },
-          { label: "Settings", icon: icon.settings, to: "/settings" },
-          { label: "Users", icon: icon.users, to: "/users" },
+          { label: "Dashboard", icon: icon.dashboards, to: "/dashboard" },
+          { label: "Live Feeds", icon: icon.camera, to: "/dashboard/live-feeds" },
+          { label: "Alerts", icon: icon.alerts, to: "/dashboard/alerts" },
+          { label: "ATM Locations", icon: icon.map, to: "/dashboard/locations" },
+          { label: "Reports", icon: icon.reports, to: "/dashboard/reports" },
+          { label: "Settings", icon: icon.settings, to: "/dashboard/settings" },
+          { label: "Users", icon: icon.users, to: "/dashboard/users" },
         ].map((item) => (
           <NavLink
             key={item.label}

@@ -1,4 +1,4 @@
-// App.jsx
+// src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 
@@ -15,18 +15,23 @@ import Settings from "./pages/Settings";
 import Users from "./pages/Users";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
-import Loading from "./pages/Loading"; // ✅ add
+import Loading from "./pages/Loading";
+import Opening from "./pages/Opening";
 
 export default function App() {
   return (
     <Routes>
+      {/* Opening splash at root */}
+      <Route path="/" element={<Opening />} />
+
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/loading" element={<Loading />} /> {/* ✅ add */}
+      <Route path="/loading" element={<Loading />} />
 
-      {/* Protected routes: wrap layout */}
+      {/* Protected app under /dashboard */}
       <Route
+        path="/dashboard"
         element={
           <PrivateRoute>
             <DashboardLayout />
@@ -42,9 +47,8 @@ export default function App() {
         <Route path="users" element={<Users />} />
       </Route>
 
-      {/* Fallbacks */}
-      <Route path="/dashboard" element={<Navigate to="/" replace />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Fallback: go to dashboard (NOT opening page) */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
