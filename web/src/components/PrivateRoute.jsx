@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { auth, onAuthStateChanged } from "../firebase";
+import BrandSplash from "./BrandSplash";
 
 export default function PrivateRoute({ children }) {
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,6 @@ export default function PrivateRoute({ children }) {
         return;
       }
       try {
-        // refresh token to read latest custom claims
         await user.getIdToken(true);
         const token = await user.getIdTokenResult();
         setAuthorized(token.claims?.admin === true);
@@ -29,11 +29,8 @@ export default function PrivateRoute({ children }) {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
-        Checking authentication…
-      </div>
-    );
+    // Branded splash while Firebase resolves auth/claims
+    return <BrandSplash subtitle="Verifying your session…" />;
   }
 
   return authorized ? children : <Navigate to="/login" replace />;
