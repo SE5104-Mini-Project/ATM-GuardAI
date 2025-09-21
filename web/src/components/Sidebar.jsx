@@ -41,11 +41,16 @@ const icon = {
 export default function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 bg-[#0f2a56] text-white w-64 h-screen shadow-lg">
-      <div className="px-5 py-6 flex items-center gap-2 border-b border-blue-800">
-        <svg className="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L2 7v6c0 5.25 3.66 10.74 10 13 6.34-2.26 10-7.75 10-13V7l-10-5z" />
-        </svg>
-        <h1 className="text-lg font-bold tracking-wide text-blue-200">ATM GuardAI</h1>
+      {/* Logo section */}
+      <div className="px-5 py-6 flex items-center justify-center border-b border-blue-800">
+        <NavLink to="/" end>
+          <img
+            src="/logo3-tight.png"
+            alt="ATM Guard AI Logo"
+            className="w-48 h-auto object-contain transition duration-300 ease-in-out hover:scale-105 hover:drop-shadow-[0_0_20px_rgba(0,70,255,0.9)]"
+            draggable="false"
+          />
+        </NavLink>
       </div>
 
       <nav className="mt-4 px-2">
