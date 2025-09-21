@@ -1,3 +1,4 @@
+// App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 
@@ -14,6 +15,7 @@ import Settings from "./pages/Settings";
 import Users from "./pages/Users";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import Loading from "./pages/Loading"; // ✅ add
 
 export default function App() {
   return (
@@ -21,6 +23,7 @@ export default function App() {
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/loading" element={<Loading />} /> {/* ✅ add */}
 
       {/* Protected routes: wrap layout */}
       <Route
