@@ -1,10 +1,8 @@
 // web/src/pages/Reports.jsx
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import LogoutButton from "../components/LogoutButton";
 
 export default function Reports() {
-  const navigate = useNavigate();
-
   const cardBase =
     "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
 
@@ -57,14 +55,12 @@ export default function Reports() {
       r = r.filter((x) => x.location === atm);
     }
     if (alertType !== "All Alerts") {
-      // simple emphasis: if filtered to Mask or Helmet, de-emphasize the other counts
       r = r.map((x) => ({
         ...x,
         mask: alertType === "Mask" ? x.mask : alertType === "Helmet" ? 0 : x.mask,
         helmet: alertType === "Helmet" ? x.helmet : alertType === "Mask" ? 0 : x.helmet,
       }));
     }
-    // period is for UI only in this demo; in real app filter by date range
     return r;
   }, [baseRows, atm, alertType]);
 
@@ -99,7 +95,7 @@ export default function Reports() {
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
-      {/* ===== Header (with profile + logout) ===== */}
+      {/* ===== Header (Admin badge + compact icon-only Logout) ===== */}
       <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
         <h2 className="text-2xl font-bold text-gray-900">Reports</h2>
 
@@ -115,24 +111,8 @@ export default function Reports() {
             </span>
           </div>
 
-          {/* profile + logout */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold grid place-items-center">JS</div>
-            <div className="leading-tight">
-              <div className="font-medium text-gray-900">John Smith</div>
-              <div className="text-sm text-gray-500">Security Officer</div>
-            </div>
-            <button
-              onClick={() => {
-                // simple demo logout: clear token if you use one, then navigate
-                // localStorage.removeItem("auth_token");
-                navigate("/login");
-              }}
-              className="ml-2 text-sm text-red-600 hover:text-red-700 underline"
-            >
-              Logout
-            </button>
-          </div>
+          {/* Admin badge + compact icon-only Logout */}
+          <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
         </div>
       </div>
 
@@ -214,7 +194,7 @@ export default function Reports() {
 
         <div className="mt-5">
           <button
-            onClick={onGenerate}
+            onClick={() => setGeneratedAt(new Date())}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 shadow"
           >
             <span className="grid place-items-center">{Icon.play}</span>
@@ -262,7 +242,6 @@ export default function Reports() {
                   <td className="px-5 py-3">{r.response}</td>
                 </tr>
               ))}
-              {/* totals row */}
               <tr className="border-t border-slate-200 bg-slate-50 font-medium">
                 <td className="px-5 py-3">Totals</td>
                 <td className="px-5 py-3">—</td>
