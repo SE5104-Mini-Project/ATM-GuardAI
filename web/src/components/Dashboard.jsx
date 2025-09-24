@@ -3,9 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import LogoutButton from "./LogoutButton"; // adjust path if this file isn't in src/components
 
-
 const icon = {
-  // Outline, color inherited from parent via currentColor
   atm: (
     <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
@@ -75,14 +73,23 @@ function LocationCard({ name, status, address, cameras, lastAlert }) {
         </div>
       </div>
       <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between text-sm">
-        <button className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800">
+        {/* 👉 route via Loading with target */}
+        <Link
+          to="/loading"
+          state={{ to: "/dashboard/live-feeds", delayMs: 700 }}
+          className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800"
+        >
           <EyeIcon />
           <span className="font-medium">View Live</span>
-        </button>
-        <button className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800">
+        </Link>
+        <Link
+          to="/loading"
+          state={{ to: "/dashboard/reports", delayMs: 700 }}
+          className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800"
+        >
           <HistoryIcon />
           <span className="font-medium">History</span>
-        </button>
+        </Link>
       </div>
     </div>
   );
@@ -124,30 +131,9 @@ export default function Dashboard() {
   ];
 
   const atmLocations = [
-    {
-      id: 1,
-      name: "ATM #12 - City Branch",
-      status: "Alert",
-      address: "123 Main Street, City Center",
-      lastAlert: "10:23 AM",
-      cameras: 2,
-    },
-    {
-      id: 2,
-      name: "ATM #07 - Main Street",
-      status: "Alert",
-      address: "456 Oak Avenue, Downtown",
-      lastAlert: "09:45 AM",
-      cameras: 2,
-    },
-    {
-      id: 3,
-      name: "ATM #15 - Hospital Branch",
-      status: "Online",
-      address: "789 Medical Plaza, Health District",
-      lastAlert: "08:30 AM",
-      cameras: 3,
-    },
+    { id: 1, name: "ATM #12 - City Branch", status: "Alert",  address: "123 Main Street, City Center", lastAlert: "10:23 AM", cameras: 2 },
+    { id: 2, name: "ATM #07 - Main Street", status: "Alert",  address: "456 Oak Avenue, Downtown",  lastAlert: "09:45 AM", cameras: 2 },
+    { id: 3, name: "ATM #15 - Hospital Branch", status: "Online", address: "789 Medical Plaza, Health District", lastAlert: "08:30 AM", cameras: 3 },
   ];
 
   const alertAccent = (type) =>
@@ -171,50 +157,17 @@ export default function Dashboard() {
           </div>
 
           {/* Admin badge + Logout */}
-          <LogoutButton
-            showEmail={false}
-            showIcon
-            label="Admin"
-            compact      // small outlined round button
-            iconOnly     // icon-only logout
-            className="px-0"
-          />
-
+          <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
         </div>
       </div>
 
-
-      {/* Stats (updated with tinted icon pills & matching colors) */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[
-          {
-            label: "Total ATMs",
-            value: stats.totalATMs,
-            icon: icon.atm,
-            iconWrap: "bg-blue-50 ring-blue-200 text-blue-600",
-            valueClass: "text-gray-900",
-          },
-          {
-            label: "Active Alerts",
-            value: stats.activeAlerts,
-            icon: icon.danger,
-            iconWrap: "bg-rose-50 ring-rose-200 text-rose-600",
-            valueClass: "text-gray-900",
-          },
-          {
-            label: "Cameras Online",
-            value: stats.camerasOnline,
-            icon: icon.camera,
-            iconWrap: "bg-emerald-50 ring-emerald-200 text-emerald-600",
-            valueClass: "text-gray-900",
-          },
-          {
-            label: "Pending Reviews",
-            value: stats.pendingReviews,
-            icon: icon.clock,
-            iconWrap: "bg-amber-50 ring-amber-200 text-amber-600",
-            valueClass: "text-gray-900",
-          },
+          { label: "Total ATMs", value: stats.totalATMs, icon: icon.atm,    iconWrap: "bg-blue-50 ring-blue-200 text-blue-600", valueClass: "text-gray-900" },
+          { label: "Active Alerts", value: stats.activeAlerts, icon: icon.danger, iconWrap: "bg-rose-50 ring-rose-200 text-rose-600", valueClass: "text-gray-900" },
+          { label: "Cameras Online", value: stats.camerasOnline, icon: icon.camera, iconWrap: "bg-emerald-50 ring-emerald-200 text-emerald-600", valueClass: "text-gray-900" },
+          { label: "Pending Reviews", value: stats.pendingReviews, icon: icon.clock, iconWrap: "bg-amber-50 ring-amber-200 text-amber-600", valueClass: "text-gray-900" },
         ].map((c) => (
           <div key={c.label} className={`p-5 flex items-center gap-4 ${cardBase}`}>
             <div className={`rounded-xl p-3 ring-1 ${c.iconWrap}`}>{c.icon}</div>
@@ -232,7 +185,13 @@ export default function Dashboard() {
         <section className={`${cardBase} mb-6`}>
           <div className="flex items-center justify-between p-6 pb-3">
             <h3 className="text-lg font-semibold text-gray-900">Recent Alerts</h3>
-            <Link to="/alerts" className="text-sm text-blue-600 hover:underline">
+
+            {/* 👉 go via Loading with redirect target */}
+            <Link
+              to="/loading"
+              state={{ to: "/dashboard/alerts", delayMs: 700 }}
+              className="text-sm text-blue-600 hover:underline"
+            >
               View All
             </Link>
           </div>
@@ -270,20 +229,29 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <button className="sm:ml-3 shrink-0 bg-blue-700 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-900 transition-colors">
+                <Link
+                  to="/loading"
+                  state={{ to: "/dashboard/alerts", delayMs: 700 }}
+                  className="sm:ml-3 shrink-0 bg-blue-700 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-900 transition-colors"
+                >
                   {a.action}
-                </button>
+                </Link>
               </div>
             ))}
           </div>
-
         </section>
 
         {/* ATM Locations */}
         <section className={`-mx-3 sm:-mx-6 rounded-none sm:rounded-2xl ${cardBase}`}>
           <div className="flex items-center justify-between px-3 sm:px-6 pt-6 pb-3">
             <h3 className="text-lg font-semibold text-gray-900">ATM Locations</h3>
-            <Link to="/locations" className="text-sm text-blue-600 hover:underline">
+
+            {/* 👉 go via Loading with redirect target */}
+            <Link
+              to="/loading"
+              state={{ to: "/dashboard/locations", delayMs: 700 }}
+              className="text-sm text-blue-600 hover:underline"
+            >
               View Map
             </Link>
           </div>

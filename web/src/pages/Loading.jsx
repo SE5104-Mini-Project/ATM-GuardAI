@@ -1,5 +1,5 @@
 // src/pages/Loading.jsx
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BrandSplash from "../components/BrandSplash";
 import { auth, signInWithEmailAndPassword, signOut } from "../firebase";
@@ -7,60 +7,69 @@ import { auth, signInWithEmailAndPassword, signOut } from "../firebase";
 export default function Loading() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const ran = useRef(false);
 
-  // Expected states when we intentionally navigate here:
-  // { mode: 'signin', credentials: {email, password}, next: '/dashboard' }
-  // or { next: '/dashboard' } to just show a short splash before redirect.
+  // Accepts either:
+  //   { mode:'signin', credentials:{email,password}, next:'/path' }
+  //   { next:'/path', delayMs:700 }  OR  { to:'/path', delayMs:700 }
   useEffect(() => {
-    if (ran.current) return;
-    ran.current = true;
+    let timeoutId = null;
+    let active = true; // survives StrictMode double-invoke
 
-    let cancelled = false;
+    const next = state?.next || state?.to || "/dashboard";
+    const delay = Number.isFinite(Number(state?.delayMs))
+      ? Number(state?.delayMs)
+      : 900; // fallback delay
 
-    async function flow() {
-      const mode = state?.mode;
-      const next = state?.next || "/dashboard";
-
+    (async () => {
       try {
-        if (mode === "signin" && state?.credentials) {
+        if (state?.mode === "signin" && state?.credentials) {
           const { email, password } = state.credentials;
-          const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
-          // force refresh to get custom claims
+          const cred = await signInWithEmailAndPassword(
+            auth,
+            String(email).trim(),
+            String(password)
+          );
           await cred.user.getIdToken(true);
           const token = await cred.user.getIdTokenResult();
 
           if (token.claims?.admin === true) {
-            if (!cancelled) navigate(next, { replace: true });
+            if (active) navigate(next, { replace: true });
           } else {
             await signOut(auth);
-            if (!cancelled)
+            if (active)
               navigate("/login", {
                 replace: true,
-                state: { error: "This account has no admin access. Contact the system administrator." },
+                state: {
+                  error:
+                    "This account has no admin access. Contact the system administrator.",
+                },
               });
           }
           return;
         }
 
-        // Generic splash → brief pause → go next
-        setTimeout(() => {
-          if (!cancelled) navigate(next, { replace: true });
-        }, 1600);
-      } catch (e) {
-        // Back to login with a friendly error
-        if (!cancelled)
+        // Generic splash → small pause → navigate
+        timeoutId = setTimeout(() => {
+          if (active) navigate(next, { replace: true });
+        }, delay);
+      } catch {
+        if (active)
           navigate("/login", {
             replace: true,
             state: { error: "Sign-in failed. Please try again." },
           });
       }
+    })();
 
-      return () => { cancelled = true; };
-    }
-
-    flow();
+    return () => {
+      active = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [navigate, state]);
 
-  return <BrandSplash subtitle={state?.mode === "signin" ? "Signing you in…" : "Loading…"} />;
+  return (
+    <BrandSplash
+      subtitle={state?.mode === "signin" ? "Signing you in…" : "Loading…"}
+    />
+  );
 }
