@@ -1,3 +1,4 @@
+// src/pages/ATMLocations.jsx
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton";
@@ -47,7 +48,7 @@ export default function ATMLocations() {
     ),
   };
 
-  /* ---------- Example data (added region for filters) ---------- */
+  /* ---------- Example data (with region for filters) ---------- */
   const locations = [
     { id: 12, name: "ATM #12 - City Branch", status: "alert",  region: "North", address: "123 Main Street, City Center", cameras: 2, lastAlert: "Today, 10:23 AM" },
     { id: 7,  name: "ATM #07 - Main Street",  status: "alert",  region: "East",  address: "456 Oak Avenue, Downtown",     cameras: 2, lastAlert: "Today, 09:45 AM" },
@@ -56,8 +57,8 @@ export default function ATMLocations() {
   ];
 
   /* ---------- Filters ---------- */
-  const [statusFilterTop, setStatusFilterTop] = useState("All ATMs"); // top select
-  const [statusFilterMap, setStatusFilterMap] = useState("All ATMs"); // map controls
+  const [statusFilterTop, setStatusFilterTop] = useState("All ATMs");
+  const [statusFilterMap, setStatusFilterMap] = useState("All ATMs");
   const [regionFilter, setRegionFilter] = useState("All Regions");
 
   const toStatus = (x) => (x === "All ATMs" ? "all" : x.toLowerCase());
@@ -109,11 +110,25 @@ export default function ATMLocations() {
         </div>
 
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
-          <button onClick={() => navigate("/live-feeds")} className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900">
+          {/* ⤵️ Show Loading then go to /dashboard/live-feeds */}
+          <button
+            onClick={() =>
+              navigate("/loading", {
+                state: { to: "/dashboard/live-feeds", delayMs: 900 }
+              })
+            }
+            className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900"
+          >
             {Icon.live} View Live
           </button>
+
+          {/* ⤵️ Show Loading then go to /dashboard/reports (include context if you want) */}
           <button
-            onClick={() => navigate("/reports", { state: { from: "atm-locations", atmId: loc.id } })}
+            onClick={() =>
+              navigate("/loading", {
+                state: { to: "/dashboard/reports", delayMs: 900, from: "atm-locations", atmId: loc.id }
+              })
+            }
             className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900"
           >
             {Icon.history} History
@@ -138,8 +153,6 @@ export default function ATMLocations() {
               {openAlertsCount}
             </span>
           </div>
-
-          {/* Admin badge + compact icon-only Logout */}
           <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
         </div>
       </div>
