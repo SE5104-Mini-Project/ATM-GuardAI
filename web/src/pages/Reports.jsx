@@ -6,7 +6,6 @@ export default function Reports() {
   const cardBase =
     "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
 
-  /* ------------ tiny inline icons (no libs) ------------ */
   const Icon = {
     bell: (
       <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
@@ -27,56 +26,67 @@ export default function Reports() {
     ),
   };
 
-  /* ------------ sample data (last 7 days) ------------ */
+  // Sample data
   const baseRows = useMemo(
     () => [
-      { date: "Oct 28, 2023", location: "City Center", mask: 3, helmet: 1, falsePos: 2, response: "2m 15s" },
-      { date: "Oct 27, 2023", location: "Downtown", mask: 2, helmet: 0, falsePos: 1, response: "1m 45s" },
+      { date: "Oct 28, 2023", location: "City Center",     mask: 3, helmet: 1, falsePos: 2, response: "2m 15s" },
+      { date: "Oct 27, 2023", location: "Downtown",        mask: 2, helmet: 0, falsePos: 1, response: "1m 45s" },
       { date: "Oct 26, 2023", location: "Health District", mask: 5, helmet: 2, falsePos: 3, response: "3m 30s" },
-      { date: "Oct 25, 2023", location: "Shopping Mall", mask: 1, helmet: 1, falsePos: 0, response: "2m 10s" },
-      { date: "Oct 24, 2023", location: "Main Street", mask: 4, helmet: 2, falsePos: 1, response: "1m 55s" },
-      { date: "Oct 23, 2023", location: "Riverside", mask: 2, helmet: 1, falsePos: 1, response: "2m 05s" },
-      { date: "Oct 22, 2023", location: "Metro Station", mask: 6, helmet: 3, falsePos: 2, response: "3m 40s" },
+      { date: "Oct 25, 2023", location: "Shopping Mall",   mask: 1, helmet: 1, falsePos: 0, response: "2m 10s" },
+      { date: "Oct 24, 2023", location: "Main Street",     mask: 4, helmet: 2, falsePos: 1, response: "1m 55s" },
+      { date: "Oct 23, 2023", location: "Riverside",       mask: 2, helmet: 1, falsePos: 1, response: "2m 05s" },
+      { date: "Oct 22, 2023", location: "Metro Station",   mask: 6, helmet: 3, falsePos: 2, response: "3m 40s" },
     ],
     []
   );
 
-  /* ------------ filters / state ------------ */
+  // Filters
   const [reportType, setReportType] = useState("Alert Summary");
   const [period, setPeriod] = useState("Last 24 Hours");
   const [atm, setAtm] = useState("All ATMs");
   const [alertType, setAlertType] = useState("All Alerts");
-  const [generatedAt, setGeneratedAt] = useState(new Date());
 
-  // derived rows based on simple filters (demo behavior)
+  // Generate button state
+  const [generatedAt, setGeneratedAt] = useState(new Date());
+  const [rowsVersion, setRowsVersion] = useState(0); // bump this when clicking "Generate"
+
+  // Rows are recalculated ONLY when rowsVersion changes (i.e., when you click Generate)
   const rows = useMemo(() => {
     let r = [...baseRows];
+
+    // Apply ATM filter
     if (atm !== "All ATMs") {
       r = r.filter((x) => x.location === atm);
     }
+
+    // Apply alert type emphasis
     if (alertType !== "All Alerts") {
       r = r.map((x) => ({
         ...x,
-        mask: alertType === "Mask" ? x.mask : alertType === "Helmet" ? 0 : x.mask,
-        helmet: alertType === "Helmet" ? x.helmet : alertType === "Mask" ? 0 : x.helmet,
+        mask:   alertType === "Mask"   ? x.mask   : alertType === "Helmet" ? 0 : x.mask,
+        helmet: alertType === "Helmet" ? x.helmet : alertType === "Mask"   ? 0 : x.helmet,
       }));
     }
+
+    // (Period is just a UI label in this demo; wire a real date range on real data.)
     return r;
-  }, [baseRows, atm, alertType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseRows, rowsVersion]); // <- NOT depending on atm/alertType so filters apply when you click Generate
 
-  const totals = useMemo(() => {
-    return rows.reduce(
-      (acc, r) => {
-        acc.mask += r.mask;
-        acc.helmet += r.helmet;
-        acc.falsePos += r.falsePos;
-        return acc;
-      },
-      { mask: 0, helmet: 0, falsePos: 0 }
-    );
-  }, [rows]);
+  const totals = useMemo(
+    () =>
+      rows.reduce(
+        (acc, r) => ({ mask: acc.mask + r.mask, helmet: acc.helmet + r.helmet, falsePos: acc.falsePos + r.falsePos }),
+        { mask: 0, helmet: 0, falsePos: 0 }
+      ),
+    [rows]
+  );
 
-  const onGenerate = () => setGeneratedAt(new Date());
+  const onGenerate = () => {
+    // Apply the current filters and update timestamp
+    setRowsVersion((v) => v + 1);
+    setGeneratedAt(new Date());
+  };
 
   const exportCSV = () => {
     const header = ["Date", "ATM Location", "Mask Alerts", "Helmet Alerts", "False Positives", "Response Time"];
@@ -91,11 +101,11 @@ export default function Reports() {
     URL.revokeObjectURL(url);
   };
 
-  const openAlertsCount = 3; // badge number in header
+  const openAlertsCount = 3;
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
-      {/* ===== Header (Admin badge + compact icon-only Logout) ===== */}
+      {/* Header */}
       <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
         <h2 className="text-2xl font-bold text-gray-900">Reports</h2>
 
@@ -116,7 +126,7 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* ===== Reports & Analytics panel ===== */}
+      {/* Reports & Analytics panel */}
       <h3 className="text-xl font-semibold mb-3">Reports &amp; Analytics</h3>
 
       <div className="rounded-2xl bg-white shadow-lg border border-slate-200 p-5 mb-6">
@@ -194,7 +204,7 @@ export default function Reports() {
 
         <div className="mt-5">
           <button
-            onClick={() => setGeneratedAt(new Date())}
+            onClick={onGenerate}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 shadow"
           >
             <span className="grid place-items-center">{Icon.play}</span>
@@ -203,7 +213,7 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* ===== Summary table ===== */}
+      {/* Summary table */}
       <div className="rounded-2xl bg-white shadow-lg border border-slate-200">
         <div className="px-5 pt-4">
           <h4 className="text-lg font-semibold">Alert Summary - Last 7 Days</h4>
@@ -213,8 +223,9 @@ export default function Reports() {
               year: "numeric",
               month: "long",
               day: "numeric",
-              hour: "numeric",
+              hour: "2-digit",
               minute: "2-digit",
+              second: "2-digit",   // show seconds so you can see it update instantly
             })}
           </p>
         </div>
