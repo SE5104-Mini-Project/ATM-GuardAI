@@ -94,7 +94,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => navigate("/reset-password")}
-                  className="text-teal-400 hover:underline"
+                  className="text-teal-400 hover:underline cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -104,7 +104,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-md bg-gradient-to-r from-cyan-400 to-blue-500 hover:opacity-90 transition font-semibold"
+                className="w-full cursor-pointer py-3 rounded-md bg-gradient-to-r from-cyan-400 to-blue-500 hover:opacity-90 transition font-semibold"
               >
                 {loading ? "Redirecting…" : "Login to Dashboard"}
               </button>
