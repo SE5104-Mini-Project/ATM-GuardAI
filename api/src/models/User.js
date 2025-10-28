@@ -1,3 +1,4 @@
+// api/src/models/User.js
 import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   uid: { type: String, unique: true, index: true },

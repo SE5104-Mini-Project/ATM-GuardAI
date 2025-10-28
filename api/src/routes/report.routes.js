@@ -1,7 +1,9 @@
+// api/src/routes/report.routes.js
 import { Router } from "express";
 import { auth } from "../middlewares/auth.js";
 import Report from "../models/Report.js";
 const r = Router();
+
 
 r.post("/", auth, async (req,res)=>{
   const doc = await Report.create({ ...req.body, uid: req.user.uid });

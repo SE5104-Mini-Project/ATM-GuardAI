@@ -1,3 +1,4 @@
+// api/src/models/Event.js
 import mongoose from "mongoose";
 const eventSchema = new mongoose.Schema({
   source: { type: String, enum: ["atm","camera","sensor"], index: true },

@@ -1,3 +1,4 @@
+// api/src/routes/event.routes.js
 import { Router } from "express";
 import { auth } from "../middlewares/auth.js";
 import Event from "../models/Event.js";

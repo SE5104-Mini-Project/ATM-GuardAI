@@ -1,3 +1,4 @@
+// api/src/models/Report.js
 import mongoose from "mongoose";
 const reportSchema = new mongoose.Schema({
   uid: { type: String, index: true },
