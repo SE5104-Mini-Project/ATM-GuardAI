@@ -1,129 +1,38 @@
-// api/src/routes/event.routes.js
-import { Router } from "express";
-// FIXED: point to src/middlewares
-import { auth } from "./middlewares/auth.js";
-// FIXED: point to src/models
-import Event from "./models/Event.js";
-// FIXED: point to src/utils
-import { runInference } from "./utils/ai.js";
+import express from "express";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import rateLimit from "express-rate-limit";
+import createError from "http-errors";
+import { initFirebase } from "./middlewares/auth.js";
+import userRouter from "./routes/user.routes.js";
+import eventRouter from "./routes/event.routes.js";
+import reportRouter from "./routes/report.routes.js";
 
-const r = Router();
+dotenv.config();
+initFirebase();
 
-const SOURCE = ["atm", "camera", "sensor"];
-const LEVEL  = ["info", "warn", "critical"];
+const app = express();
+app.use(express.json());
+app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+app.use(helmet());
+app.use(morgan("dev"));
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 
-/** Create event */
-r.post("/", auth, async (req, res) => {
-  try {
-    const { source, level = "info", tags = [], data = {} } = req.body || {};
+app.get("/health", (_req, res) => res.json({ ok: true }));
 
-    if (!SOURCE.includes(source)) {
-      return res.status(400).json({ error: `source must be one of ${SOURCE.join(", ")}` });
-    }
-    if (!LEVEL.includes(level)) {
-      return res.status(400).json({ error: `level must be one of ${LEVEL.join(", ")}` });
-    }
+app.use("/users", userRouter);
+app.use("/events", eventRouter);
+app.use("/reports", reportRouter);
 
-    const doc = await Event.create({
-      source,
-      level,
-      tags: Array.isArray(tags) ? tags : [String(tags)],
-      data,
-      createdBy: req.user.uid,
-    });
+app.use((_req, _res, next) => next(createError(404, "Not found")));
+app.use((err, _req, res, _next) => res.status(err.status || 500).json({ error: err.message }));
 
-    return res.status(201).json(doc);
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
+await mongoose.connect(process.env.MONGO_URI);
+app.listen(process.env.PORT || 8080, () => console.log("API running on", process.env.PORT));
 
-/** List events (filters + pagination) */
-r.get("/", auth, async (req, res) => {
-  try {
-    const q = {};
-    const { source, level, tag, from, to } = req.query;
-
-    if (SOURCE.includes(source)) q.source = source;
-    if (LEVEL.includes(level)) q.level = level;
-    if (tag) q.tags = { $in: Array.isArray(tag) ? tag : [tag] };
-
-    // date range filters (createdAt)
-    if (from || to) {
-      q.createdAt = {};
-      if (from) q.createdAt.$gte = new Date(from);
-      if (to) q.createdAt.$lte = new Date(to);
-    }
-
-    // pagination
-    const page  = Math.max(parseInt(req.query.page ?? "1", 10), 1);
-    const limit = Math.min(Math.max(parseInt(req.query.limit ?? "50", 10), 1), 200);
-    const skip  = (page - 1) * limit;
-
-    // sort (default newest first)
-    const sort = req.query.sort === "asc" ? "createdAt" : "-createdAt";
-
-    const [items, total] = await Promise.all([
-      Event.find(q).sort(sort).skip(skip).limit(limit).lean(),
-      Event.countDocuments(q),
-    ]);
-
-    return res.json({
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-      items,
-    });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-/** Get single event by id */
-r.get("/:id", auth, async (req, res) => {
-  try {
-    const doc = await Event.findById(req.params.id).lean();
-    if (!doc) return res.status(404).json({ error: "Not found" });
-    return res.json(doc);
-  } catch (e) {
-    return res.status(400).json({ error: "Invalid id" });
-  }
-});
-
-/** Delete event (optionally restrict to admin) */
-r.delete("/:id",
-//  auth, permit("admin"), // <-- use this if you enabled RBAC
-  auth,
-  async (req, res) => {
-    try {
-      const deleted = await Event.findByIdAndDelete(req.params.id);
-      if (!deleted) return res.status(404).json({ error: "Not found" });
-      return res.sendStatus(204);
-    } catch (e) {
-      return res.status(400).json({ error: "Invalid id" });
-    }
-  }
-);
-
-/** (Optional) Call your AI service then store result */
-// uncomment imports above to enable
-
-r.post("/infer-and-store", auth, async (req, res) => {
-  try {
-    const result = await runInference(req.body); // { type, score, frameUrl, ... }
-    const doc = await Event.create({
-      source: "camera",
-      level: result.score > 0.8 ? "critical" : "warn",
-      tags: [result.type].filter(Boolean),
-      data: result,
-      createdBy: req.user.uid,
-    });
-    return res.status(201).json(doc);
-  } catch (e) {
-    return res.status(502).json({ error: `AI service error: ${e.message}` });
-  }
-});
-
-
-export default r;
+// in src/index.js, after mongoose.connect(...)
+mongoose.connection.on("connected", ()=>console.log("MongoDB connected"));
+mongoose.connection.on("error", (e)=>console.error("MongoDB error:", e.message));
