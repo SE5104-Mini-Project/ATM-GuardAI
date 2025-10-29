@@ -1,11 +1,11 @@
 // api/src/routes/event.routes.js
 import { Router } from "express";
-import { auth } from "../middlewares/auth.js";
-import Event from "../models/Event.js";
-// OPTIONAL: enable RBAC if you created this helper
-// import { permit } from "../middlewares/permit.js";
-
-import { runInference } from "../utils/ai.js";
+// FIXED: point to src/middlewares
+import { auth } from "./middlewares/auth.js";
+// FIXED: point to src/models
+import Event from "./models/Event.js";
+// FIXED: point to src/utils
+import { runInference } from "./utils/ai.js";
 
 const r = Router();
 
