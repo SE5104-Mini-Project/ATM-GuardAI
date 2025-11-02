@@ -120,3 +120,89 @@ def draw_box_and_label(frame, x, y, w, h, label, conf):
     cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
     text = f"{label} {conf*100:.1f}%"
     cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+
+
+    
+# -------------------- Camera thread --------------------
+stop_threads = False
+
+def run_camera(cam_index, alert_manager):
+    print(f"Starting camera {cam_index}")
+    cap = cv2.VideoCapture(cam_index)
+    if not cap.isOpened():
+        print(f"Could not open camera {cam_index}")
+        return
+
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    frame_counter = 0
+
+    while not stop_threads:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame_counter += 1
+        if frame_counter % 3 != 0:
+            cv2.imshow(f"Camera {cam_index}", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            continue
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = faceCascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(60, 60))
+
+        for (x, y, w, h) in faces:
+            face_roi = frame[y:y+h, x:x+w]
+            processed = preprocess_face(face_roi)
+            preds = model.predict(processed, verbose=0)
+            conf = float(np.max(preds))
+            pred_idx = int(np.argmax(preds))
+            label = Classes[pred_idx]
+            draw_box_and_label(frame, x, y, w, h, label, conf)
+
+            if conf >= CONFIDENCE_THRESHOLD and label != "normal face":
+                alert_manager.send_alert(cam_index, label, conf, frame=frame)
+
+        cv2.imshow(f"Camera {cam_index}", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyWindow(f"Camera {cam_index}")
+    print(f"Stopped camera {cam_index}")
+
+
+# -------------------- Signal handling --------------------
+import signal
+def signal_handler(sig, frame):
+    global stop_threads
+    print("Stopping threads...")
+    stop_threads = True
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
+
+# -------------------- Main --------------------
+if __name__ == "__main__":
+    print("Starting Detection System")
+    alert_manager = AlertManager()
+    threads = []
+    for i in range(len(CAMERAS)):
+        t = threading.Thread(target=run_camera, args=(i, alert_manager), daemon=True)
+        t.start()
+        threads.append(t)
+        time.sleep(1)
+
+    if len(CAMERAS) == 0:
+        t = threading.Thread(target=run_camera, args=(0, alert_manager), daemon=True)
+        t.start()
+        threads.append(t)
+
+    try:
+        while any(t.is_alive() for t in threads):
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        stop_threads = True
+
+    print("All cameras stopped. Exiting.")
