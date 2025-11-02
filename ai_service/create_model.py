@@ -1,56 +1,59 @@
-import tensorflow as tf
-from tensorflow.keras import layers, models
-import cv2
+# data_loader.py
 import os
+import cv2
 import numpy as np
-import random
-import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.utils import class_weight
 
-# -------------------- Define Data Directory and Classes --------------------
-Data_directory = './images/'
+# -------------------- Configuration --------------------
+Data_directory = './images'
 Classes = ['normal face', 'with helmet', 'with mask']
-img_size = 224
+IMG_SIZE = 224
+SEED = 42
+BATCH_SIZE = 32
 
+# -------------------- Helpers --------------------
+def list_image_files(path):
+    return [f for f in os.listdir(path) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
 
-# -------------------- Create Training Data --------------------
-training_Data = []
-
-def create_training_data():
-    for category in Classes:
-        path = os.path.join(Data_directory, category)
-        class_num = Classes.index(category)
-        for img in os.listdir(path):
+def load_images_and_labels():
+    X, y = [], []
+    counts = {}
+    for idx, cls in enumerate(Classes):
+        cls_path = os.path.join(Data_directory, cls)
+        if not os.path.isdir(cls_path):
+            print(f"WARNING: class directory not found: {cls_path}")
+            continue
+        files = list_image_files(cls_path)
+        counts[cls] = len(files)
+        print(f"Found {len(files)} images for class '{cls}'")
+        for fname in files:
             try:
-                img_array = cv2.imread(os.path.join(path, img))
-                new_array = cv2.resize(img_array, (img_size, img_size))
-                training_Data.append([new_array, class_num])
+                img_path = os.path.join(cls_path, fname)
+                img = cv2.imread(img_path)
+                if img is None:
+                    continue
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+                X.append(img)
+                y.append(idx)
             except Exception as e:
-                print("Error reading file:", img)
-    return training_Data
+                print(f"Error reading {fname}: {e}")
+    X = np.array(X, dtype=np.float32) / 255.0
+    y = np.array(y, dtype=np.int32)
+    print("Total samples:", len(y))
+    return X, y, counts
 
-create_training_data()
-print("Total Training Samples:", len(training_Data))
+# -------------------- Load Data --------------------
+X, y, class_counts = load_images_and_labels()
+if len(y) == 0:
+    raise SystemExit("No training images found. Put images inside ./images/<class_name>/")
 
+# -------------------- Class Weights --------------------
+class_weights = class_weight.compute_class_weight('balanced', classes=np.unique(y), y=y)
+class_weights_dict = {i: w for i, w in enumerate(class_weights)}
 
-
-# -------------------- Shuffle and Split Data --------------------
-random.shuffle(training_Data)
-
-X = []
-Y = []
-
-for features, label in training_Data:
-    X.append(features)
-    Y.append(label)
-
-X = np.array(X).reshape(-1, img_size, img_size, 3) / 255.0
-Y = np.array(Y)
-
-
-
-# -------------------- Save Data Using Pickle --------------------
-with open("X.pickle", "wb") as f:
-    pickle.dump(X, f)
-
-with open("Y.pickle", "wb") as f:
-    pickle.dump(Y, f)
+# -------------------- Train/Test Split --------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=SEED, stratify=y
+)
