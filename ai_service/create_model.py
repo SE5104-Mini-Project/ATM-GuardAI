@@ -106,3 +106,129 @@ def make_dataset(images, labels, shuffle=True, augment=False):
         ds = ds.map(_augment, num_parallel_calls=AUTOTUNE)
     ds = ds.batch(BATCH_SIZE).prefetch(AUTOTUNE)
     return ds
+
+
+train_ds = make_dataset(X_train, y_train, shuffle=True, augment=True)
+val_ds = make_dataset(X_test, y_test, shuffle=False, augment=False)
+
+
+# -------------------- Build Model (MobileNetV2) --------------------
+base_model = tf.keras.applications.MobileNetV2(
+    input_shape=(IMG_SIZE, IMG_SIZE, 3),
+    include_top=False,
+    weights='imagenet'
+)
+
+base_model.trainable = False
+
+inputs = layers.Input(shape=(IMG_SIZE, IMG_SIZE, 3))
+x = layers.Rescaling(1.0)(inputs)
+x = base_model(x, training=False)
+x = layers.GlobalAveragePooling2D()(x)
+x = layers.Dense(256, activation='relu')(x)
+x = layers.Dropout(0.4)(x)
+outputs = layers.Dense(len(Classes), activation='softmax')(x)
+
+model = models.Model(inputs, outputs)
+
+model.compile(
+    optimizer=optimizers.Adam(learning_rate=1e-3),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+model.summary()
+
+
+# -------------------- Callbacks --------------------
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+checkpoint_dir = "checkpoints"
+os.makedirs(checkpoint_dir, exist_ok=True)
+checkpoint_path = os.path.join(checkpoint_dir, f"model_initial_{timestamp}.h5")
+
+cb_early = callbacks.EarlyStopping(monitor='val_loss', patience=PATIENCE, restore_best_weights=True)
+cb_ckpt = callbacks.ModelCheckpoint(checkpoint_path, save_best_only=True, monitor='val_loss')
+cb_reduce = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=2, min_lr=1e-6)
+
+
+# -------------------- Initial training --------------------
+print("=== Starting initial training (backbone frozen) ===")
+history1 = model.fit(
+    train_ds,
+    validation_data=val_ds,
+    epochs=EPOCHS_INITIAL,
+    callbacks=[cb_early, cb_ckpt, cb_reduce],
+    class_weight=class_weights_dict,
+    verbose=1
+)
+
+
+# -------------------- Fine-tuning --------------------
+print("=== Fine-tuning: unfreezing top layers of backbone ===")
+base_model.trainable = True
+
+fine_tune_at = int(len(base_model.layers) * 0.6) 
+for i, layer in enumerate(base_model.layers):
+    layer.trainable = i >= fine_tune_at
+    if isinstance(layer, layers.BatchNormalization):
+        layer.trainable = False
+
+print(f"Unfrozen layers from index {fine_tune_at} to {len(base_model.layers)-1}")
+
+model.compile(
+    optimizer=optimizers.Adam(learning_rate=1e-5),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+checkpoint_path_ft = os.path.join(checkpoint_dir, f"model_finetune_{timestamp}.h5")
+cb_ckpt_ft = callbacks.ModelCheckpoint(checkpoint_path_ft, save_best_only=True, monitor='val_loss')
+
+history2 = model.fit(
+    train_ds,
+    validation_data=val_ds,
+    epochs=EPOCHS_FINE,
+    callbacks=[cb_early, cb_ckpt_ft, cb_reduce],
+    class_weight=class_weights_dict,
+    verbose=1
+)
+
+
+# -------------------- Evaluate --------------------
+print("=== Evaluation on test set ===")
+y_pred_probs = model.predict(val_ds, verbose=1)
+y_pred = np.argmax(y_pred_probs, axis=1)
+
+y_test_preds = np.argmax(model.predict(X_test, verbose=0), axis=1)
+
+print("Classification Report:")
+print(classification_report(y_test, y_test_preds, target_names=Classes))
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_test_preds))
+
+
+
+# -------------------- Save model and metadata --------------------
+final_model_path = "face_model_finetuned.h5"
+model.save(final_model_path)
+print("Saved finetuned model to", final_model_path)
+
+model_info = {
+    "training_date": datetime.now().isoformat(),
+    "classes": Classes,
+    "img_size": IMG_SIZE,
+    "train_samples": int(len(y_train)),
+    "test_samples": int(len(y_test)),
+    "class_counts": class_counts,
+}
+
+with open("model_info.json", "w") as f:
+    json.dump(model_info, f, indent=2)
+
+with open("X_test.pickle", "wb") as f:
+    pickle.dump(X_test, f)
+with open("Y_test.pickle", "wb") as f:
+    pickle.dump(y_test, f)
+
+print("Training complete. Model info saved to model_info.json")
