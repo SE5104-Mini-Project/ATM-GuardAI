@@ -1,0 +1,9 @@
+images/
+checkpoints/
+.venv/
+venv/
+.env
+face_model_finetuned.h5
+model_info.json
+X_test.pickle
+Y_test.pickle
