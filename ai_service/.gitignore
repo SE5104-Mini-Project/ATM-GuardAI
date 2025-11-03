@@ -1,5 +1,6 @@
 images/
 checkpoints/
+.venv/
 venv/
 .env
 face_model_finetuned.h5
