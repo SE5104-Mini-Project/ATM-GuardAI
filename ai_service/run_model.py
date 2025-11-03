@@ -1,3 +1,4 @@
+# ai_service/run_model.py
 import os
 import sys
 import time
@@ -8,23 +9,27 @@ import threading
 from datetime import datetime
 import tensorflow as tf
 from tensorflow.keras.layers import Rescaling
-
-
+import requests
 
 # -------------------- Configuration --------------------
 Classes = ['normal face', 'with helmet', 'with mask']
 IMG_SIZE = 224
-CONFIDENCE_THRESHOLD = 0.7
-ALERT_COOLDOWN = 30
+CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.7))
+ALERT_COOLDOWN = int(os.environ.get("ALERT_COOLDOWN", 30))
+
+# Worker/API settings
+API_EVENTS_URL = os.environ.get("API_EVENTS_URL")  # e.g. http://localhost:8080/events
+AI_SERVICE_API_TOKEN = os.environ.get("AI_SERVICE_API_TOKEN")  # Bearer token to post to API
+HEADLESS = os.environ.get("HEADLESS", "1") == "1"
+SAVE_ALERT_IMAGES = True
 
 CAMERAS = [
     {"id": 0, "name": "ATM #12 - City Branch", "location": "ATM #12 - City Branch", "camera": "Camera 1"},
-    # {"id": 1, "name": "ATM #07 - Main Street", "location": "ATM #07 - Main Street", "camera": "Camera 2"},
+    # add other cameras if desired
 ]
 
 # -------------------- Load model --------------------
 custom_objects = {"Rescaling": Rescaling}
-
 MODEL_PATHS = ["face_model_finetuned.h5", "face_model.h5"]
 model = None
 for p in MODEL_PATHS:
@@ -52,11 +57,8 @@ try:
 except Exception as e:
     print("model_info.json not found; using default Classes.")
 
-
 # -------------------- Face Detector --------------------
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-
-
 
 # -------------------- Alert Manager --------------------
 class AlertManager:
@@ -77,7 +79,6 @@ class AlertManager:
     def send_alert(self, camera_id, alert_type, confidence, frame=None):
         if not self._can_alert(camera_id, alert_type):
             return False
-        # Build alert object
         alert_id = f"alert_{camera_id}_{int(time.time())}"
         alert = {
             "id": alert_id,
@@ -92,16 +93,35 @@ class AlertManager:
             "timestamp": datetime.now().isoformat()
         }
         print("ALERT:", json.dumps(alert, indent=2))
-        if frame is not None:
+        if frame is not None and SAVE_ALERT_IMAGES:
             path = os.path.join("alert_images", f"{alert_id}.jpg")
             try:
                 cv2.imwrite(path, frame)
                 alert["image_path"] = path
             except Exception as e:
                 print("Failed to save alert image:", e)
+
+        # POST to API if configured
+        if API_EVENTS_URL:
+            try:
+                payload = {
+                    "source": "camera",
+                    "level": "critical" if confidence > 0.8 else "warn",
+                    "tags": [alert_type],
+                    "data": alert
+                }
+                headers = {"Content-Type": "application/json"}
+                if AI_SERVICE_API_TOKEN:
+                    headers["Authorization"] = f"Bearer {AI_SERVICE_API_TOKEN}"
+                r = requests.post(API_EVENTS_URL, json=payload, timeout=8, headers=headers)
+                if r.status_code not in (200, 201):
+                    print("API POST failed:", r.status_code, r.text)
+                else:
+                    print("Posted alert to API:", r.status_code)
+            except Exception as e:
+                print("Failed to POST to API:", e)
+
         return True
-
-
 
 # -------------------- Preprocessing --------------------
 def preprocess_face(face_bgr):
@@ -121,8 +141,6 @@ def draw_box_and_label(frame, x, y, w, h, label, conf):
     text = f"{label} {conf*100:.1f}%"
     cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-
-    
 # -------------------- Camera thread --------------------
 stop_threads = False
 
@@ -142,10 +160,12 @@ def run_camera(cam_index, alert_manager):
         if not ret:
             break
         frame_counter += 1
+        # process every 3rd frame for speed
         if frame_counter % 3 != 0:
-            cv2.imshow(f"Camera {cam_index}", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            if not HEADLESS:
+                cv2.imshow(f"Camera {cam_index}", frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
             continue
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -163,14 +183,15 @@ def run_camera(cam_index, alert_manager):
             if conf >= CONFIDENCE_THRESHOLD and label != "normal face":
                 alert_manager.send_alert(cam_index, label, conf, frame=frame)
 
-        cv2.imshow(f"Camera {cam_index}", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        if not HEADLESS:
+            cv2.imshow(f"Camera {cam_index}", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     cap.release()
-    cv2.destroyWindow(f"Camera {cam_index}")
+    if not HEADLESS:
+        cv2.destroyWindow(f"Camera {cam_index}")
     print(f"Stopped camera {cam_index}")
-
 
 # -------------------- Signal handling --------------------
 import signal
@@ -181,11 +202,9 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
-
 # -------------------- Main --------------------
 if __name__ == "__main__":
-    print("Starting Detection System")
+    print("Starting Detection System (headless: {})".format(HEADLESS))
     alert_manager = AlertManager()
     threads = []
     for i in range(len(CAMERAS)):
@@ -194,6 +213,7 @@ if __name__ == "__main__":
         threads.append(t)
         time.sleep(1)
 
+    # If no configured cameras, try default camera id 0
     if len(CAMERAS) == 0:
         t = threading.Thread(target=run_camera, args=(0, alert_manager), daemon=True)
         t.start()

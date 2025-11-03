@@ -1,11 +1,9 @@
 // api/src/routes/event.routes.js
 import { Router } from "express";
 import { auth } from "../middlewares/auth.js";
+import { aiAuth } from "../middlewares/aiAuth.js";
 import Event from "../models/Event.js";
-// OPTIONAL: enable RBAC if you created this helper
-// import { permit } from "../middlewares/permit.js";
-// OPTIONAL: enable AI call if you created utils/ai.js
-import { runInference } from "../utils/ai.js";
+// import { runInference } from "../utils/ai.js"; // optional
 
 const r = Router();
 
@@ -13,7 +11,7 @@ const SOURCE = ["atm", "camera", "sensor"];
 const LEVEL  = ["info", "warn", "critical"];
 
 /** Create event */
-r.post("/", auth, async (req, res) => {
+r.post("/", aiAuth, auth, async (req, res) => {
   try {
     const { source, level = "info", tags = [], data = {} } = req.body || {};
 
@@ -29,7 +27,7 @@ r.post("/", auth, async (req, res) => {
       level,
       tags: Array.isArray(tags) ? tags : [String(tags)],
       data,
-      createdBy: req.user.uid,
+      createdBy: req.user?.uid || null,
     });
 
     return res.status(201).json(doc);
@@ -39,7 +37,7 @@ r.post("/", auth, async (req, res) => {
 });
 
 /** List events (filters + pagination) */
-r.get("/", auth, async (req, res) => {
+r.get("/", aiAuth, auth, async (req, res) => {
   try {
     const q = {};
     const { source, level, tag, from, to } = req.query;
@@ -81,7 +79,7 @@ r.get("/", auth, async (req, res) => {
 });
 
 /** Get single event by id */
-r.get("/:id", auth, async (req, res) => {
+r.get("/:id", aiAuth, auth, async (req, res) => {
   try {
     const doc = await Event.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ error: "Not found" });
@@ -93,7 +91,7 @@ r.get("/:id", auth, async (req, res) => {
 
 /** Delete event (optionally restrict to admin) */
 r.delete("/:id",
-//  auth, permit("admin"), // <-- use this if you enabled RBAC
+  aiAuth,
   auth,
   async (req, res) => {
     try {
@@ -107,23 +105,6 @@ r.delete("/:id",
 );
 
 /** (Optional) Call your AI service then store result */
-// uncomment imports above to enable
-
-r.post("/infer-and-store", auth, async (req, res) => {
-  try {
-    const result = await runInference(req.body); // { type, score, frameUrl, ... }
-    const doc = await Event.create({
-      source: "camera",
-      level: result.score > 0.8 ? "critical" : "warn",
-      tags: [result.type].filter(Boolean),
-      data: result,
-      createdBy: req.user.uid,
-    });
-    return res.status(201).json(doc);
-  } catch (e) {
-    return res.status(502).json({ error: `AI service error: ${e.message}` });
-  }
-});
-
+// r.post("/infer-and-store", aiAuth, auth, async (req, res) => { ... });
 
 export default r;
