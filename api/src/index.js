@@ -3,6 +3,18 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import liveFeedsRouter from './routes/liveFeedsRouter.js';
+import mongoose from 'mongoose';   // <-- added
+
+// MongoDB connection
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://ATMguardAI:ATMguardAI1234@atmguardai.oexuwur.mongodb.net/?appName=ATMGuardAI";
+
+mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log("✅ MongoDB connected"))
+.catch((err) => console.error("❌ MongoDB connection error:", err));
+// -------------------------------------------------------------
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
