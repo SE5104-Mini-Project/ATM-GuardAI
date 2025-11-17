@@ -40,12 +40,16 @@ export const auth = async (req, res, next) => {
     const decoded = await admin.auth().verifyIdToken(token);
     if (!decoded || !decoded.uid) return res.status(401).json({ error: "Invalid token" });
 
-    // Find user profile in MongoDB by firebase uid
-    const user = await User.findOne({ uid: decoded.uid });
+    // Find or create user profile in MongoDB by firebase uid
+    let user = await User.findOne({ uid: decoded.uid });
     if (!user) {
-      // optional: create profile automatically if you want:
-      // const created = await User.create({ uid: decoded.uid, email: decoded.email, role: 'user' });
-      return res.status(403).json({ error: "User profile missing in DB" });
+      // Auto-create profile if it doesn't exist
+      user = await User.create({ 
+        uid: decoded.uid, 
+        email: decoded.email || decoded.firebase.identities?.email?.[0], 
+        role: 'user' 
+      });
+      console.log(`✨ Auto-created user profile for ${decoded.email || decoded.uid}`);
     }
 
     // attach DB user to req.user

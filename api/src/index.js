@@ -1,4 +1,5 @@
 // api/src/index.js
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -14,10 +15,7 @@ import { initFirebase } from './middlewares/auth.js';
 const MONGO_URI = process.env.MONGO_URI ||
   "mongodb+srv://ATMguardAI:ATMguardAI1234@atmguardai.oexuwur.mongodb.net/?appName=ATMGuardAI";
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(MONGO_URI)
 .then(() => console.log("✅ MongoDB connected"))
 .catch((err) => console.error("❌ MongoDB connection error:", err));
 

@@ -8,7 +8,7 @@ async function apiFetch(path, opts = {}) {
   const user = auth.currentUser;
   if (!user) throw new Error("Not authenticated");
   const token = await user.getIdToken();
-  const base = import.meta.env.VITE_API_URL || "http://localhost:8081";
+  const base = import.meta.env.VITE_API_URL || "http://localhost:3001";
   const headers = { ...(opts.headers || {}), Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
   const res = await fetch(base + path, { ...opts, headers });
   if (!res.ok) {
