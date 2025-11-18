@@ -1,10 +1,9 @@
 Pillow
 scikit-learn
-request
+requests
 tensorflow
 opencv-python
 numpy
 pickle-mixin
-Version
 Flask
 flask-cors

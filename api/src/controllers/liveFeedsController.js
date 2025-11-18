@@ -9,20 +9,7 @@ const mockCameras = [
     { id: 9, name: "ATM #09 - Shopping Mall", camLabel: "Camera 1 - ATM Area", status: "online" },
 ];
 
-const mockAlerts = [
-    {
-        id: "alert_1",
-        type: "with mask",
-        severity: "high",
-        status: "open",
-        description: "Detected: with mask",
-        camera: "Camera 1 - ATM Area",
-        location: "ATM #12 - City Branch",
-        time: "2024-01-15 02:30:45 PM",
-        confidence: 0.89,
-        timestamp: new Date().toISOString()
-    }
-];
+
 
 async function checkFlaskHealth() {
     try {
