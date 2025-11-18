@@ -57,6 +57,11 @@ r.post("/", requireAdmin, async (req, res, next) => {
       disabled: false
     });
 
+    // Set custom claims for the user (optional, for enhanced security)
+    if (role === "admin") {
+      await admin.auth().setCustomUserClaims(fbUser.uid, { admin: true });
+    }
+
     // create Mongo profile
     const user = await User.create({ uid: fbUser.uid, email, role });
     res.status(201).json({ message: "User created", user });

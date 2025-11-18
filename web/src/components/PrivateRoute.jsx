@@ -16,10 +16,28 @@ export default function PrivateRoute({ children }) {
         return;
       }
       try {
-        await user.getIdToken(true);
-        const token = await user.getIdTokenResult();
-        setAuthorized(token.claims?.admin === true);
-      } catch {
+        const token = await user.getIdToken(true);
+        
+        // Verify user exists in backend database
+        const base = import.meta.env.VITE_API_URL || "http://localhost:3001";
+        const res = await fetch(base + "/api/users/me", {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        if (res.ok) {
+          const userData = await res.json();
+          console.log("PrivateRoute: User verified:", userData);
+          // Allow all authenticated users with valid backend profile
+          setAuthorized(true);
+        } else {
+          console.error("PrivateRoute: Backend verification failed");
+          setAuthorized(false);
+        }
+      } catch (err) {
+        console.error("PrivateRoute: Error verifying user:", err);
         setAuthorized(false);
       } finally {
         setLoading(false);

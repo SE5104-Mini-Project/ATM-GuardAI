@@ -50,6 +50,8 @@ export default function Users() {
       try {
         setLoading(true);
         const profile = await apiFetch("/api/users/me");
+        console.log("Current user profile:", profile);
+        console.log("Is admin?", profile.role === "admin");
         setMe(profile);
 
         if (profile.role === "admin") {
@@ -165,14 +167,11 @@ export default function Users() {
         </div>
       </div>
 
-      <h3 className={`text-xl font-semibold text-gray-900 mb-3 transition-all ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`} style={{ transitionDelay: "30ms" }}>User Management</h3>
+      {/* Add User Section */}
+      <div className={`${cardBase} mb-6 transition-all ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`} style={{ transitionDelay: "30ms" }}>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{editingUserId ? "Edit User" : "Add User"}</h3>
 
-      {/* Add/Edit User (only show to admin) */}
-      {isAddingUser && (
-        <div className={`${cardBase} mb-6 transition-all ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`} style={{ transitionDelay: "30ms" }}>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{editingUserId ? "Edit User" : "Add New User"}</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
               <input type="text" name="name" value={newUser.name} onChange={handleInputChange} className={inputBase} placeholder="Enter full name" />
@@ -196,31 +195,26 @@ export default function Users() {
             </div>
             {!editingUserId && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" name="password" value={newUser.password || ""} onChange={handleInputChange} className={inputBase} placeholder="Temporary password" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                <input type="password" name="password" value={newUser.password || ""} onChange={handleInputChange} className={inputBase} placeholder="Min. 6 characters" required />
               </div>
             )}
           </div>
 
           <div className="flex justify-end space-x-3">
-            <button onClick={handleCancel} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
-            <button onClick={handleSaveUser} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" disabled={!newUser.name || !newUser.email}>
+            {editingUserId && (
+              <button onClick={handleCancel} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+            )}
+            <button onClick={handleSaveUser} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" disabled={!newUser.name || !newUser.email || (!editingUserId && (!newUser.password || newUser.password.length < 6))}>
               {editingUserId ? "Update User" : "Add User"}
             </button>
           </div>
-        </div>
-      )}
+      </div>
 
       {/* Users Table */}
       <div className={`${cardBase} transition-all overflow-x-auto ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`} style={{ transitionDelay: "60ms" }}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">User List</h3>
-          {isAdmin && (
-            <button onClick={handleAddUser} className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-              Add New User
-            </button>
-          )}
         </div>
 
         <table className="min-w-full divide-y divide-gray-200">
