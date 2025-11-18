@@ -1,7 +1,9 @@
-opencv-python>=4.12.0
-numpy>=1.26.0
-tensorflow==2.20.0
-flask==2.2.5
-Pillow==10.0.0
-scikit-learn==1.7.2
-requests==2.31.0
+Pillow
+scikit-learn
+requests
+tensorflow
+opencv-python
+numpy
+pickle-mixin
+Flask
+flask-cors
