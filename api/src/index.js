@@ -4,7 +4,6 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import mongoose from 'mongoose';
 import liveFeedsRouter from './routes/liveFeedsRouter.js';
 import mongoose from 'mongoose';
 import userRouter from './routes/user.routes.js';
@@ -64,7 +63,7 @@ app.use((req, res, next) => {
 // Parsers & Static
 // -------------------------
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
 // -------------------------
 // Routes
