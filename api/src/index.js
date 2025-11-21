@@ -16,8 +16,8 @@ const MONGO_URI = process.env.MONGO_URI ||
   "mongodb+srv://ATMguardAI:ATMguardAI1234@atmguardai.oexuwur.mongodb.net/?appName=ATMGuardAI";
 
 mongoose.connect(MONGO_URI)
-.then(() => console.log("✅ MongoDB connected"))
-.catch((err) => console.error("❌ MongoDB connection error:", err));
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // -------------------------
 // Initialize Firebase Admin
