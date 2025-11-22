@@ -1,23 +1,20 @@
 import 'dotenv/config';
 import express from 'express';
-import mongoose from 'mongoose';
+import path from 'path';
 import liveFeedsRouter from './routes/liveFeedsRouter.js';
-
-// ------------ MongoDB connection ------------
-const MONGO_URI = process.env.MONGO_URI;
-mongoose.connect(MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+import { connectDB } from './config/db.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+connectDB();
 
 app.use((req, res, next) => {
   console.log(`➡️  ${req.method} ${req.originalUrl}`);
   next();
 });
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 // ------------ Routes ------------
 app.use('/api/liveFeeds', liveFeedsRouter);
