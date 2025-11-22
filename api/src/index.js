@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import path from 'path';
+import cors from 'cors';
 import liveFeedsRouter from './routes/liveFeedsRouter.js';
 import userRouter from './routes/userRouter.js';
 import { connectDB } from './config/db.js';
@@ -16,6 +17,9 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 
 // ------------ Routes ------------
 app.use('/api/liveFeeds', liveFeedsRouter);

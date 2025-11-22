@@ -1,7 +1,5 @@
 // src/components/LogoutButton.jsx
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, signOut, onAuthStateChanged } from "../firebase";
 
 /**
  * Props:
@@ -20,21 +18,11 @@ export default function LogoutButton({
   iconOnly = true,
   className = "",
 }) {
-  const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setEmail(u?.email || ""));
-    return () => unsub();
-  }, []);
-
-  async function handleLogout() {
-    try {
-      await signOut(auth);
-      navigate("/login", { replace: true });
-    } catch (e) {
-      console.error("Logout failed", e);
-    }
+  function handleLogout() {
+    // Mock logout - redirect to login page
+    navigate("/login", { replace: true });
   }
 
   const wrapper = `flex items-center gap-3 ${className}`;
@@ -50,7 +38,7 @@ export default function LogoutButton({
 
   return (
     <div className={wrapper}>
-      {(label || showIcon || (showEmail && email)) && (
+      {(label || showIcon || showEmail) && (
         <div className="flex items-center gap-2">
           {showIcon && (
             <span
@@ -66,9 +54,9 @@ export default function LogoutButton({
             </span>
           )}
           {label && <span className="text-sm font-medium text-gray-800">{label}</span>}
-          {showEmail && email && (
-            <span className="text-xs text-gray-500 truncate max-w-[160px]" title={email}>
-              {email}
+          {showEmail && (
+            <span className="text-xs text-gray-500 truncate max-w-[160px]">
+              user@example.com
             </span>
           )}
         </div>

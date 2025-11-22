@@ -1,6 +1,5 @@
 // src/pages/ResetPassword.jsx
 import { useState } from "react";
-import { sendPasswordResetEmail, auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 
 export default function ResetPassword() {
@@ -15,7 +14,8 @@ export default function ResetPassword() {
     setErr("");
     setLoading(true);
     try {
-      await sendPasswordResetEmail(auth, email.trim());
+      // Mock password reset - simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setMsg("Password reset email sent (if the account exists).");
     } catch {
       setErr("Failed to send reset email. Try again.");

@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 
 import DashboardLayout from "./layout/DashboardLayout";
-import PrivateRoute from "./components/PrivateRoute";
+// import PrivateRoute from "./components/PrivateRoute";
 
 // Pages
 import Dashboard from "./components/Dashboard";
@@ -33,9 +33,9 @@ export default function App() {
       <Route
         path="/dashboard"
         element={
-          <PrivateRoute>
+          // <PrivateRoute>
             <DashboardLayout />
-          </PrivateRoute>
+          // </PrivateRoute>
         }
       >
         <Route index element={<Dashboard />} />

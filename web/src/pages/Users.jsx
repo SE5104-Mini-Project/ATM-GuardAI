@@ -1,22 +1,5 @@
 // web/src/pages/Users.jsx
 import { useState, useEffect } from "react";
-import LogoutButton from "../components/LogoutButton";
-import { auth } from "../firebase"; // ensure this points to your firebase export
-
-// helper: get ID token and include Authorization header
-async function apiFetch(path, opts = {}) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Not authenticated");
-  const token = await user.getIdToken();
-  const base = import.meta.env.VITE_API_URL || "http://localhost:3001";
-  const headers = { ...(opts.headers || {}), Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-  const res = await fetch(base + path, { ...opts, headers });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || res.statusText);
-  }
-  return res.json();
-}
 
 // map frontend labels <-> backend role values
 const roleOptions = [
@@ -41,57 +24,44 @@ export default function Users() {
   const [editingUserId, setEditingUserId] = useState(null);
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "user", status: "Active" });
   const [me, setMe] = useState(null);
-  const [loading, setLoading] = useState(true);
   const isAdmin = me?.role === "admin";
 
-  // load current user and list
+  // Mock data for demonstration
   useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const profile = await apiFetch("/api/users/me");
-        console.log("Current user profile:", profile);
-        console.log("Is admin?", profile.role === "admin");
-        setMe(profile);
-
-        if (profile.role === "admin") {
-          const list = await apiFetch("/api/users");
-          setUsers(list.map(u => ({
-            id: u._id,
-            uid: u.uid,
-            email: u.email,
-            role: u.role,
-            lastLogin: u.updatedAt ? new Date(u.updatedAt).toLocaleString() : "",
-            status: u.disabled ? "Inactive" : "Active",
-            name: u.name || u.email.split("@")[0]
-          })));
-        } else {
-          // non-admin: show only self
-          setUsers([{
-            id: profile._id || profile.id,
-            uid: profile.uid,
-            email: profile.email,
-            role: profile.role,
-            lastLogin: profile.updatedAt ? new Date(profile.updatedAt).toLocaleString() : "",
-            status: profile.disabled ? "Inactive" : "Active",
-            name: profile.name || profile.email.split("@")[0]
-          }]);
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to load users: " + err.message);
-      } finally {
-        setLoading(false);
+    const mockUsers = [
+      {
+        id: "1",
+        uid: "user1",
+        email: "admin@example.com",
+        role: "admin",
+        lastLogin: new Date().toLocaleString(),
+        status: "Active",
+        name: "Admin User"
+      },
+      {
+        id: "2",
+        uid: "user2",
+        email: "user@example.com",
+        role: "user",
+        lastLogin: new Date().toLocaleString(),
+        status: "Active",
+        name: "Regular User"
       }
+    ];
+    
+    const mockMe = {
+      _id: "1",
+      id: "1",
+      uid: "user1",
+      email: "admin@example.com",
+      role: "admin",
+      updatedAt: new Date().toISOString(),
+      disabled: false,
+      name: "Admin User"
     };
-    if (auth.currentUser) load();
-    else {
-      // wait for firebase to set currentUser; attach listener
-      const unsub = auth.onAuthStateChanged(user => {
-        if (user) load();
-      });
-      return () => unsub();
-    }
+
+    setUsers(mockUsers);
+    setMe(mockMe);
   }, []);
 
   const handleAddUser = () => {
@@ -109,19 +79,22 @@ export default function Users() {
   const handleSaveUser = async () => {
     try {
       if (!newUser.name || !newUser.email) return alert("Name and email required");
+      
       if (editingUserId) {
-        // find the mongo id
-        const body = { name: newUser.name, email: newUser.email, role: newUser.role, status: newUser.status };
-        if (newUser.password) body.password = newUser.password;
-        const updated = await apiFetch(`/api/users/${editingUserId}`, { method: "PUT", body: JSON.stringify(body) });
-
+        // Update existing user
         setUsers(users.map(u => (u.id === editingUserId ? { ...u, ...newUser, lastLogin: "Just now" } : u)));
       } else {
-        // create user (admin only)
-        const body = { name: newUser.name, email: newUser.email, password: newUser.password || "TempPass123!", role: newUser.role, status: newUser.status };
-        const created = await apiFetch("/api/users", { method: "POST", body: JSON.stringify(body) });
-        const u = created.user || created;
-        setUsers([{ id: u._id, uid: u.uid, email: u.email, role: u.role, name: newUser.name, lastLogin: "Just now", status: u.disabled ? "Inactive" : "Active" }, ...users]);
+        // Create new user
+        const newUserObj = {
+          id: Date.now().toString(),
+          uid: `user${Date.now()}`,
+          email: newUser.email,
+          role: newUser.role,
+          name: newUser.name,
+          lastLogin: "Just now",
+          status: newUser.status
+        };
+        setUsers([newUserObj, ...users]);
       }
       setIsAddingUser(false);
     } catch (err) {
@@ -132,13 +105,7 @@ export default function Users() {
 
   const handleDeleteUser = async (id) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
-    try {
-      await apiFetch(`/api/users/${id}`, { method: "DELETE" });
-      setUsers(users.filter(u => u.id !== id));
-    } catch (err) {
-      console.error(err);
-      alert("Delete failed: " + err.message);
-    }
+    setUsers(users.filter(u => u.id !== id));
   };
 
   const handleCancel = () => {
@@ -151,7 +118,6 @@ export default function Users() {
     setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
@@ -160,10 +126,15 @@ export default function Users() {
         <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
         <div className="flex items-center gap-6">
           <span className="text-sm text-blue-700">Total Users: <span className="font-semibold">{users.length}</span></span>
-          <div className="relative"><svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" /></svg>
+          <div className="relative">
+            <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
+            </svg>
             <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">3</span>
           </div>
-          <LogoutButton showEmail={false} showIcon label={me?.email || "Admin"} compact iconOnly className="px-0" />
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            {me?.email || "Admin"}
+          </div>
         </div>
       </div>
 
