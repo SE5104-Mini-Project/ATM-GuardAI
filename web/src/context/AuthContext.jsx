@@ -52,6 +52,7 @@ export function AuthProvider({ children }) {
         } catch (error) {
             console.error('Logout API call failed:', error);
         } finally {
+            navigator('./login')
             clearAuth();
         }
     }, [clearAuth]);

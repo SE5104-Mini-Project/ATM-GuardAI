@@ -46,7 +46,7 @@ const register = async (req, res) => {
 
         const token = generateToken(user._id);
 
-        res.cookie('ATM_GuardAI_token', token, {
+        res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
@@ -115,7 +115,7 @@ const login = async (req, res) => {
 
         const token = generateToken(user._id);
 
-        res.cookie('ATM_GuardAI_token', token, {
+        res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
@@ -151,7 +151,7 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        res.cookie('ATM_GuardAI_token', '', {
+        res.cookie('token', '', {
             httpOnly: true,
             expires: new Date(0)
         });

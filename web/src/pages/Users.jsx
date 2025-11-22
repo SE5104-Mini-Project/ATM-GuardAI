@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import Header from "../components/Header";
 
 const roleOptions = [
   { label: "Administrator", value: "admin" },
@@ -49,7 +50,7 @@ export default function Users() {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3001/api/users', {
-        credentials: 'include' 
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -206,17 +207,7 @@ export default function Users() {
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
-      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
-        <div className="flex items-center gap-6">
-          <span className="text-sm text-blue-700">
-            Total Users: <span className="font-semibold">{users.length}</span>
-          </span>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            {currentUser?.email || "Admin"}
-          </div>
-        </div>
-      </div>
+      <Header />
 
       {/* Messages */}
       {error && (
