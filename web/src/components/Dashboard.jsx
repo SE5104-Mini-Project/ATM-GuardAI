@@ -1,7 +1,5 @@
-// src/components/Dashboard.jsx
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import LogoutButton from "./LogoutButton"; // adjust path if this file isn't in src/components
+import LogoutButton from "./LogoutButton";
 
 const icon = {
   atm: (
@@ -47,11 +45,9 @@ const HistoryIcon = () => (
   </svg>
 );
 
-/** Shared card style with MEDIUM shadow */
 const cardBase =
   "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
 
-/** Navy header location card */
 function LocationCard({ name, status, address, cameras, lastAlert }) {
   const pill = status === "Alert" ? "bg-red-500 text-white" : "bg-green-500 text-white";
   return (
@@ -96,7 +92,6 @@ function LocationCard({ name, status, address, cameras, lastAlert }) {
 }
 
 export default function Dashboard() {
-  const [isSidebarOpen] = useState(true);
 
   const stats = { totalATMs: 24, activeAlerts: 5, camerasOnline: 22, pendingReviews: 12 };
 
@@ -136,11 +131,6 @@ export default function Dashboard() {
     { id: 3, name: "ATM #15 - Hospital Branch", status: "Online", address: "789 Medical Plaza, Health District", lastAlert: "08:30 AM", cameras: 3 },
   ];
 
-  const alertAccent = (type) =>
-    type === "resolved"
-      ? "border-green-400 bg-green-100 text-green-800"
-      : "border-red-400 bg-red-100 text-red-800";
-
   return (
     <div className="px-3 sm:px-6 pt-6">
       {/* Header */}
@@ -155,7 +145,6 @@ export default function Dashboard() {
               3
             </span>
           </div>
-
           {/* Admin badge + Logout */}
           <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
         </div>
