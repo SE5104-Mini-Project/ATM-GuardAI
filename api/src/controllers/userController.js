@@ -5,13 +5,27 @@ const generateToken = (userId) => {
     return jwt.sign(
         { userId },
         process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: process.env.JWT_EXPIRES_IN || '5d' }
+        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 };
 
 const register = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
+
+        if (!name || !email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name, email and password are required'
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters long'
+            });
+        }
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -50,6 +64,7 @@ const register = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Register error:', error);
         res.status(500).json({
             success: false,
             message: 'Error registering user',
@@ -58,9 +73,17 @@ const register = async (req, res) => {
     }
 };
 
+
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email and password are required'
+            });
+        }
 
         const user = await User.findOne({ email });
         if (!user) {
@@ -106,6 +129,7 @@ const login = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({
             success: false,
             message: 'Error logging in',
@@ -113,6 +137,26 @@ const login = async (req, res) => {
         });
     }
 };
+
+
+const getProfile = async (req, res) => {
+    try {
+        res.json({
+            success: true,
+            data: {
+                user: req.user
+            }
+        });
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching profile',
+            error: error.message
+        });
+    }
+};
+
 
 const getUsers = async (req, res) => {
     try {
@@ -147,6 +191,7 @@ const getUsers = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Get users error:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching users',
@@ -172,6 +217,7 @@ const getUser = async (req, res) => {
             data: { user }
         });
     } catch (error) {
+        console.error('Get user error:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching user',
@@ -184,6 +230,13 @@ const getUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const { name, role, status } = req.body;
+
+        if (req.user._id.toString() === req.params.id && (role || status)) {
+            return res.status(403).json({
+                success: false,
+                message: 'You cannot change your own role or status'
+            });
+        }
 
         const user = await User.findById(req.params.id);
 
@@ -215,6 +268,7 @@ const updateUser = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Update user error:', error);
         res.status(500).json({
             success: false,
             message: 'Error updating user',
@@ -226,6 +280,13 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
+        if (req.user._id.toString() === req.params.id) {
+            return res.status(403).json({
+                success: false,
+                message: 'You cannot delete your own account'
+            });
+        }
+
         const user = await User.findByIdAndDelete(req.params.id);
 
         if (!user) {
@@ -240,6 +301,7 @@ const deleteUser = async (req, res) => {
             message: 'User deleted successfully'
         });
     } catch (error) {
+        console.error('Delete user error:', error);
         res.status(500).json({
             success: false,
             message: 'Error deleting user',
@@ -251,13 +313,12 @@ const deleteUser = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        res.clearCookie('token');
-
         res.json({
             success: true,
             message: 'Logged out successfully'
         });
     } catch (error) {
+        console.error('Logout error:', error);
         res.status(500).json({
             success: false,
             message: 'Error logging out',
@@ -266,12 +327,11 @@ const logout = async (req, res) => {
     }
 };
 
-
-
 export {
     register,
     login,
     logout,
+    getProfile,
     getUsers,
     getUser,
     updateUser,

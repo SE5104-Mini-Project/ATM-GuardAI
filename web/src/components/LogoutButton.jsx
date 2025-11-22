@@ -1,15 +1,5 @@
-// src/components/LogoutButton.jsx
 import { useNavigate } from "react-router-dom";
 
-/**
- * Props:
- * - label: string | null  -> text shown left to the button (e.g., "Admin")
- * - showIcon: boolean     -> show a small shield icon before the label
- * - showEmail: boolean    -> show user email (default false for admin)
- * - compact: boolean      -> small outline/icon style for logout button
- * - iconOnly: boolean     -> logout button with icon only (no text)
- * - className: string     -> wrapper classes
- */
 export default function LogoutButton({
   label = "Admin",
   showIcon = true,
@@ -21,13 +11,11 @@ export default function LogoutButton({
   const navigate = useNavigate();
 
   function handleLogout() {
-    // Mock logout - redirect to login page
     navigate("/login", { replace: true });
   }
 
   const wrapper = `flex items-center gap-3 ${className}`;
 
-  // Compact, subtle, icon-only button to fit header chips
   const btnBase =
     "inline-flex items-center justify-center transition rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1";
   const btnCompact =
