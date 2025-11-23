@@ -8,6 +8,7 @@ import DashboardLayout from "./layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import LiveFeeds from "./pages/LiveFeeds";
 import Alerts from "./pages/Alerts";
+import CameraManagement from "./pages/CameraManagement"
 import ATMLocations from "./pages/ATMLocations";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="live-feeds" element={<LiveFeeds />} />
         <Route path="alerts" element={<Alerts />} />
         <Route path="locations" element={<ATMLocations />} />
+        <Route path="camera-management" element={<CameraManagement />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
         <Route path="users" element={<Users />} />
