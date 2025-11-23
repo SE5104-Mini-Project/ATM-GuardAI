@@ -5,6 +5,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser'; 
 import liveFeedsRouter from './routes/liveFeedsRouter.js';
 import userRouter from './routes/userRouter.js';
+import cameraRoutes from './routes/cameraRoutes.js'
 import { connectDB } from './config/db.js';
 
 const app = express();
@@ -27,6 +28,7 @@ app.use(cors({
 // ------------ Routes ------------
 app.use('/api/liveFeeds', liveFeedsRouter);
 app.use('/api/users', userRouter);
+app.use('/api/cameras', cameraRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'ATM Surveillance System API' });

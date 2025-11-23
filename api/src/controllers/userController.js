@@ -9,7 +9,7 @@ const generateToken = (userId) => {
     );
 };
 
-const register = async (req, res) => {
+export const register = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
@@ -79,7 +79,7 @@ const register = async (req, res) => {
     }
 };
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -149,7 +149,7 @@ const login = async (req, res) => {
     }
 };
 
-const logout = async (req, res) => {
+export const logout = async (req, res) => {
     try {
         res.cookie('token', '', {
             httpOnly: true,
@@ -170,7 +170,7 @@ const logout = async (req, res) => {
     }
 };
 
-const getProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('-password');
         
@@ -206,7 +206,7 @@ const getProfile = async (req, res) => {
     }
 };
 
-const getUsers = async (req, res) => {
+export const getUsers = async (req, res) => {
     try {
         const { page = 1, limit = 10, role, status, search } = req.query;
 
@@ -248,7 +248,7 @@ const getUsers = async (req, res) => {
     }
 };
 
-const getUser = async (req, res) => {
+export const getUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
 
@@ -273,7 +273,7 @@ const getUser = async (req, res) => {
     }
 };
 
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         const { name, role, status } = req.body;
 
@@ -323,7 +323,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         if (req.user._id.toString() === req.params.id) {
             return res.status(403).json({
@@ -353,15 +353,4 @@ const deleteUser = async (req, res) => {
             error: error.message
         });
     }
-};
-
-export {
-    register,
-    login,
-    logout,
-    getProfile,
-    getUsers,
-    getUser,
-    updateUser,
-    deleteUser,
 };

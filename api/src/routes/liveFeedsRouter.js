@@ -1,5 +1,9 @@
 import express from 'express';
-import { getCameras,getCameraStatus, getVideoFeed } from '../controllers/liveFeedsController.js';
+import {
+    getCameras,
+    getCameraStatus,
+    getVideoFeed
+} from '../controllers/liveFeedsController.js';
 
 const router = express.Router();
 
