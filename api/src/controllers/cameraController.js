@@ -40,6 +40,7 @@ export const createCamera = async (req, res) => {
     }
 };
 
+
 export const getCameras = async (req, res) => {
     try {
         const {
@@ -99,6 +100,173 @@ export const getCameras = async (req, res) => {
         });
     }
 };
+
+
+export const getCameraById = async (req, res) => {
+    try {
+        const camera = await Camera.findById(req.params.id);
+
+        if (!camera) {
+            return res.status(404).json({
+                success: false,
+                message: "Camera not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: camera
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+export const updateCamera = async (req, res) => {
+    try {
+        const updates = { ...req.body };
+
+        if (req.body.latitude || req.body.longitude) {
+            updates.location = {
+                latitude: req.body.latitude || req.body.location?.latitude,
+                longitude: req.body.longitude || req.body.location?.longitude
+            };
+        }
+
+        const camera = await Camera.findByIdAndUpdate(
+            req.params.id,
+            updates,
+            { new: true, runValidators: true }
+        );
+
+        if (!camera) {
+            return res.status(404).json({
+                success: false,
+                message: "Camera not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Camera updated successfully",
+            data: camera
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+export const updateCameraStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+
+        if (!status || !["online", "offline"].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Status must be either 'online' or 'offline'"
+            });
+        }
+
+        const updateData = { 
+            status,
+            lastAvailableTime: status === "online" ? Date.now() : undefined
+        };
+
+        const camera = await Camera.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        if (!camera) {
+            return res.status(404).json({
+                success: false,
+                message: "Camera not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Camera status updated to ${status}`,
+            data: camera
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+export const deleteCamera = async (req, res) => {
+    try {
+        const camera = await Camera.findByIdAndDelete(req.params.id);
+
+        if (!camera) {
+            return res.status(404).json({
+                success: false,
+                message: "Camera not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Camera deleted successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+export const getCamerasByLocation = async (req, res) => {
+    try {
+        const { latitude, longitude, radius = 5000 } = req.query; 
+
+        if (!latitude || !longitude) {
+            return res.status(400).json({
+                success: false,
+                message: "Latitude and longitude are required"
+            });
+        }
+
+        const cameras = await Camera.find({
+            location: {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: [parseFloat(longitude), parseFloat(latitude)]
+                    },
+                    $maxDistance: parseInt(radius)
+                }
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: cameras,
+            count: cameras.length
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 
 export const getCameraStats = async (req, res) => {
     try {
