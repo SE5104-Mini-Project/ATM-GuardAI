@@ -1,6 +1,5 @@
-// src/pages/Alerts.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import LogoutButton from "../components/LogoutButton";
+import Header from "../components/Header";
 
 /* ========== Tiny inline icons (kept only small ones for details row) ========== */
 const Icon = {
@@ -45,26 +44,24 @@ const Icon = {
 
 /* ========== Alerts data (open at top, resolved later) ========== */
 const ALERTS = [
-  { id:"a1", type:"Mask Detected", severity:"high", status:"open", description:"Individual detected wearing facial covering", location:"ATM #12 - City Branch", time:"Today, 10:23 AM", camera:"Camera 1" },
-  { id:"a2", type:"Helmet Detected", severity:"medium", status:"open", description:"Individual detected wearing helmet", location:"ATM #07 - Main Street", time:"Today, 09:45 AM", camera:"Camera 2" },
-  { id:"a4", type:"Suspicious Activity", severity:"high", status:"open", description:"Multiple failed ATM access attempts detected", location:"ATM #21 - Central Mall", time:"Yesterday, 07:15 PM", camera:"Camera 3" },
-  { id:"a6", type:"Crowd Detected", severity:"medium", status:"open", description:"Unusually large group near ATM", location:"ATM #19 - Metro Station", time:"Today, 11:10 AM", camera:"Camera 5" },
-  { id:"a3", type:"False Alarm - Resolved", severity:"ok", status:"resolved", description:"Medical mask correctly identified", location:"ATM #15 - Hospital Branch", time:"Today, 08:30 AM", resolvedBy:"John Smith" },
-  { id:"a5", type:"Unauthorized Access - Resolved", severity:"ok", status:"resolved", description:"Backdoor ATM panel access checked and cleared", location:"ATM #03 - Riverside Branch", time:"Yesterday, 02:10 PM", resolvedBy:"Sarah Johnson" },
+  { id: "a1", type: "Mask Detected", severity: "high", status: "open", description: "Individual detected wearing facial covering", location: "ATM #12 - City Branch", time: "Today, 10:23 AM", camera: "Camera 1" },
+  { id: "a2", type: "Helmet Detected", severity: "medium", status: "open", description: "Individual detected wearing helmet", location: "ATM #07 - Main Street", time: "Today, 09:45 AM", camera: "Camera 2" },
+  { id: "a4", type: "Suspicious Activity", severity: "high", status: "open", description: "Multiple failed ATM access attempts detected", location: "ATM #21 - Central Mall", time: "Yesterday, 07:15 PM", camera: "Camera 3" },
+  { id: "a6", type: "Crowd Detected", severity: "medium", status: "open", description: "Unusually large group near ATM", location: "ATM #19 - Metro Station", time: "Today, 11:10 AM", camera: "Camera 5" },
+  { id: "a3", type: "False Alarm - Resolved", severity: "ok", status: "resolved", description: "Medical mask correctly identified", location: "ATM #15 - Hospital Branch", time: "Today, 08:30 AM", resolvedBy: "John Smith" },
+  { id: "a5", type: "Unauthorized Access - Resolved", severity: "ok", status: "resolved", description: "Backdoor ATM panel access checked and cleared", location: "ATM #03 - Riverside Branch", time: "Yesterday, 02:10 PM", resolvedBy: "Sarah Johnson" },
 ];
 
 /* ========== Style tokens ========== */
 const STYLE = {
-  high:   { card:"bg-rose-50 border border-rose-300", rail:"bg-rose-500", button:"bg-indigo-600 hover:bg-indigo-700 text-white" },
-  medium: { card:"bg-amber-50 border border-amber-300", rail:"bg-amber-500", button:"bg-indigo-600 hover:bg-indigo-700 text-white" },
-  ok:     { card:"bg-emerald-50 border border-emerald-300", rail:"bg-emerald-500", button:"bg-indigo-600 hover:bg-indigo-700 text-white" },
+  high: { card: "bg-rose-50 border border-rose-300", rail: "bg-rose-500", button: "bg-indigo-600 hover:bg-indigo-700 text-white" },
+  medium: { card: "bg-amber-50 border border-amber-300", rail: "bg-amber-500", button: "bg-indigo-600 hover:bg-indigo-700 text-white" },
+  ok: { card: "bg-emerald-50 border border-emerald-300", rail: "bg-emerald-500", button: "bg-indigo-600 hover:bg-indigo-700 text-white" },
 };
 
 const FILTERS = ["All Alerts", "Mask Detections", "Helmet Detections", "Resolved"];
 
 export default function Alerts() {
-  const cardBase =
-    "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
 
   const [filter, setFilter] = useState("All Alerts");
   const [entered, setEntered] = useState(false);
@@ -94,7 +91,6 @@ export default function Alerts() {
     };
   }, []);
 
-  const openCount = useMemo(() => ALERTS.filter((a) => a.status === "open").length, []);
   const filtered = useMemo(() => {
     let arr = ALERTS;
     if (filter === "Mask Detections") arr = ALERTS.filter((a) => a.type.toLowerCase().includes("mask"));
@@ -105,31 +101,8 @@ export default function Alerts() {
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
-      {/* ===== Top header (updated with Admin badge + compact logout) ===== */}
-      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold text-gray-900">Alerts</h2>
-        <div className="flex items-center gap-6">
-          <span className="text-sm text-blue-700">
-            Last updated: <span className="underline">Just now</span>
-          </span>
-          <div className="relative">
-            {Icon.bell}
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-              {openCount}
-            </span>
-          </div>
-
-          {/* Admin badge + compact icon-only Logout (matches global header style) */}
-          <LogoutButton
-            showEmail={false}
-            showIcon
-            label="Admin"
-            compact
-            iconOnly
-            className="px-0"
-          />
-        </div>
-      </div>
+      {/* header */}
+      <Header title={"Alerts"} />
 
       {/* ===== Section title + custom dropdown ===== */}
       <div className="mb-4 flex items-center justify-between">

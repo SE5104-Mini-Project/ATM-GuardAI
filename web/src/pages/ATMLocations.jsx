@@ -1,13 +1,9 @@
-// src/pages/ATMLocations.jsx
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LogoutButton from "../components/LogoutButton";
+import Header from "../components/Header";
 
 export default function ATMLocations() {
   const navigate = useNavigate();
-
-  const cardBase =
-    "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
 
   /* ---------- Tiny inline icons (no libs) ---------- */
   const Icon = {
@@ -50,10 +46,10 @@ export default function ATMLocations() {
 
   /* ---------- Example data (with region for filters) ---------- */
   const locations = [
-    { id: 12, name: "ATM #12 - City Branch", status: "alert",  region: "North", address: "123 Main Street, City Center", cameras: 2, lastAlert: "Today, 10:23 AM" },
-    { id: 7,  name: "ATM #07 - Main Street",  status: "alert",  region: "East",  address: "456 Oak Avenue, Downtown",     cameras: 2, lastAlert: "Today, 09:45 AM" },
+    { id: 12, name: "ATM #12 - City Branch", status: "alert", region: "North", address: "123 Main Street, City Center", cameras: 2, lastAlert: "Today, 10:23 AM" },
+    { id: 7, name: "ATM #07 - Main Street", status: "alert", region: "East", address: "456 Oak Avenue, Downtown", cameras: 2, lastAlert: "Today, 09:45 AM" },
     { id: 15, name: "ATM #15 - Hospital Branch", status: "online", region: "South", address: "789 Medical Plaza, Health District", cameras: 3, lastAlert: "Today, 08:30 AM" },
-    { id: 9,  name: "ATM #09 - Shopping Mall", status: "offline", region: "West",  address: "Mall Blvd, Level 2 – Atrium", cameras: 2, lastAlert: "Yesterday" },
+    { id: 9, name: "ATM #09 - Shopping Mall", status: "offline", region: "West", address: "Mall Blvd, Level 2 – Atrium", cameras: 2, lastAlert: "Yesterday" },
   ];
 
   /* ---------- Filters ---------- */
@@ -78,14 +74,13 @@ export default function ATMLocations() {
         effectiveStatus === "all"
           ? true
           : effectiveStatus === "__none__"
-          ? false
-          : loc.status === effectiveStatus;
+            ? false
+            : loc.status === effectiveStatus;
       const regionOK = regionFilter === "All Regions" ? true : loc.region === regionFilter;
       return statusOK && regionOK;
     });
   }, [locations, effectiveStatus, regionFilter]);
 
-  const openAlertsCount = useMemo(() => locations.filter((l) => l.status === "alert").length, [locations]);
 
   const statusPill = (status) => {
     const map = { alert: "bg-red-600 text-white", online: "bg-emerald-600 text-white", offline: "bg-slate-400 text-white" };
@@ -141,21 +136,7 @@ export default function ATMLocations() {
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
-      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold text-gray-900">ATM Locations</h2>
-        <div className="flex items-center gap-6">
-          <span className="text-sm text-blue-700">
-            Last updated: <span className="underline">Just now</span>
-          </span>
-          <div className="relative">
-            {Icon.bell}
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-              {openAlertsCount}
-            </span>
-          </div>
-          <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
-        </div>
-      </div>
+      <Header title={"ATM Locations"} />
 
       {/* Section title + top filter */}
       <div className="mb-2 flex items-center gap-3">

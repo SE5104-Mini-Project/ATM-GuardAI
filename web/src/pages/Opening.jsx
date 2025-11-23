@@ -1,4 +1,3 @@
-// src/pages/Opening.jsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MatrixRain from "../components/MatrixRain";

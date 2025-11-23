@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import LogoutButton from "../components/LogoutButton";
+import Header from "../components/Header";
 
 export default function Settings() {
   const cardBase = "rounded-2xl bg-white shadow-lg p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
@@ -48,21 +48,7 @@ export default function Settings() {
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
-      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`} style={{ transitionDelay: "0ms" }}>
-        <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-        <div className="flex items-center gap-6">
-          <span className="text-sm text-blue-700">
-            Last updated: <span className="underline">Just now</span>
-          </span>
-          <div className="relative">
-            <Bell />
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">3</span>
-          </div>
-
-          {/* Admin badge + compact icon-only Logout */}
-          <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
-        </div>
-      </div>
+      <Header title={"Settings"} />
 
       {/* Section title */}
       <h3 className={`text-xl font-semibold text-gray-900 mb-3 transition-all ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`} style={{ transitionDelay: "30ms" }}>
@@ -89,15 +75,15 @@ export default function Settings() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Notification Methods</label>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="notify-dashboard" checked={alertSettings.dashboardAlerts} onChange={(e) => handleAlertSettingChange("dashboardAlerts", e.target.checked)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"/>
+                  <input type="checkbox" id="notify-dashboard" checked={alertSettings.dashboardAlerts} onChange={(e) => handleAlertSettingChange("dashboardAlerts", e.target.checked)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
                   <label htmlFor="notify-dashboard" className="text-sm text-gray-900">Dashboard Alerts</label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="notify-email" checked={alertSettings.emailNotifications} onChange={(e) => handleAlertSettingChange("emailNotifications", e.target.checked)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"/>
+                  <input type="checkbox" id="notify-email" checked={alertSettings.emailNotifications} onChange={(e) => handleAlertSettingChange("emailNotifications", e.target.checked)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
                   <label htmlFor="notify-email" className="text-sm text-gray-900">Email Notifications</label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="notify-sms" checked={alertSettings.smsAlerts} onChange={(e) => handleAlertSettingChange("smsAlerts", e.target.checked)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"/>
+                  <input type="checkbox" id="notify-sms" checked={alertSettings.smsAlerts} onChange={(e) => handleAlertSettingChange("smsAlerts", e.target.checked)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
                   <label htmlFor="notify-sms" className="text-sm text-gray-900">SMS Alerts</label>
                 </div>
               </div>
@@ -156,7 +142,7 @@ export default function Settings() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 font-medium mb-2">Detection Confidence Threshold: {aiSettings.confidenceThreshold}%</label>
-              <input type="range" min="50" max="99" value={aiSettings.confidenceThreshold} onChange={(e) => handleAiSettingChange("confidenceThreshold", parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"/>
+              <input type="range" min="50" max="99" value={aiSettings.confidenceThreshold} onChange={(e) => handleAiSettingChange("confidenceThreshold", parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
               <div className="flex justify-between text-xs text-gray-500 mt-1"><span>50%</span><span>75%</span><span>99%</span></div>
             </div>
 

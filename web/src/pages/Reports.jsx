@@ -1,11 +1,7 @@
-// web/src/pages/Reports.jsx
 import { useMemo, useState } from "react";
-import LogoutButton from "../components/LogoutButton";
+import Header from "../components/Header";
 
 export default function Reports() {
-  const cardBase =
-    "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
-
   const Icon = {
     bell: (
       <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
@@ -101,30 +97,10 @@ export default function Reports() {
     URL.revokeObjectURL(url);
   };
 
-  const openAlertsCount = 3;
-
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
-      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold text-gray-900">Reports</h2>
-
-        <div className="flex items-center gap-6">
-          <span className="text-sm text-blue-700">
-            Last updated: <span className="underline">Just now</span>
-          </span>
-
-          <div className="relative">
-            {Icon.bell}
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-              {openAlertsCount}
-            </span>
-          </div>
-
-          {/* Admin badge + compact icon-only Logout */}
-          <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
-        </div>
-      </div>
+      <Header title={"Reports"}/>
 
       {/* Reports & Analytics panel */}
       <h3 className="text-xl font-semibold mb-3">Reports &amp; Analytics</h3>

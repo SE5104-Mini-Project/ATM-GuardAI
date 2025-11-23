@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import LogoutButton from "./LogoutButton";
+import Header from "../components/Header";
 
 const icon = {
   atm: (
@@ -126,34 +126,20 @@ export default function Dashboard() {
   ];
 
   const atmLocations = [
-    { id: 1, name: "ATM #12 - City Branch", status: "Alert",  address: "123 Main Street, City Center", lastAlert: "10:23 AM", cameras: 2 },
-    { id: 2, name: "ATM #07 - Main Street", status: "Alert",  address: "456 Oak Avenue, Downtown",  lastAlert: "09:45 AM", cameras: 2 },
+    { id: 1, name: "ATM #12 - City Branch", status: "Alert", address: "123 Main Street, City Center", lastAlert: "10:23 AM", cameras: 2 },
+    { id: 2, name: "ATM #07 - Main Street", status: "Alert", address: "456 Oak Avenue, Downtown", lastAlert: "09:45 AM", cameras: 2 },
     { id: 3, name: "ATM #15 - Hospital Branch", status: "Online", address: "789 Medical Plaza, Health District", lastAlert: "08:30 AM", cameras: 3 },
   ];
 
   return (
     <div className="px-3 sm:px-6 pt-6">
       {/* Header */}
-      <div className={`px-5 py-4 mb-6 flex items-center justify-between ${cardBase}`}>
-        <h2 className="text-2xl font-bold text-gray-900">Security Dashboard</h2>
-        <div className="flex items-center gap-5">
-          <div className="relative">
-            <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
-            </svg>
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-              3
-            </span>
-          </div>
-          {/* Admin badge + Logout */}
-          <LogoutButton showEmail={false} showIcon label="Admin" compact iconOnly className="px-0" />
-        </div>
-      </div>
+      <Header title={"Security Dashboard"} />
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[
-          { label: "Total ATMs", value: stats.totalATMs, icon: icon.atm,    iconWrap: "bg-blue-50 ring-blue-200 text-blue-600", valueClass: "text-gray-900" },
+          { label: "Total ATMs", value: stats.totalATMs, icon: icon.atm, iconWrap: "bg-blue-50 ring-blue-200 text-blue-600", valueClass: "text-gray-900" },
           { label: "Active Alerts", value: stats.activeAlerts, icon: icon.danger, iconWrap: "bg-rose-50 ring-rose-200 text-rose-600", valueClass: "text-gray-900" },
           { label: "Cameras Online", value: stats.camerasOnline, icon: icon.camera, iconWrap: "bg-emerald-50 ring-emerald-200 text-emerald-600", valueClass: "text-gray-900" },
           { label: "Pending Reviews", value: stats.pendingReviews, icon: icon.clock, iconWrap: "bg-amber-50 ring-amber-200 text-amber-600", valueClass: "text-gray-900" },
@@ -193,8 +179,8 @@ export default function Dashboard() {
                   ${a.type === "resolved"
                     ? "border-green-400 bg-green-50"
                     : a.type === "helmet"
-                    ? "border-amber-400 bg-amber-50"
-                    : "border-rose-400 bg-rose-50"}`}
+                      ? "border-amber-400 bg-amber-50"
+                      : "border-rose-400 bg-rose-50"}`}
               >
                 {/* Colored strip */}
                 <div

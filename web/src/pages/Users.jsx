@@ -207,8 +207,7 @@ export default function Users() {
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
-      <Header />
-
+      <Header title="User Management" />
       {/* Messages */}
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">

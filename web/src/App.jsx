@@ -5,7 +5,7 @@ import "./index.css";
 import DashboardLayout from "./layout/DashboardLayout";
 
 // Pages
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import LiveFeeds from "./pages/LiveFeeds";
 import Alerts from "./pages/Alerts";
 import ATMLocations from "./pages/ATMLocations";
