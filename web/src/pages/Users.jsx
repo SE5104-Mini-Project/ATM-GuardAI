@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import Header from "../components/Header";
 
 const roleOptions = [
   { label: "Administrator", value: "admin" },
@@ -17,7 +18,7 @@ export default function Users() {
   const cardBase = "rounded-2xl bg-white shadow-lg p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
   const inputBase = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm font-normal";
 
-  const { currentUser, token } = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
 
   const [entered, setEntered] = useState(false);
   const [users, setUsers] = useState([]);
@@ -46,15 +47,10 @@ export default function Users() {
   }, []);
 
   const fetchUsers = async () => {
-    if (!isAdmin) return;
-
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3001/api/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -141,9 +137,9 @@ export default function Users() {
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
 
@@ -157,7 +153,7 @@ export default function Users() {
         showMessage(editingUserId ? 'User updated successfully' : 'User created successfully');
         setIsAddingUser(false);
         setEditingUserId(null);
-        fetchUsers(); 
+        fetchUsers();
       }
     } catch (err) {
       setError(err.message);
@@ -171,10 +167,7 @@ export default function Users() {
     try {
       const response = await fetch(`http://localhost:3001/api/users/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include'
       });
 
       const result = await response.json();
@@ -185,7 +178,7 @@ export default function Users() {
 
       if (result.success) {
         showMessage('User deleted successfully');
-        fetchUsers(); 
+        fetchUsers();
       }
     } catch (err) {
       setError(err.message);
@@ -211,31 +204,10 @@ export default function Users() {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
-  if (!isAdmin) {
-    return (
-      <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
-        <div className={cardBase}>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-          <p className="text-gray-700">You don't have permission to access user management.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
-      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
-        <div className="flex items-center gap-6">
-          <span className="text-sm text-blue-700">
-            Total Users: <span className="font-semibold">{users.length}</span>
-          </span>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            {currentUser?.email || "Admin"}
-          </div>
-        </div>
-      </div>
+      <Header />
 
       {/* Messages */}
       {error && (
@@ -250,7 +222,7 @@ export default function Users() {
       )}
 
       {/* Add User Section */}
-      {isAddingUser && (
+      {isAddingUser && isAdmin && (
         <div className={`${cardBase} mb-6 transition-all ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`} style={{ transitionDelay: "30ms" }}>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {editingUserId ? "Edit User" : "Add User"}
@@ -281,7 +253,7 @@ export default function Users() {
                 onChange={handleInputChange}
                 className={inputBase}
                 placeholder="Enter email address"
-                disabled={!!editingUserId} 
+                disabled={!!editingUserId}
               />
             </div>
             <div>
@@ -349,15 +321,17 @@ export default function Users() {
       <div className={`${cardBase} transition-all overflow-x-auto ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`} style={{ transitionDelay: "60ms" }}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">User List</h3>
-          <button
-            onClick={handleAddUser}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add User
-          </button>
+          {isAdmin && (
+            <button
+              onClick={handleAddUser}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add User
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -375,7 +349,9 @@ export default function Users() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                {isAdmin && (
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -392,30 +368,32 @@ export default function Users() {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : user.status === "Suspended"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-800"
+                      ? "bg-green-100 text-green-800"
+                      : user.status === "Suspended"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-gray-100 text-gray-800"
                       }`}>
                       {user.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditUser(user)}
-                        className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(user._id)}
-                        className="text-red-600 hover:text-red-900 px-2 py-1 rounded"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+                  {isAdmin && (
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user._id)}
+                          className="text-red-600 hover:text-red-900 px-2 py-1 rounded"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {users.length === 0 && (

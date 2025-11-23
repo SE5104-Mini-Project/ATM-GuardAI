@@ -17,7 +17,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', authMiddleware, logout);
 router.get('/profile', authMiddleware, getProfile);
-router.get('/', authMiddleware, adminMiddleware, getUsers);
+router.get('/', authMiddleware, getUsers);
 router.get('/:id', authMiddleware, adminMiddleware, getUser);
 router.put('/:id', authMiddleware, adminMiddleware, updateUser);
 router.delete('/:id', authMiddleware, adminMiddleware, deleteUser);
