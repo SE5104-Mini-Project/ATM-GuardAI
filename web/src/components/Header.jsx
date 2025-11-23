@@ -6,7 +6,7 @@ const cardBase = "rounded-2xl bg-white shadow-lg transition-all duration-300 wil
 
 const btnClass = "inline-flex items-center justify-center transition rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 h-8 w-8 border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 focus:ring-red-400";
 
-export default function Header() {
+export default function Header({ title }) {
   const { currentUser, logout, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -18,7 +18,7 @@ export default function Header() {
   if (loading) {
     return (
       <div className={`px-6 py-4 mb-6 flex items-center justify-between ${cardBase}`}>
-        <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
         <span className="text-gray-500 text-sm">Checking authentication...</span>
       </div>
     );
@@ -26,7 +26,7 @@ export default function Header() {
 
   return (
     <div className={`px-6 py-4 mb-6 flex items-center justify-between ${cardBase}`}>
-      <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
+      <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
 
       <div className="flex items-center gap-6">
         {/* Notifications */}
