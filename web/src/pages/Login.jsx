@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import Loading from "./Loading";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,9 +14,11 @@ export default function Login() {
   const { login, verifyAuth } = useContext(AuthContext);
 
   const from = location.state?.from?.pathname || "/dashboard";
+  const inboundError = location.state?.error;
 
-  /* -------------- Handle Form Submit -------------- */
-  async function handleSubmit(e) {
+
+  /* -------------- handle Submit with Loading -------------- */
+  async function handleSubmitWithRedirect(e) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -30,13 +31,13 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        `http://localhost:3001/api/users/login`,
+        "http://localhost:3001/api/users/login",
         { email, password },
         {
           withCredentials: true,
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -47,8 +48,13 @@ export default function Login() {
 
         await verifyAuth();
 
-        console.log("Login successful, user set in context:", user);
-        navigate(from, { replace: true });
+        navigate("/loading", {
+          replace: true,
+          state: {
+            mode: "signin",
+            next: from,
+          },
+        });
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -61,6 +67,7 @@ export default function Login() {
       setLoading(false);
     }
   }
+
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -100,14 +107,21 @@ export default function Login() {
               SECURE DASHBOARD ACCESS
             </p>
 
-            {error && (
+            {/* -------------- Error Messages -------------- */}
+            {inboundError && (
+              <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-md text-sm text-red-300 text-center">
+                {inboundError}
+              </div>
+            )}
+
+            {error && !inboundError && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-md text-sm text-red-300 text-center">
                 {error}
               </div>
             )}
 
             {/* -------------- Login Form -------------- */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmitWithRedirect} className="space-y-4">
               {/* Email Input */}
               <div>
                 <input
@@ -118,7 +132,7 @@ export default function Login() {
                   placeholder="Enter Email"
                   autoComplete="username"
                   disabled={loading}
-                  className="w-full rounded-md bg-[#1A2235] border border-gray-600 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-md bg-[#1A2235] border border-gray-600 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 />
               </div>
 
@@ -133,14 +147,15 @@ export default function Login() {
                   autoComplete="current-password"
                   disabled={loading}
                   minLength={6}
-                  className="w-full rounded-md bg-[#1A2235] border border-gray-600 p-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-md bg-[#1A2235] border border-gray-600 p-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 />
                 {/* Eye Icon Button */}
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
                   disabled={loading}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-teal-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-teal-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,10 +172,10 @@ export default function Login() {
 
               {/* -------------- Options -------------- */}
               <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-gray-300">
                   <input
                     type="checkbox"
-                    className="accent-teal-500"
+                    className="accent-teal-500 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-[#101826] rounded"
                     disabled={loading}
                   />
                   Remember me
@@ -169,7 +184,7 @@ export default function Login() {
                   type="button"
                   onClick={() => navigate("/reset-password")}
                   disabled={loading}
-                  className="text-teal-400 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-teal-400 hover:text-teal-300 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   Forgot Password?
                 </button>
@@ -178,8 +193,9 @@ export default function Login() {
               {/* -------------- Submit Button -------------- */}
               <button
                 type="submit"
+                onClick={handleSubmitWithRedirect}
                 disabled={loading || !email || !password}
-                className="w-full cursor-pointer py-3 rounded-md bg-gradient-to-r from-cyan-400 to-blue-500 hover:opacity-90 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full cursor-pointer py-3 rounded-md bg-gradient-to-r from-cyan-400 to-blue-500 hover:opacity-90 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] disabled:hover:scale-100"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -210,8 +226,11 @@ export default function Login() {
               This system contains sensitive information. Ensure your credentials are
               protected at all times.
             </p>
-            <p className="text-xs text-teal-400 text-center mt-2">
-              ✓ Connection is encrypted
+            <p className="text-xs text-teal-400 text-center mt-2 flex items-center justify-center gap-1">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Connection is encrypted
             </p>
 
           </div>
