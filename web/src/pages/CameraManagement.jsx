@@ -4,6 +4,15 @@ import Header from "../components/Header";
 
 export default function CameraManagement() {
     const navigate = useNavigate();
+    const [showAddCamera, setShowAddCamera] = useState(false);
+    const [newCamera, setNewCamera] = useState({
+        name: "",
+        location: "",
+        ipAddress: "",
+        username: "",
+        password: "",
+        streamUrl: ""
+    });
 
     /* ---------- Icons ---------- */
     const Icon = {
@@ -25,12 +34,6 @@ export default function CameraManagement() {
                 <path d="M15 9l-6 6m0-6l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
             </svg>
         ),
-        settings: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-        ),
         eye: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
@@ -49,11 +52,16 @@ export default function CameraManagement() {
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 5v14m-7-7h14" />
             </svg>
+        ),
+        close: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
         )
     };
 
     /* ---------- Camera Data ---------- */
-    const cameras = [
+    const [cameras, setCameras] = useState([
         {
             id: 1,
             name: "Front Entrance",
@@ -96,23 +104,19 @@ export default function CameraManagement() {
             location: "ATM #09 - Shopping Mall",
             lastActive: "3 hours ago",
         }
-    ];
+    ]);
 
     /* ---------- Filters ---------- */
     const [statusFilter, setStatusFilter] = useState("all");
-    const [locationFilter, setLocationFilter] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
 
     const filteredCameras = useMemo(() => {
         return cameras.filter(camera => {
             const matchesStatus = statusFilter === "all" || camera.status === statusFilter;
-            const matchesLocation = locationFilter === "all" || camera.location === locationFilter;
-            const matchesSearch = camera.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                camera.model.toLowerCase().includes(searchQuery.toLowerCase());
-
-            return matchesStatus && matchesLocation && matchesSearch;
+            const matchesSearch = camera.name.toLowerCase().includes(searchQuery.toLowerCase())
+            return matchesStatus && matchesSearch;
         });
-    }, [cameras, statusFilter, locationFilter, searchQuery]);
+    }, [cameras, statusFilter, searchQuery]);
 
     const stats = {
         total: cameras.length,
@@ -134,6 +138,39 @@ export default function CameraManagement() {
         );
     };
 
+    /* ---------- Add Camera Functions ---------- */
+    const handleAddCamera = () => {
+        if (!newCamera.name || !newCamera.location) {
+            alert("Please fill in all required fields");
+            return;
+        }
+
+        const camera = {
+            id: cameras.length + 1,
+            name: newCamera.name,
+            status: "online",
+            location: newCamera.location,
+            lastActive: "Just now"
+        };
+
+        setCameras(prev => [camera, ...prev]);
+        setShowAddCamera(false);
+        setNewCamera({
+            name: "",
+            location: "",
+            ipAddress: "",
+            username: "",
+            password: "",
+            streamUrl: ""
+        });
+    };
+
+    const handleInputChange = (field, value) => {
+        setNewCamera(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
 
     return (
         <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
@@ -191,13 +228,19 @@ export default function CameraManagement() {
 
                     <div className="flex gap-2 w-full lg:w-auto">
                         <button
-                            onClick={() => navigate("/loading", { state: { to: "/dashboard/camera-setup", delayMs: 700 } })}
+                            onClick={() => setShowAddCamera(true)}
                             className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                         >
                             {Icon.add}
                             Add Camera
                         </button>
-                        <button className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                        <button
+                            onClick={() => {
+                                // Refresh logic here
+                                console.log("Refreshing cameras...");
+                            }}
+                            className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                        >
                             {Icon.refresh}
                             Refresh
                         </button>
@@ -262,12 +305,87 @@ export default function CameraManagement() {
                         onClick={() => {
                             setSearchQuery("");
                             setStatusFilter("all");
-                            setLocationFilter("all");
                         }}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                     >
                         Clear all filters
                     </button>
+                </div>
+            )}
+
+            {/* Add Camera Modal */}
+            {showAddCamera && (
+                <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">Add New Camera</h3>
+                            <button
+                                onClick={() => setShowAddCamera(false)}
+                                className="text-white hover:text-gray-200 transition-colors"
+                            >
+                                {Icon.close}
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Camera Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.name}
+                                    onChange={(e) => handleInputChange("name", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Front Entrance Camera"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Location *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.name}
+                                    onChange={(e) => handleInputChange("location", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Front Entrance Camera"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Stream URL
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.streamUrl}
+                                    onChange={(e) => handleInputChange("streamUrl", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., rtsp://192.168.1.100:554/stream1"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+                            <button
+                                onClick={() => setShowAddCamera(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAddCamera}
+                                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Add Camera
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
