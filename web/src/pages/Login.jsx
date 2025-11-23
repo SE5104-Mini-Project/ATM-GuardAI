@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import Loading from "./Loading";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -29,10 +30,10 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        `http://localhost:3001/api/users/login`, 
+        `http://localhost:3001/api/users/login`,
         { email, password },
-        { 
-          withCredentials: true, 
+        {
+          withCredentials: true,
           headers: {
             'Content-Type': 'application/json'
           }

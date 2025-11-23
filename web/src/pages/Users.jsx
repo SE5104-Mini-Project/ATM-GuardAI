@@ -349,7 +349,9 @@ export default function Users() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                {isAdmin && (
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -374,22 +376,24 @@ export default function Users() {
                       {user.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditUser(user)}
-                        className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(user._id)}
-                        className="text-red-600 hover:text-red-900 px-2 py-1 rounded"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+                  {isAdmin && (
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user._id)}
+                          className="text-red-600 hover:text-red-900 px-2 py-1 rounded"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {users.length === 0 && (

@@ -1,8 +1,11 @@
 import { createContext, useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+    const navigate = useNavigate();
+
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -13,7 +16,7 @@ export function AuthProvider({ children }) {
     const verifyAuth = useCallback(async () => {
         try {
             const response = await fetch('http://localhost:3001/api/users/profile', {
-                credentials: 'include' 
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -23,7 +26,7 @@ export function AuthProvider({ children }) {
                     return true;
                 }
             }
-            
+
             clearAuth();
             return false;
         } catch (error) {
@@ -52,10 +55,11 @@ export function AuthProvider({ children }) {
         } catch (error) {
             console.error('Logout API call failed:', error);
         } finally {
-            navigator('./login')
+            navigate('/login');
             clearAuth();
         }
     }, [clearAuth]);
+
 
     const updateUser = (userData) => {
         setCurrentUser(prev => ({ ...prev, ...userData }));

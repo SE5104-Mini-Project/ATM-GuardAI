@@ -1,14 +1,19 @@
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-const cardBase =
-  "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
+const cardBase = "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
 
-const btnClass =
-  "inline-flex items-center justify-center transition rounded-lg p-1.5 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1";
+const btnClass = "inline-flex items-center justify-center transition rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 h-8 w-8 border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 focus:ring-red-400";
 
 export default function Header() {
   const { currentUser, logout, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
 
   if (loading) {
     return (
@@ -24,13 +29,9 @@ export default function Header() {
       <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
 
       <div className="flex items-center gap-6">
-        {/* Notifications icon - unchanged */}
+        {/* Notifications */}
         <div className="relative">
-          <svg
-            className="w-6 h-6 text-gray-500"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
+          <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
           </svg>
 
@@ -61,12 +62,12 @@ export default function Header() {
             {currentUser?.email || "Unknown User"}
           </span>
 
-          {/* Logout button */}
+          {/* Logout */}
           <button
             className={btnClass}
             aria-label="Logout"
             title="Logout"
-            onClick={logout}
+            onClick={handleLogout}
           >
             <svg
               viewBox="0 0 24 24"

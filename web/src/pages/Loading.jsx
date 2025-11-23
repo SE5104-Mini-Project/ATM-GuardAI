@@ -1,4 +1,3 @@
-// src/pages/Loading.jsx
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BrandSplash from "../components/BrandSplash";
