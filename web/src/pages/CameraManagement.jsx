@@ -1,10 +1,14 @@
-import { useState, useMemo, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { AuthContext } from "../context/AuthContext";
 
 export default function CameraManagement() {
     const navigate = useNavigate();
+    const { currentUser } = useContext(AuthContext);
     const [showAddCamera, setShowAddCamera] = useState(false);
+    const [showEditCamera, setShowEditCamera] = useState(false);
+    const [editingCamera, setEditingCamera] = useState(null);
     const [cameras, setCameras] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -17,8 +21,11 @@ export default function CameraManagement() {
         latitude: "",
         longitude: "",
         address: "",
-        status: "online"
+        status: "online",
+        streamUrl: ""
     });
+
+    const isAdmin = currentUser?.role === "admin";
 
     /* ---------- Icons ---------- */
     const Icon = {
@@ -121,25 +128,25 @@ export default function CameraManagement() {
         }
     };
 
-    const updateCameraStatus = async (cameraId, status) => {
+    const updateCamera = async (cameraId, cameraData) => {
         try {
-            const response = await fetch(`${API_BASE}/cameras/${cameraId}/status`, {
-                method: "PATCH",
+            const response = await fetch(`${API_BASE}/cameras/${cameraId}`, {
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ status }),
+                body: JSON.stringify(cameraData),
             });
             const result = await response.json();
 
             if (result.success) {
                 await fetchCameras();
-                return { success: true };
+                return { success: true, data: result.data };
             } else {
                 return { success: false, message: result.message };
             }
         } catch (err) {
-            return { success: false, message: "Error updating camera status", err };
+            return { success: false, message: "Error updating camera", err };
         }
     };
 
@@ -222,18 +229,26 @@ export default function CameraManagement() {
                 latitude: "",
                 longitude: "",
                 address: "",
-                status: "online"
+                status: "online",
+                streamUrl: ""
             });
         } else {
             alert(result.message);
         }
     };
 
-    const handleStatusToggle = async (cameraId, currentStatus) => {
-        const newStatus = currentStatus === "online" ? "offline" : "online";
-        const result = await updateCameraStatus(cameraId, newStatus);
+    const handleEditCamera = async () => {
+        if (!editingCamera.name || !editingCamera.bankName || !editingCamera.branch) {
+            alert("Please fill in all required fields");
+            return;
+        }
 
-        if (!result.success) {
+        const result = await updateCamera(editingCamera._id, editingCamera);
+
+        if (result.success) {
+            setShowEditCamera(false);
+            setEditingCamera(null);
+        } else {
             alert(result.message);
         }
     };
@@ -253,6 +268,30 @@ export default function CameraManagement() {
             ...prev,
             [field]: value
         }));
+    };
+
+    const handleEditInputChange = (field, value) => {
+        setEditingCamera(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const openEditModal = (camera) => {
+        setEditingCamera({
+            _id: camera._id,
+            name: camera.name,
+            bankName: camera.bankName,
+            district: camera.district,
+            province: camera.province,
+            branch: camera.branch,
+            latitude: camera.location?.latitude || "",
+            longitude: camera.location?.longitude || "",
+            address: camera.address,
+            status: camera.status,
+            streamUrl: camera.streamUrl || ""
+        });
+        setShowEditCamera(true);
     };
 
     const formatLastActive = (lastAvailableTime) => {
@@ -333,13 +372,15 @@ export default function CameraManagement() {
                     </div>
 
                     <div className="flex gap-2 w-full lg:w-auto">
-                        <button
-                            onClick={() => setShowAddCamera(true)}
-                            className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                        >
-                            {Icon.add}
-                            Add Camera
-                        </button>
+                        {isAdmin && (
+                            <button
+                                onClick={() => setShowAddCamera(true)}
+                                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                            >
+                                {Icon.add}
+                                Add Camera
+                            </button>
+                        )}
                         <button
                             onClick={fetchCameras}
                             disabled={loading}
@@ -373,7 +414,8 @@ export default function CameraManagement() {
 
                             {/* Camera Details */}
                             <div className="px-5 py-4">
-                                <p className="text-gray-900 font-medium mb-2">{camera.bankName} - {camera.branch}</p>
+                                <p className="text-gray-900 font-medium mb-2">{camera._id} - {camera.bankName} </p>
+                                <p className="text-gray-900 font-medium mb-2">{camera.branch}</p>
                                 <p className="text-sm text-gray-600 mb-3">{camera.address}</p>
 
                                 <div className="space-y-2 text-sm text-gray-600">
@@ -408,28 +450,24 @@ export default function CameraManagement() {
                                     <span className="font-medium">View Live</span>
                                 </button>
 
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => handleStatusToggle(camera._id, camera.status)}
-                                        className={`inline-flex items-center gap-1 ${camera.status === "online"
-                                            ? "text-orange-600 hover:text-orange-800"
-                                            : "text-emerald-600 hover:text-emerald-800"
-                                            }`}
-                                    >
-                                        {camera.status === "online" ? Icon.offline : Icon.online}
-                                        <span className="font-medium">
-                                            {camera.status === "online" ? "Take Offline" : "Bring Online"}
-                                        </span>
-                                    </button>
-
-                                    <button
-                                        onClick={() => handleDeleteCamera(camera._id)}
-                                        className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
-                                    >
-                                        {Icon.delete}
-                                        <span className="font-medium">Delete</span>
-                                    </button>
-                                </div>
+                                {isAdmin && (
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => openEditModal(camera)}
+                                            className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                        >
+                                            {Icon.edit}
+                                            <span className="font-medium">Edit</span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteCamera(camera._id)}
+                                            className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
+                                        >
+                                            {Icon.delete}
+                                            <span className="font-medium">Delete</span>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -595,6 +633,19 @@ export default function CameraManagement() {
                                     <option value="offline">Offline</option>
                                 </select>
                             </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Stream URL
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.streamUrl}
+                                    onChange={(e) => handleInputChange("streamUrl", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., http://192.168.1.10:8080/stream"
+                                />
+                            </div>
                         </div>
 
                         {/* Modal Footer */}
@@ -610,6 +661,176 @@ export default function CameraManagement() {
                                 className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 Add Camera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Camera Modal */}
+            {showEditCamera && editingCamera && (
+                <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">Edit Camera</h3>
+                            <button
+                                onClick={() => setShowEditCamera(false)}
+                                className="text-white hover:text-gray-200 transition-colors"
+                            >
+                                {Icon.close}
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Camera Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.name}
+                                    onChange={(e) => handleEditInputChange("name", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Front Entrance Camera"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Bank Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.bankName}
+                                    onChange={(e) => handleEditInputChange("bankName", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., ABC Bank"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Branch *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.branch}
+                                    onChange={(e) => handleEditInputChange("branch", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Main Branch"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    District
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.district}
+                                    onChange={(e) => handleEditInputChange("district", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Colombo"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Province
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.province}
+                                    onChange={(e) => handleEditInputChange("province", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Western Province"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Address
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.address}
+                                    onChange={(e) => handleEditInputChange("address", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 123 Main Street"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Latitude
+                                </label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={editingCamera.latitude}
+                                    onChange={(e) => handleEditInputChange("latitude", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 6.9271"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Longitude
+                                </label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={editingCamera.longitude}
+                                    onChange={(e) => handleEditInputChange("longitude", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 79.8612"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Status
+                                </label>
+                                <select
+                                    value={editingCamera.status}
+                                    onChange={(e) => handleEditInputChange("status", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="online">Online</option>
+                                    <option value="offline">Offline</option>
+                                </select>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Stream URL
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.streamUrl}
+                                    onChange={(e) => handleEditInputChange("streamUrl", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., http://192.168.1.10:8080/stream"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+                            <button
+                                onClick={() => setShowEditCamera(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditCamera}
+                                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Update Camera
                             </button>
                         </div>
                     </div>

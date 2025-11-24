@@ -1,5 +1,19 @@
 import Camera from "../models/cameraModel.js";
 
+import axios from 'axios';
+
+const FAST_API = 'http://localhost:5000';
+
+async function checkFastAPIHealth() {
+    try {
+        const response = await axios.get(`${FAST_API}/`, { timeout: 5000 });
+        return response.status === 200;
+    } catch (error) {
+        console.log('FastAPI is not available');
+        return false;
+    }
+}
+
 export const createCamera = async (req, res) => {
     try {
         const cameraData = {
@@ -69,6 +83,14 @@ export const getCameras = async (req, res) => {
             ];
         }
 
+        const allCameras = await Camera.find({});
+
+        if (await checkFastAPIHealth()) {
+            axios.post(`${FAST_API}/api/all-cameras`, allCameras)
+                .then(() => console.log("Sent all cameras to FastAPI"))
+                .catch(err => console.log("FastAPI error:", err.message));
+        }
+
         const options = {
             page: parseInt(page),
             limit: parseInt(limit),
@@ -76,7 +98,7 @@ export const getCameras = async (req, res) => {
         };
 
         const cameras = await Camera.find(filter)
-            .limit(options.limit * 1)
+            .limit(options.limit)
             .skip((options.page - 1) * options.limit)
             .sort(options.sort);
 
@@ -93,7 +115,9 @@ export const getCameras = async (req, res) => {
                 hasPrev: options.page > 1
             }
         });
+
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
             message: error.message

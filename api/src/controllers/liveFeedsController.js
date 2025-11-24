@@ -3,11 +3,11 @@ import axios from 'axios';
 const FLASK_API = 'http://localhost:5000';
 
 const mockCameras = [
-    { id: 12, name: "ATM #12 - City Branch", camLabel: "Camera 1 - ATM Area", status: "online" },
-    { id: 7, name: "ATM #07 - Main Street", camLabel: "Camera 1 - Entrance", status: "online" },
-    { id: 15, name: "ATM #15 - Hospital Branch", camLabel: "Camera 1 - Lobby", status: "online" },
-    { id: 9, name: "ATM #09 - Shopping Mall", camLabel: "Camera 1 - ATM Area", status: "online" },
-];
+    { "id": 0, "name": "ATM #12 - City Branch", "location": "ATM #12 - City Branch", "camera": "Camera 1" },
+    { "id": 1, "name": "ATM #07 - Main Street", "location": "ATM #07 - Main Street", "camera": "Camera 2" },
+    { "id": 2, "name": "ATM #15 - Hospital Branch", "location": "ATM #15 - Hospital Branch", "camera": "Camera 1" },
+    { "id": 3, "name": "ATM #09 - Shopping Mall", "location": "ATM #09 - Shopping Mall", "camera": "Camera 1" },
+]
 
 
 

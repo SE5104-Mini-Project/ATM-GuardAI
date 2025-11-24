@@ -26,7 +26,6 @@ CAMERAS = [
     {"id": 3, "name": "ATM #09 - Shopping Mall", "location": "ATM #09 - Shopping Mall", "camera": "Camera 1"},
 ]
 
-
 app = Flask(__name__)
 CORS(app)
 
@@ -200,19 +199,25 @@ def generate_frames(cam_index):
 def index():
     return jsonify({"message": "AI Surveillance System API", "status": "running"})
 
-@app.route('/api/cameras')
-def get_cameras():
-    return jsonify(CAMERAS)
+@app.route('/api/all-cameras', methods=['POST'])
+def receive_all_cameras():
+    global CAMERAS
+    try:
+        data = request.get_json()
 
-@app.route('/api/cameras/<int:camera_id>/status')
-def get_camera_status(camera_id):
-    if camera_id not in camera_status:
-        return jsonify({"error": "Camera not found"}), 404
-    return jsonify(camera_status[camera_id])
+        if not isinstance(data, list):
+            return jsonify({"success": False, "message": "Invalid data format. Expected a list."}), 400
 
-@app.route('/api/alerts')
-def get_alerts():
-    return jsonify(active_alerts)
+        CAMERAS  = data 
+
+        return jsonify({
+            "success": True,
+            "message": "Camera data updated successfully",
+            "total_cameras": len(CAMERAS)
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/api/alerts/recent')
 def get_recent_alerts():
