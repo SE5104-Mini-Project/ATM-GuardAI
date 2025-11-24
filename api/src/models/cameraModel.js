@@ -43,6 +43,9 @@ const cameraSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    streamUrl: {
+        type: String,
+    },
     status: {
         type: String,
         enum: ["online", "offline"],

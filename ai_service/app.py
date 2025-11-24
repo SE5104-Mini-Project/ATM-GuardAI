@@ -19,12 +19,10 @@ CLASSES = ['normal face', 'with helmet', 'with mask']
 IMG_SIZE = 224
 CONFIDENCE_THRESHOLD = 0.7
 ALERT_COOLDOWN = 30
-CAMERAS = [
-    {"id": 0, "name": "ATM #12 - City Branch", "location": "ATM #12 - City Branch", "camera": "Camera 1"},
-    {"id": 1, "name": "ATM #07 - Main Street", "location": "ATM #07 - Main Street", "camera": "Camera 2"},
-    {"id": 2, "name": "ATM #15 - Hospital Branch", "location": "ATM #15 - Hospital Branch", "camera": "Camera 1"},
-    {"id": 3, "name": "ATM #09 - Shopping Mall", "location": "ATM #09 - Shopping Mall", "camera": "Camera 1"},
-]
+CAMERAS = []
+
+print("A - ", CAMERAS)
+
 
 app = Flask(__name__)
 CORS(app)
@@ -209,6 +207,7 @@ def receive_all_cameras():
             return jsonify({"success": False, "message": "Invalid data format. Expected a list."}), 400
 
         CAMERAS  = data 
+        print(CAMERAS)
 
         return jsonify({
             "success": True,

@@ -424,6 +424,10 @@ export default function CameraManagement() {
                                         <span className="font-medium">{camera.district}</span>
                                     </div>
                                     <div className="flex justify-between">
+                                        <span>streamUrl:</span>
+                                        <span className="font-medium">{camera.streamUrl}</span>
+                                    </div>
+                                    <div className="flex justify-between">
                                         <span>Province:</span>
                                         <span className="font-medium">{camera.province}</span>
                                     </div>

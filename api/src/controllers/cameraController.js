@@ -1,5 +1,4 @@
 import Camera from "../models/cameraModel.js";
-
 import axios from 'axios';
 
 const FAST_API = 'http://localhost:5000';
@@ -27,9 +26,21 @@ export const createCamera = async (req, res) => {
                 longitude: req.body.longitude
             },
             address: req.body.address,
+            streamUrl: req.body.streamUrl,
             status: req.body.status || "online",
             lastAvailableTime: req.body.lastAvailableTime || Date.now()
         };
+
+        if (cameraData.streamUrl) {
+            try {
+                new URL(cameraData.streamUrl);
+            } catch (error) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid stream URL format"
+                });
+            }
+        }
 
         const camera = new Camera(cameraData);
         await camera.save();
@@ -53,7 +64,6 @@ export const createCamera = async (req, res) => {
         });
     }
 };
-
 
 export const getCameras = async (req, res) => {
     try {
@@ -79,7 +89,8 @@ export const getCameras = async (req, res) => {
                 { name: new RegExp(search, 'i') },
                 { bankName: new RegExp(search, 'i') },
                 { branch: new RegExp(search, 'i') },
-                { address: new RegExp(search, 'i') }
+                { address: new RegExp(search, 'i') },
+                { streamUrl: new RegExp(search, 'i') }
             ];
         }
 
@@ -125,6 +136,49 @@ export const getCameras = async (req, res) => {
     }
 };
 
+export const getCameraStats = async (req, res) => {
+    try {
+        const totalCameras = await Camera.countDocuments();
+        const onlineCameras = await Camera.countDocuments({ status: "online" });
+        const offlineCameras = await Camera.countDocuments({ status: "offline" });
+
+        const camerasByProvince = await Camera.aggregate([
+            {
+                $group: {
+                    _id: "$province",
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { count: -1 } }
+        ]);
+
+        const camerasByBank = await Camera.aggregate([
+            {
+                $group: {
+                    _id: "$bankName",
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { count: -1 } }
+        ]);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                total: totalCameras,
+                online: onlineCameras,
+                offline: offlineCameras,
+                byProvince: camerasByProvince,
+                byBank: camerasByBank
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 export const getCameraById = async (req, res) => {
     try {
@@ -149,7 +203,6 @@ export const getCameraById = async (req, res) => {
     }
 };
 
-
 export const updateCamera = async (req, res) => {
     try {
         const updates = { ...req.body };
@@ -159,6 +212,17 @@ export const updateCamera = async (req, res) => {
                 latitude: req.body.latitude || req.body.location?.latitude,
                 longitude: req.body.longitude || req.body.location?.longitude
             };
+        }
+
+        if (updates.streamUrl) {
+            try {
+                new URL(updates.streamUrl);
+            } catch (error) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid stream URL format"
+                });
+            }
         }
 
         const camera = await Camera.findByIdAndUpdate(
@@ -186,7 +250,6 @@ export const updateCamera = async (req, res) => {
         });
     }
 };
-
 
 export const updateCameraStatus = async (req, res) => {
     try {
@@ -230,7 +293,6 @@ export const updateCameraStatus = async (req, res) => {
     }
 };
 
-
 export const deleteCamera = async (req, res) => {
     try {
         const camera = await Camera.findByIdAndDelete(req.params.id);
@@ -245,88 +307,6 @@ export const deleteCamera = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Camera deleted successfully"
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-
-export const getCamerasByLocation = async (req, res) => {
-    try {
-        const { latitude, longitude, radius = 5000 } = req.query; 
-
-        if (!latitude || !longitude) {
-            return res.status(400).json({
-                success: false,
-                message: "Latitude and longitude are required"
-            });
-        }
-
-        const cameras = await Camera.find({
-            location: {
-                $near: {
-                    $geometry: {
-                        type: "Point",
-                        coordinates: [parseFloat(longitude), parseFloat(latitude)]
-                    },
-                    $maxDistance: parseInt(radius)
-                }
-            }
-        });
-
-        res.status(200).json({
-            success: true,
-            data: cameras,
-            count: cameras.length
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-
-export const getCameraStats = async (req, res) => {
-    try {
-        const totalCameras = await Camera.countDocuments();
-        const onlineCameras = await Camera.countDocuments({ status: "online" });
-        const offlineCameras = await Camera.countDocuments({ status: "offline" });
-
-        const camerasByProvince = await Camera.aggregate([
-            {
-                $group: {
-                    _id: "$province",
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { count: -1 } }
-        ]);
-
-        const camerasByBank = await Camera.aggregate([
-            {
-                $group: {
-                    _id: "$bankName",
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { count: -1 } }
-        ]);
-
-        res.status(200).json({
-            success: true,
-            data: {
-                total: totalCameras,
-                online: onlineCameras,
-                offline: offlineCameras,
-                byProvince: camerasByProvince,
-                byBank: camerasByBank
-            }
         });
     } catch (error) {
         res.status(500).json({
