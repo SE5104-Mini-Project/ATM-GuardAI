@@ -61,6 +61,7 @@ export default function Sidebar() {
           { label: "Dashboard", icon: icon.dashboards, to: "/dashboard" },
           { label: "Live Feeds", icon: icon.camera, to: "/dashboard/live-feeds" },
           { label: "Alerts", icon: icon.alerts, to: "/dashboard/alerts" },
+          { label: "Camera Management", icon: icon.camera, to: "/dashboard/camera-management" },
           { label: "ATM Locations", icon: icon.map, to: "/dashboard/locations" },
           { label: "Reports", icon: icon.reports, to: "/dashboard/reports" },
           { label: "Settings", icon: icon.settings, to: "/dashboard/settings" },
@@ -71,10 +72,9 @@ export default function Sidebar() {
             to={item.to}
             end
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "text-blue-200 hover:bg-blue-700 hover:text-white"
+              `flex items-center gap-3 px-3 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${isActive
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-blue-200 hover:bg-blue-700 hover:text-white"
               }`
             }
           >

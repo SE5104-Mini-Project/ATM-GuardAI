@@ -1,17 +1,9 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-
-const counterSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
-    seq: { type: Number, default: 0 }
-});
-
-const Counter = mongoose.model('Counter', counterSchema);
+import Counter from './counterModel.js';
 
 const userSchema = new mongoose.Schema({
-    _id: {
-        type: String
-    },
+    _id: { type: String },
     name: {
         type: String,
         required: [true, 'Name is required'],

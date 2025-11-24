@@ -3,7 +3,7 @@ import User from '../models/UserModel.js';
 
 const authMiddleware = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
 
         if (!token) {
             return res.status(401).json({
@@ -29,7 +29,15 @@ const authMiddleware = async (req, res, next) => {
             });
         }
 
-        req.user = user;
+        req.user = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+            lastLogin: user.lastLogin
+        };
+
         next();
     } catch (error) {
         console.error('Auth middleware error:', error);

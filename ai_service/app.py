@@ -19,12 +19,7 @@ CLASSES = ['normal face', 'with helmet', 'with mask']
 IMG_SIZE = 224
 CONFIDENCE_THRESHOLD = 0.7
 ALERT_COOLDOWN = 30
-CAMERAS = [
-    {"id": 0, "name": "ATM #12 - City Branch", "location": "ATM #12 - City Branch", "camera": "Camera 1"},
-    {"id": 1, "name": "ATM #07 - Main Street", "location": "ATM #07 - Main Street", "camera": "Camera 2"},
-    {"id": 2, "name": "ATM #15 - Hospital Branch", "location": "ATM #15 - Hospital Branch", "camera": "Camera 1"},
-    {"id": 3, "name": "ATM #09 - Shopping Mall", "location": "ATM #09 - Shopping Mall", "camera": "Camera 1"},
-]
+CAMERAS = []
 
 
 app = Flask(__name__)
@@ -33,7 +28,7 @@ CORS(app)
 
 # ------------- Global Variables -------------
 active_alerts = [] 
-camera_status = {cam["id"]: {"status": "offline", "last_frame": None, "alerts": []} for cam in CAMERAS}
+camera_status = {}
 
 
 # ------------- Load Face Recognition Model -------------
@@ -81,16 +76,20 @@ class AlertManager:
             return False
 
         current_time = datetime.now()
-        alert_id = f"alert_{camera_id}_{current_time.strftime('%Y%m%d_%H%M%S')}"
+        alert_id = f"alert_{camera_id}{current_time.strftime('%Y%m%d%H%M%S')}"
 
+        camera_info = next((cam for cam in CAMERAS if cam["_id"] == camera_id), {})
+        
         alert = {
             "id": alert_id,
             "type": alert_type,
             "severity": "high" if alert_type in ["with mask", "with helmet"] else "medium",
             "status": "open",
             "description": f"Detected: {alert_type}",
-            "camera": CAMERAS[camera_id].get("name", f"Camera {camera_id}"),
-            "location": CAMERAS[camera_id].get("location", "unknown"),
+            "camera": camera_info.get("name", f"Camera {camera_id}"),
+            "location": camera_info.get("address", "unknown"),
+            "bankName": camera_info.get("bankName", "unknown"),
+            "branch": camera_info.get("branch", "unknown"),
             "time": current_time.strftime("%Y-%m-%d %I:%M:%S %p"),
             "confidence": float(confidence),
             "timestamp": current_time.isoformat()
@@ -99,6 +98,9 @@ class AlertManager:
         print("[ALERT]", json.dumps(alert, indent=2))
 
         active_alerts.append(alert)
+        
+        if camera_id not in camera_status:
+            camera_status[camera_id] = {"status": "online", "last_frame": None, "alerts": []}
         camera_status[camera_id]["alerts"].append(alert)
 
         if len(active_alerts) > 50:
@@ -135,17 +137,34 @@ def draw_box_and_label(frame, x, y, w, h, label, conf):
     text = f"{label} {conf*100:.1f}%"
     cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
+def get_camera_source(camera_id):
+    camera = next((cam for cam in CAMERAS if cam["_id"] == camera_id), None)
+    if camera and "streamUrl" in camera:
+        return camera["streamUrl"]
+    return None
 
 
 # ------------- Camera Processing -------------
-def process_camera_frame(cam_index, alert_manager):
-    cap = cv2.VideoCapture(cam_index)
+def process_camera_frame(camera_id, alert_manager):
+    stream_url = get_camera_source(camera_id)
+    if not stream_url:
+        print(f"[ERROR] No stream URL found for camera: {camera_id}")
+        return None, []
+
+    cap = cv2.VideoCapture(stream_url)
+    
+    if stream_url.startswith('rtsp://'):
+        cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 10000)
+    
     if not cap.isOpened():
+        print(f"[ERROR] Could not open camera stream: {stream_url}")
         return None, []
 
     ret, frame = cap.read()
+    cap.release()  
+    
     if not ret:
-        cap.release()
+        print(f"[ERROR] Could not read frame from: {stream_url}")
         return None, []
 
     alerts = []
@@ -160,23 +179,38 @@ def process_camera_frame(cam_index, alert_manager):
         label = CLASSES[int(np.argmax(preds))]
         draw_box_and_label(frame, x, y, w, h, label, conf)
 
-        # Send alert if confidence is high and not normal
         if conf >= CONFIDENCE_THRESHOLD and label != "normal face":
-            if alert_manager.send_alert(cam_index, label, conf, frame=frame.copy()):
+            if alert_manager.send_alert(camera_id, label, conf, frame=frame.copy()):
                 alerts.append({
                     "type": label,
                     "confidence": conf,
                     "timestamp": datetime.now().isoformat()
                 })
 
-    cap.release()
     return frame, alerts
 
-def generate_frames(cam_index):
-    cap = cv2.VideoCapture(cam_index)
+def generate_frames(camera_id):
+    stream_url = get_camera_source(camera_id)
+    print(stream_url)
+    if not stream_url:
+        print(f"[ERROR] No stream URL found for camera: {camera_id}")
+        return
+    if stream_url == "0":
+        stream_url = 0
+
+    cap = cv2.VideoCapture(stream_url)
+    
+    
+    if not cap.isOpened():
+        print(f"[ERROR] Could not open camera stream: {stream_url}")
+        return
+    
+    print(f"[INFO] Started streaming from: {stream_url}")
+    
     while True:
         success, frame = cap.read()
         if not success:
+            print(f"[WARNING] Failed to read frame from: {stream_url}")
             break
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -190,58 +224,117 @@ def generate_frames(cam_index):
             label = CLASSES[int(np.argmax(preds))]
             draw_box_and_label(frame, x, y, w, h, label, conf)
 
-        ret, buffer = cv2.imencode('.jpg', frame)
+        ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
+        if not ret:
+            continue
+            
         frame_bytes = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+    cap.release()
+    print(f"[INFO] Stopped streaming from: {stream_url}")
+
 
 # ------------- Flask Routes -------------
 @app.route('/')
 def index():
     return jsonify({"message": "AI Surveillance System API", "status": "running"})
 
-@app.route('/api/cameras')
-def get_cameras():
-    return jsonify(CAMERAS)
+@app.route('/api/all-cameras', methods=['POST'])
+def receive_all_cameras():
+    global CAMERAS, camera_status
+    try:
+        data = request.get_json()
 
-@app.route('/api/cameras/<int:camera_id>/status')
-def get_camera_status(camera_id):
-    if camera_id not in camera_status:
-        return jsonify({"error": "Camera not found"}), 404
-    return jsonify(camera_status[camera_id])
+        if not isinstance(data, list):
+            return jsonify({"success": False, "message": "Invalid data format. Expected a list."}), 400
 
-@app.route('/api/alerts')
-def get_alerts():
-    return jsonify(active_alerts)
+        CAMERAS = data 
+        
+        for camera in CAMERAS:
+            cam_id = camera["_id"]
+            camera_status[cam_id] = {
+                "status": "online", 
+                "last_frame": None, 
+                "alerts": [],
+                "streamUrl": camera.get("streamUrl", "")
+            }
+
+        print(f"[INFO] Updated camera list with {len(CAMERAS)} cameras")
+        for cam in CAMERAS:
+            print(f"  - {cam['_id']}: {cam.get('streamUrl', 'No stream URL')}")
+
+        return jsonify({
+            "success": True,
+            "message": "Camera data updated successfully",
+            "total_cameras": len(CAMERAS)
+        })
+
+    except Exception as e:
+        print(f"[ERROR] Failed to process camera data: {e}")
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/api/alerts/recent')
 def get_recent_alerts():
     recent = sorted(active_alerts, key=lambda x: x['timestamp'], reverse=True)[:10]
     return jsonify(recent)
 
-@app.route('/video_feed/<int:camera_id>')
+@app.route('/api/alerts/all')
+def get_all_alerts():
+    return jsonify(active_alerts)
+
+@app.route('/api/cameras/status')
+def get_camera_status():
+    return jsonify(camera_status)
+
+@app.route('/video_feed/<camera_id>')
 def video_feed(camera_id):
     return Response(generate_frames(camera_id),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/api/cameras/<int:camera_id>/snapshot')
+@app.route('/api/cameras/<camera_id>/snapshot')
 def get_snapshot(camera_id):
     alert_manager = AlertManager()
+    
     frame, alerts = process_camera_frame(camera_id, alert_manager)
 
     if frame is not None:
         _, buffer = cv2.imencode('.jpg', frame)
         frame_base64 = base64.b64encode(buffer).decode('utf-8')
+        
+        if camera_id in camera_status:
+            camera_status[camera_id]["last_frame"] = datetime.now().isoformat()
+        
         return jsonify({
             "success": True,
+            "camera_id": camera_id,
             "image": f"data:image/jpeg;base64,{frame_base64}",
             "alerts": alerts,
             "timestamp": datetime.now().isoformat()
         })
     else:
-        return jsonify({"success": False, "error": "Could not capture frame"})
+        return jsonify({
+            "success": False, 
+            "error": "Could not capture frame",
+            "camera_id": camera_id
+        })
+
+@app.route('/api/cameras')
+def get_cameras():
+    return jsonify(CAMERAS)
+
+@app.route('/api/cameras/<camera_id>')
+def get_camera_info(camera_id):
+    camera = next((cam for cam in CAMERAS if cam["_id"] == camera_id), None)
+    if camera:
+        return jsonify(camera)
+    else:
+        return jsonify({"error": "Camera not found"}), 404
+
 
 # ------------- Main -------------
 if __name__ == '__main__':
     print("[INFO] Starting Flask AI Surveillance API...")
+    print("[INFO] Waiting for camera configuration via /api/all-cameras endpoint")
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)

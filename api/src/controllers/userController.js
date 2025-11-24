@@ -9,7 +9,7 @@ const generateToken = (userId) => {
     );
 };
 
-const register = async (req, res) => {
+export const register = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
@@ -46,6 +46,13 @@ const register = async (req, res) => {
 
         const token = generateToken(user._id);
 
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 
+        });
+
         await user.updateLastLogin();
 
         res.status(201).json({
@@ -59,8 +66,7 @@ const register = async (req, res) => {
                     role: user.role,
                     status: user.status,
                     lastLogin: user.lastLogin
-                },
-                token
+                }
             }
         });
     } catch (error) {
@@ -73,8 +79,7 @@ const register = async (req, res) => {
     }
 };
 
-
-const login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -110,6 +115,13 @@ const login = async (req, res) => {
 
         const token = generateToken(user._id);
 
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 
+        });
+
         await user.updateLastLogin();
 
         res.json({
@@ -123,8 +135,7 @@ const login = async (req, res) => {
                     role: user.role,
                     status: user.status,
                     lastLogin: user.lastLogin
-                },
-                token
+                }
             }
         });
 
@@ -138,13 +149,51 @@ const login = async (req, res) => {
     }
 };
 
-
-const getProfile = async (req, res) => {
+export const logout = async (req, res) => {
     try {
+        res.cookie('token', '', {
+            httpOnly: true,
+            expires: new Date(0)
+        });
+
+        res.json({
+            success: true,
+            message: 'Logged out successfully'
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error logging out',
+            error: error.message
+        });
+    }
+};
+
+export const getProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
         res.json({
             success: true,
             data: {
-                user: req.user
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    status: user.status,
+                    lastLogin: user.lastLogin,
+                    createdAt: user.createdAt,
+                    updatedAt: user.updatedAt
+                }
             }
         });
     } catch (error) {
@@ -157,8 +206,7 @@ const getProfile = async (req, res) => {
     }
 };
 
-
-const getUsers = async (req, res) => {
+export const getUsers = async (req, res) => {
     try {
         const { page = 1, limit = 10, role, status, search } = req.query;
 
@@ -200,8 +248,7 @@ const getUsers = async (req, res) => {
     }
 };
 
-
-const getUser = async (req, res) => {
+export const getUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
 
@@ -226,8 +273,7 @@ const getUser = async (req, res) => {
     }
 };
 
-
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         const { name, role, status } = req.body;
 
@@ -277,8 +323,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         if (req.user._id.toString() === req.params.id) {
             return res.status(403).json({
@@ -308,32 +353,4 @@ const deleteUser = async (req, res) => {
             error: error.message
         });
     }
-};
-
-
-const logout = async (req, res) => {
-    try {
-        res.json({
-            success: true,
-            message: 'Logged out successfully'
-        });
-    } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error logging out',
-            error: error.message
-        });
-    }
-};
-
-export {
-    register,
-    login,
-    logout,
-    getProfile,
-    getUsers,
-    getUser,
-    updateUser,
-    deleteUser,
 };
