@@ -56,7 +56,7 @@ export default function Reports() {
       if (!response.ok) throw new Error('Failed to fetch cameras');
       const result = await response.json();
       if (result.success) {
-        setCameras(result.data || []); 
+        setCameras(result.data || []);
       } else {
         throw new Error(result.message || 'Failed to fetch cameras');
       }
@@ -198,7 +198,7 @@ export default function Reports() {
       uniqueBanks: [...new Set(filteredCameras.map(c => c.bankName).filter(Boolean))].length,
     };
 
-    stats.uptimePercentage = stats.totalCameras > 0 ? 
+    stats.uptimePercentage = stats.totalCameras > 0 ?
       ((stats.onlineCameras / stats.totalCameras) * 100).toFixed(1) : 0;
 
     return stats;
@@ -229,7 +229,7 @@ export default function Reports() {
       "Resolved By",
       "Resolved Time"
     ];
-    
+
     const dataLines = filteredAlerts.map(alert => [
       alert._id,
       new Date(alert.createdTime || alert.createdAt).toLocaleString(),
@@ -237,7 +237,7 @@ export default function Reports() {
       alert.cameraId?.bankName || 'N/A',
       alert.cameraId?.branch || 'N/A',
       alert.cameraId?.address || 'N/A',
-      alert.cameraId?.location ? 
+      alert.cameraId?.location ?
         `${alert.cameraId.location.latitude}, ${alert.cameraId.location.longitude}` : 'N/A',
       alert.type,
       alert.severity,
@@ -247,7 +247,7 @@ export default function Reports() {
       alert.resolvedBy?.name || 'N/A',
       alert.resolvedTime ? new Date(alert.resolvedTime).toLocaleString() : 'N/A'
     ].join(","));
-    
+
     const csv = [header.join(","), ...dataLines].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -275,7 +275,7 @@ export default function Reports() {
       "Created At",
       "Updated At"
     ];
-    
+
     const dataLines = filteredCameras.map(camera => [
       camera._id,
       camera.name,
@@ -292,7 +292,7 @@ export default function Reports() {
       new Date(camera.createdAt).toLocaleString(),
       new Date(camera.updatedAt).toLocaleString()
     ].join(","));
-    
+
     const csv = [header.join(","), ...dataLines].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -312,13 +312,13 @@ export default function Reports() {
   };
 
   // Get unique values for filters
-  const uniqueProvinces = useMemo(() => 
-    [...new Set(cameras.map(camera => camera.province).filter(Boolean))], 
+  const uniqueProvinces = useMemo(() =>
+    [...new Set(cameras.map(camera => camera.province).filter(Boolean))],
     [cameras]
   );
 
-  const uniqueDistricts = useMemo(() => 
-    [...new Set(cameras.map(camera => camera.district).filter(Boolean))], 
+  const uniqueDistricts = useMemo(() =>
+    [...new Set(cameras.map(camera => camera.district).filter(Boolean))],
     [cameras]
   );
 
@@ -344,7 +344,7 @@ export default function Reports() {
   // Calculate last active time
   const getLastActive = (lastAvailableTime) => {
     if (!lastAvailableTime) return 'Unknown';
-    
+
     const now = new Date();
     const diffMs = now - new Date(lastAvailableTime);
     const diffMin = Math.floor(diffMs / 60000);
@@ -370,21 +370,19 @@ export default function Reports() {
         <div className="flex border-b border-slate-200 mb-4">
           <button
             onClick={() => setActiveTab("alerts")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "alerts"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === "alerts"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
           >
             Alerts Report
           </button>
           <button
             onClick={() => setActiveTab("cameras")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "cameras"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === "cameras"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
           >
             Cameras Report
           </button>
@@ -398,8 +396,8 @@ export default function Reports() {
           </div>
           <button
             onClick={exportAllData}
-            disabled={(activeTab === "alerts" && filteredAlerts.length === 0) || 
-                     (activeTab === "cameras" && filteredCameras.length === 0)}
+            disabled={(activeTab === "alerts" && filteredAlerts.length === 0) ||
+              (activeTab === "cameras" && filteredCameras.length === 0)}
             className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm px-3 py-2 shadow"
           >
             <span className="grid place-items-center">{Icon.download}</span>
@@ -541,238 +539,249 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* Data Tables */}
-      {activeTab === "alerts" ? (
-        /* Alerts Table */
-        <div className="rounded-2xl bg-white shadow-lg border border-slate-200">
-          <div className="px-5 pt-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h4 className="text-lg font-semibold">Detailed Alert Report - {period}</h4>
-                <p className="text-sm text-slate-500 mt-1">
-                  Generated on:{" "}
-                  {generatedAt.toLocaleString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                  {" "}• Showing {filteredAlerts.length} alerts
-                  {" "}• Avg Confidence: {statistics.averageConfidence}%
-                </p>
-              </div>
-              <div className="text-right text-sm text-slate-600">
-                <div>Severity: H({statistics.highSeverity}) M({statistics.mediumSeverity}) L({statistics.lowSeverity})</div>
-                <div>Status: Open({statistics.openAlerts}) Resolved({statistics.resolvedAlerts})</div>
-              </div>
-            </div>
-          </div>
+      {loading && (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading alerts...</p>
+        </div>
+      )}
 
-          <div className="overflow-x-auto mt-4">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="text-left text-slate-600 bg-slate-50">
-                  <th className="px-4 py-3 font-semibold">Alert ID</th>
-                  <th className="px-4 py-3 font-semibold">Date & Time</th>
-                  <th className="px-4 py-3 font-semibold">Camera</th>
-                  <th className="px-4 py-3 font-semibold">Location</th>
-                  <th className="px-4 py-3 font-semibold">Type</th>
-                  <th className="px-4 py-3 font-semibold">Severity</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Confidence</th>
-                  <th className="px-4 py-3 font-semibold">Description</th>
-                  <th className="px-4 py-3 font-semibold">Resolved Info</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAlerts.length === 0 ? (
-                  <tr>
-                    <td colSpan="10" className="px-4 py-8 text-center text-slate-500">
-                      {loading ? "Loading alerts..." : "No alerts found for the selected filters"}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredAlerts.map((alert) => (
-                    <tr key={alert._id} className="border-t border-slate-100 hover:bg-slate-50">
-                      <td className="px-4 py-3 font-mono text-xs">{alert._id}</td>
-                      <td className="px-4 py-3">
-                        <div>{formatDate(alert.createdTime || alert.createdAt)}</div>
-                        <div className="text-xs text-slate-500">{formatTime(alert.createdTime || alert.createdAt)}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{alert.cameraId?.name || 'N/A'}</div>
-                        <div className="text-xs text-slate-500">{alert.cameraId?.branch || 'N/A'}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-xs text-slate-500">
-                          {alert.cameraId?.location ?
-                            `${alert.cameraId.location.latitude?.toFixed(4) || 'N/A'}, ${alert.cameraId.location.longitude?.toFixed(4) || 'N/A'}` :
-                            'N/A'
-                          }
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.type === "with mask"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-orange-100 text-orange-800"
-                          }`}>
-                          {alert.type === "with mask" ? "Mask" : "Helmet"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.severity === "high"
-                          ? "bg-red-100 text-red-800"
-                          : alert.severity === "medium"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
-                          }`}>
-                          {alert.severity}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.status === "open"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-green-100 text-green-800"
-                          }`}>
-                          {alert.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-12 bg-slate-200 rounded-full h-2">
-                            <div
-                              className={`h-2 rounded-full ${(alert.confidence || 0) >= 80 ? "bg-green-500" :
-                                (alert.confidence || 0) >= 60 ? "bg-yellow-500" : "bg-red-500"
-                                }`}
-                              style={{ width: `${alert.confidence || 0}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs font-medium">{alert.confidence || 0}%</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 max-w-xs">
-                        <div className="text-sm">{alert.description || "No description"}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        {alert.status === "resolved" ? (
-                          <div>
-                            <div className="text-xs">
-                              By: {alert.resolvedBy?.name || 'System'}
-                            </div>
+      {!loading && (
+        <>
+          {/* Data Tables */}
+          {activeTab === "alerts" ? (
+            /* Alerts Table */
+            <div className="rounded-2xl bg-white shadow-lg border border-slate-200">
+              <div className="px-5 pt-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-lg font-semibold">Detailed Alert Report - {period}</h4>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Generated on:{" "}
+                      {generatedAt.toLocaleString(undefined, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      {" "}• Showing {filteredAlerts.length} alerts
+                      {" "}• Avg Confidence: {statistics.averageConfidence}%
+                    </p>
+                  </div>
+                  <div className="text-right text-sm text-slate-600">
+                    <div>Severity: H({statistics.highSeverity}) M({statistics.mediumSeverity}) L({statistics.lowSeverity})</div>
+                    <div>Status: Open({statistics.openAlerts}) Resolved({statistics.resolvedAlerts})</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto mt-4">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-slate-600 bg-slate-50">
+                      <th className="px-4 py-3 font-semibold">Alert ID</th>
+                      <th className="px-4 py-3 font-semibold">Date & Time</th>
+                      <th className="px-4 py-3 font-semibold">Camera</th>
+                      <th className="px-4 py-3 font-semibold">Location</th>
+                      <th className="px-4 py-3 font-semibold">Type</th>
+                      <th className="px-4 py-3 font-semibold">Severity</th>
+                      <th className="px-4 py-3 font-semibold">Status</th>
+                      <th className="px-4 py-3 font-semibold">Confidence</th>
+                      <th className="px-4 py-3 font-semibold">Description</th>
+                      <th className="px-4 py-3 font-semibold">Resolved Info</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAlerts.length === 0 ? (
+                      <tr>
+                        <td colSpan="10" className="px-4 py-8 text-center text-slate-500">
+                          {loading ? "Loading alerts..." : "No alerts found for the selected filters"}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredAlerts.map((alert) => (
+                        <tr key={alert._id} className="border-t border-slate-100 hover:bg-slate-50">
+                          <td className="px-4 py-3 font-mono text-xs">{alert._id}</td>
+                          <td className="px-4 py-3">
+                            <div>{formatDate(alert.createdTime || alert.createdAt)}</div>
+                            <div className="text-xs text-slate-500">{formatTime(alert.createdTime || alert.createdAt)}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="font-medium">{alert.cameraId?.name || 'N/A'}</div>
+                            <div className="text-xs text-slate-500">{alert.cameraId?.branch || 'N/A'}</div>
+                          </td>
+                          <td className="px-4 py-3">
                             <div className="text-xs text-slate-500">
-                              {alert.resolvedTime ? formatDate(alert.resolvedTime) : 'N/A'}
+                              {alert.cameraId?.location ?
+                                `${alert.cameraId.location.latitude?.toFixed(4) || 'N/A'}, ${alert.cameraId.location.longitude?.toFixed(4) || 'N/A'}` :
+                                'N/A'
+                              }
                             </div>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        /* Cameras Table */
-        <div className="rounded-2xl bg-white shadow-lg border border-slate-200">
-          <div className="px-5 pt-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h4 className="text-lg font-semibold">Camera Inventory Report</h4>
-                <p className="text-sm text-slate-500 mt-1">
-                  Generated on:{" "}
-                  {generatedAt.toLocaleString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                  {" "}• Showing {filteredCameras.length} cameras
-                  {" "}• Uptime: {cameraStatistics.uptimePercentage}%
-                </p>
-              </div>
-              <div className="text-right text-sm text-slate-600">
-                <div>Online: {cameraStatistics.onlineCameras} • Offline: {cameraStatistics.offlineCameras}</div>
-                <div>Provinces: {cameraStatistics.uniqueProvinces} • Districts: {cameraStatistics.uniqueDistricts}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.type === "with mask"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-orange-100 text-orange-800"
+                              }`}>
+                              {alert.type === "with mask" ? "Mask" : "Helmet"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.severity === "high"
+                              ? "bg-red-100 text-red-800"
+                              : alert.severity === "medium"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-green-100 text-green-800"
+                              }`}>
+                              {alert.severity}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.status === "open"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-green-100 text-green-800"
+                              }`}>
+                              {alert.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-12 bg-slate-200 rounded-full h-2">
+                                <div
+                                  className={`h-2 rounded-full ${(alert.confidence || 0) >= 80 ? "bg-green-500" :
+                                    (alert.confidence || 0) >= 60 ? "bg-yellow-500" : "bg-red-500"
+                                    }`}
+                                  style={{ width: `${alert.confidence || 0}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs font-medium">{alert.confidence || 0}%</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 max-w-xs">
+                            <div className="text-sm">{alert.description || "No description"}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            {alert.status === "resolved" ? (
+                              <div>
+                                <div className="text-xs">
+                                  By: {alert.resolvedBy?.name || 'System'}
+                                </div>
+                                <div className="text-xs text-slate-500">
+                                  {alert.resolvedTime ? formatDate(alert.resolvedTime) : 'N/A'}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-slate-400">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
+          ) : (
+            /* Cameras Table */
+            <div className="rounded-2xl bg-white shadow-lg border border-slate-200">
+              <div className="px-5 pt-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-lg font-semibold">Camera Inventory Report</h4>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Generated on:{" "}
+                      {generatedAt.toLocaleString(undefined, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      {" "}• Showing {filteredCameras.length} cameras
+                      {" "}• Uptime: {cameraStatistics.uptimePercentage}%
+                    </p>
+                  </div>
+                  <div className="text-right text-sm text-slate-600">
+                    <div>Online: {cameraStatistics.onlineCameras} • Offline: {cameraStatistics.offlineCameras}</div>
+                    <div>Provinces: {cameraStatistics.uniqueProvinces} • Districts: {cameraStatistics.uniqueDistricts}</div>
+                  </div>
+                </div>
+              </div>
 
-          <div className="overflow-x-auto mt-4">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="text-left text-slate-600 bg-slate-50">
-                  <th className="px-4 py-3 font-semibold">Camera ID</th>
-                  <th className="px-4 py-3 font-semibold">Camera Name</th>
-                  <th className="px-4 py-3 font-semibold">Bank & Branch</th>
-                  <th className="px-4 py-3 font-semibold">Location</th>
-                  <th className="px-4 py-3 font-semibold">Province/District</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Last Active</th>
-                  <th className="px-4 py-3 font-semibold">Coordinates</th>
-                  <th className="px-4 py-3 font-semibold">Stream URL</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCameras.length === 0 ? (
-                  <tr>
-                    <td colSpan="9" className="px-4 py-8 text-center text-slate-500">
-                      {loading ? "Loading cameras..." : "No cameras found for the selected filters"}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredCameras.map((camera) => (
-                    <tr key={camera._id} className="border-t border-slate-100 hover:bg-slate-50">
-                      <td className="px-4 py-3 font-mono text-xs">{camera._id}</td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{camera.name}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{camera.bankName}</div>
-                        <div className="text-xs text-slate-500">{camera.branch}</div>
-                      </td>
-                      <td className="px-4 py-3 max-w-xs">
-                        <div className="text-sm">{camera.address}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-sm">{camera.province}</div>
-                        <div className="text-xs text-slate-500">{camera.district}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${camera.status === "online"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}>
-                          {camera.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-sm">{getLastActive(camera.lastAvailableTime)}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-xs text-slate-500">
-                          {camera.location ?
-                            `${camera.location.latitude?.toFixed(6) || 'N/A'}, ${camera.location.longitude?.toFixed(6) || 'N/A'}` :
-                            'N/A'
-                          }
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-xs text-slate-500 truncate max-w-[200px]">
-                          {camera.streamUrl || 'N/A'}
-                        </div>
-                      </td>
+              <div className="overflow-x-auto mt-4">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-slate-600 bg-slate-50">
+                      <th className="px-4 py-3 font-semibold">Camera ID</th>
+                      <th className="px-4 py-3 font-semibold">Camera Name</th>
+                      <th className="px-4 py-3 font-semibold">Bank & Branch</th>
+                      <th className="px-4 py-3 font-semibold">Location</th>
+                      <th className="px-4 py-3 font-semibold">Province/District</th>
+                      <th className="px-4 py-3 font-semibold">Status</th>
+                      <th className="px-4 py-3 font-semibold">Last Active</th>
+                      <th className="px-4 py-3 font-semibold">Coordinates</th>
+                      <th className="px-4 py-3 font-semibold">Stream URL</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                  </thead>
+                  <tbody>
+                    {filteredCameras.length === 0 ? (
+                      <tr>
+                        <td colSpan="9" className="px-4 py-8 text-center text-slate-500">
+                          {loading ? "Loading cameras..." : "No cameras found for the selected filters"}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredCameras.map((camera) => (
+                        <tr key={camera._id} className="border-t border-slate-100 hover:bg-slate-50">
+                          <td className="px-4 py-3 font-mono text-xs">{camera._id}</td>
+                          <td className="px-4 py-3">
+                            <div className="font-medium">{camera.name}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="font-medium">{camera.bankName}</div>
+                            <div className="text-xs text-slate-500">{camera.branch}</div>
+                          </td>
+                          <td className="px-4 py-3 max-w-xs">
+                            <div className="text-sm">{camera.address}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm">{camera.province}</div>
+                            <div className="text-xs text-slate-500">{camera.district}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${camera.status === "online"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                              }`}>
+                              {camera.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm">{getLastActive(camera.lastAvailableTime)}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-xs text-slate-500">
+                              {camera.location ?
+                                `${camera.location.latitude?.toFixed(6) || 'N/A'}, ${camera.location.longitude?.toFixed(6) || 'N/A'}` :
+                                'N/A'
+                              }
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-xs text-slate-500 truncate max-w-[200px]">
+                              {camera.streamUrl || 'N/A'}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
