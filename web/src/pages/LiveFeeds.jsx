@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import LogoutButton from "../components/LogoutButton";
+import Header from "../components/Header";
 
 export default function LiveFeeds() {
   const cardBase = "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
@@ -8,22 +8,24 @@ export default function LiveFeeds() {
 
   useEffect(() => {
     fetchCameras();
-
-    return;
   }, []);
 
   const fetchCameras = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/liveFeeds/cameras');
-      const data = await response.json();
-      setFeeds(data);
+      const response = await fetch('http://localhost:3001/api/cameras');
+      const result = await response.json();
+      
+      if (result.success) {
+        setFeeds(result.data);
+      } else {
+        console.error('Error fetching cameras:', result.message);
+      }
     } catch (error) {
       console.error('Error fetching cameras:', error);
     } finally {
       setLoading(false);
     }
   };
-
 
   const Bell = () => (
     <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
@@ -73,10 +75,10 @@ export default function LiveFeeds() {
       return () => clearInterval(interval);
     }, [recording]);
 
-    // Set up video stream
+    // Set up video stream - using camera._id instead of camera.id
     useEffect(() => {
-      setStreamUrl(`http://localhost:3001/api/liveFeeds/video_feed/${camera.id}`);
-    }, [camera.id]);
+      setStreamUrl(`http://localhost:3001/api/liveFeeds/video_feed/${camera._id}`);
+    }, [camera._id]);
 
     const formatTime = (s) => {
       const m = Math.floor(s / 60).toString().padStart(2, "0");
@@ -159,7 +161,7 @@ export default function LiveFeeds() {
           )}
 
           <span className="absolute left-4 bottom-4 text-xs px-2 py-1 rounded bg-black text-white/90">
-            {camera.camLabel || `Camera ${camera.id}`}
+            {camera.branch || `Camera ${camera.autoIncrementId}`}
           </span>
         </div>
 
@@ -204,30 +206,8 @@ export default function LiveFeeds() {
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10">
-      {/* Top header card */}
-      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold text-gray-900">Live Feeds</h2>
-        <div className="flex items-center gap-6">
-          <span className="text-sm text-blue-700">
-            Last updated: <span className="underline">Just now</span>
-          </span>
-          <div className="relative">
-            <Bell />
-            {/* <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-              {alerts.length}
-            </span> */}
-          </div>
-
-          <LogoutButton
-            showEmail={false}
-            showIcon
-            label="Admin"
-            compact
-            iconOnly
-            className="px-0"
-          />
-        </div>
-      </div>
+      {/* header */}
+      <Header title={"Live Feeds"}/>
 
       {/* Section title */}
       <h3 className="text-xl font-semibold text-gray-900 mb-3">Live Camera Feeds</h3>
@@ -235,7 +215,7 @@ export default function LiveFeeds() {
       {/* Grid of cameras */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {feeds.map((camera) => (
-          <CameraCard key={camera.id} camera={camera} />
+          <CameraCard key={camera._id} camera={camera} />
         ))}
       </div>
 
