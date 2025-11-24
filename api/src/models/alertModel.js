@@ -7,7 +7,7 @@ const alertSchema = new mongoose.Schema(
 
         type: {
             type: String,
-            enum: ["normal face", "with helmet", "with mask"],
+            enum: ["with helmet", "with mask"],
             required: true,
         },
 

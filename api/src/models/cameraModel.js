@@ -70,7 +70,7 @@ cameraSchema.pre("save", async function (next) {
         );
 
         this.autoIncrementId = counter.seq;
-        this._id = `ATM_Cam_${String(counter.seq).padStart(2, "0")}`;
+        this._id = `camera_${String(counter.seq).padStart(2, "0")}`;
         next();
     } catch (err) {
         next(err);
