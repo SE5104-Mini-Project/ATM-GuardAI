@@ -521,9 +521,6 @@ export default function Alerts() {
                           </span>
                         )}
                         <span className="inline-flex items-center gap-1.5">
-                          {Icon.pin} {alert.cameraId?.location || "Unknown Location"}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5">
                           {Icon.clock} {formatTime(alert.createdTime)}
                         </span>
                         {isResolved && alert.resolvedBy && (
@@ -636,7 +633,7 @@ export default function Alerts() {
                     Camera
                   </label>
                   <p className="text-sm text-gray-600">
-                    {selectedAlert.cameraId?.name || `Camera ${selectedAlert.cameraId?._id}`} - {selectedAlert.cameraId?.location}
+                    {selectedAlert.cameraId?.name || `Camera ${selectedAlert.cameraId?._id}`}
                   </p>
                 </div>
 
