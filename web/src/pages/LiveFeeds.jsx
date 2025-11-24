@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import Header from "../components/Header";
+import LogoutButton from "../components/LogoutButton";
 
 export default function LiveFeeds() {
   const cardBase = "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
@@ -204,8 +204,30 @@ export default function LiveFeeds() {
 
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10">
-      {/* header */}
-      <Header title={"Live Feeds"}/>
+      {/* Top header card */}
+      <div className={`${cardBase} mb-6 px-5 py-4 flex items-center justify-between`}>
+        <h2 className="text-2xl font-bold text-gray-900">Live Feeds</h2>
+        <div className="flex items-center gap-6">
+          <span className="text-sm text-blue-700">
+            Last updated: <span className="underline">Just now</span>
+          </span>
+          <div className="relative">
+            <Bell />
+            {/* <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+              {alerts.length}
+            </span> */}
+          </div>
+
+          <LogoutButton
+            showEmail={false}
+            showIcon
+            label="Admin"
+            compact
+            iconOnly
+            className="px-0"
+          />
+        </div>
+      </div>
 
       {/* Section title */}
       <h3 className="text-xl font-semibold text-gray-900 mb-3">Live Camera Feeds</h3>

@@ -19,12 +19,9 @@ CLASSES = ['normal face', 'with helmet', 'with mask']
 IMG_SIZE = 224
 CONFIDENCE_THRESHOLD = 0.7
 ALERT_COOLDOWN = 30
-CAMERAS = [
-    {"id": 0, "name": "ATM #12 - City Branch", "location": "ATM #12 - City Branch", "camera": "Camera 1"},
-    {"id": 1, "name": "ATM #07 - Main Street", "location": "ATM #07 - Main Street", "camera": "Camera 2"},
-    {"id": 2, "name": "ATM #15 - Hospital Branch", "location": "ATM #15 - Hospital Branch", "camera": "Camera 1"},
-    {"id": 3, "name": "ATM #09 - Shopping Mall", "location": "ATM #09 - Shopping Mall", "camera": "Camera 1"},
-]
+CAMERAS = []
+
+print("A - ", CAMERAS)
 
 
 app = Flask(__name__)
@@ -200,19 +197,26 @@ def generate_frames(cam_index):
 def index():
     return jsonify({"message": "AI Surveillance System API", "status": "running"})
 
-@app.route('/api/cameras')
-def get_cameras():
-    return jsonify(CAMERAS)
+@app.route('/api/all-cameras', methods=['POST'])
+def receive_all_cameras():
+    global CAMERAS
+    try:
+        data = request.get_json()
 
-@app.route('/api/cameras/<int:camera_id>/status')
-def get_camera_status(camera_id):
-    if camera_id not in camera_status:
-        return jsonify({"error": "Camera not found"}), 404
-    return jsonify(camera_status[camera_id])
+        if not isinstance(data, list):
+            return jsonify({"success": False, "message": "Invalid data format. Expected a list."}), 400
 
-@app.route('/api/alerts')
-def get_alerts():
-    return jsonify(active_alerts)
+        CAMERAS  = data 
+        print(CAMERAS)
+
+        return jsonify({
+            "success": True,
+            "message": "Camera data updated successfully",
+            "total_cameras": len(CAMERAS)
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/api/alerts/recent')
 def get_recent_alerts():

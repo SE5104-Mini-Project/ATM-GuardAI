@@ -1,18 +1,31 @@
-import { useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { AuthContext } from "../context/AuthContext";
 
 export default function CameraManagement() {
     const navigate = useNavigate();
+    const { currentUser } = useContext(AuthContext);
     const [showAddCamera, setShowAddCamera] = useState(false);
+    const [showEditCamera, setShowEditCamera] = useState(false);
+    const [editingCamera, setEditingCamera] = useState(null);
+    const [cameras, setCameras] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
     const [newCamera, setNewCamera] = useState({
         name: "",
-        location: "",
-        ipAddress: "",
-        username: "",
-        password: "",
+        bankName: "",
+        district: "",
+        province: "",
+        branch: "",
+        latitude: "",
+        longitude: "",
+        address: "",
+        status: "online",
         streamUrl: ""
     });
+
+    const isAdmin = currentUser?.role === "admin";
 
     /* ---------- Icons ---------- */
     const Icon = {
@@ -57,54 +70,108 @@ export default function CameraManagement() {
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6L6 18M6 6l12 12" />
             </svg>
+        ),
+        edit: (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+        ),
+        delete: (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
         )
     };
 
-    /* ---------- Camera Data ---------- */
-    const [cameras, setCameras] = useState([
-        {
-            id: 1,
-            name: "Front Entrance",
-            status: "online",
-            location: "ATM #12 - City Branch",
-            lastActive: "2 min ago",
-        },
-        {
-            id: 2,
-            name: "Cash Area",
-            status: "online",
-            location: "ATM #12 - City Branch",
-            lastActive: "5 min ago",
-        },
-        {
-            id: 3,
-            name: "Lobby Overview",
-            status: "offline",
-            location: "ATM #07 - Main Street",
-            lastActive: "2 hours ago",
-        },
-        {
-            id: 4,
-            name: "Vestibule",
-            status: "online",
-            location: "ATM #15 - Hospital Branch",
-            lastActive: "Just now",
-        },
-        {
-            id: 5,
-            name: "Street View",
-            status: "online",
-            location: "ATM #15 - Hospital Branch",
-            lastActive: "1 min ago",
-        },
-        {
-            id: 6,
-            name: "Rear Exit",
-            status: "offline",
-            location: "ATM #09 - Shopping Mall",
-            lastActive: "3 hours ago",
+    /* ---------- API Functions ---------- */
+    const API_BASE = "http://localhost:3001/api";
+
+    const fetchCameras = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(`${API_BASE}/cameras`);
+            const result = await response.json();
+
+            if (result.success) {
+                setCameras(result.data);
+            } else {
+                setError("Failed to fetch cameras");
+            }
+        } catch (err) {
+            setError("Error connecting to server");
+            console.error("Error fetching cameras:", err);
+        } finally {
+            setLoading(false);
         }
-    ]);
+    };
+
+    const createCamera = async (cameraData) => {
+        try {
+            const response = await fetch(`${API_BASE}/cameras`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(cameraData),
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                await fetchCameras();
+                return { success: true, data: result.data };
+            } else {
+                return { success: false, message: result.message };
+            }
+        } catch (err) {
+            return { success: false, message: "Error creating camera", err };
+        }
+    };
+
+    const updateCamera = async (cameraId, cameraData) => {
+        try {
+            const response = await fetch(`${API_BASE}/cameras/${cameraId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(cameraData),
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                await fetchCameras();
+                return { success: true, data: result.data };
+            } else {
+                return { success: false, message: result.message };
+            }
+        } catch (err) {
+            return { success: false, message: "Error updating camera", err };
+        }
+    };
+
+    const deleteCamera = async (cameraId) => {
+        try {
+            const response = await fetch(`${API_BASE}/cameras/${cameraId}`, {
+                method: "DELETE",
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                await fetchCameras();
+                return { success: true };
+            } else {
+                return { success: false, message: result.message };
+            }
+        } catch (err) {
+            return { success: false, message: "Error deleting camera", err };
+        }
+    };
+
+    /* ---------- Effects ---------- */
+    useEffect(() => {
+        fetchCameras();
+    }, []);
 
     /* ---------- Filters ---------- */
     const [statusFilter, setStatusFilter] = useState("all");
@@ -113,7 +180,11 @@ export default function CameraManagement() {
     const filteredCameras = useMemo(() => {
         return cameras.filter(camera => {
             const matchesStatus = statusFilter === "all" || camera.status === statusFilter;
-            const matchesSearch = camera.name.toLowerCase().includes(searchQuery.toLowerCase())
+            const matchesSearch =
+                camera.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                camera.bankName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                camera.branch?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                camera.address?.toLowerCase().includes(searchQuery.toLowerCase());
             return matchesStatus && matchesSearch;
         });
     }, [cameras, statusFilter, searchQuery]);
@@ -131,38 +202,65 @@ export default function CameraManagement() {
         };
 
         return (
-            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${config[status].class}`}>
+            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${config[status]?.class || config.offline.class}`}>
                 {status === "online" ? Icon.online : Icon.offline}
-                {config[status].text}
+                {config[status]?.text || "Offline"}
             </div>
         );
     };
 
-    /* ---------- Add Camera Functions ---------- */
-    const handleAddCamera = () => {
-        if (!newCamera.name || !newCamera.location) {
+    /* ---------- Camera Management Functions ---------- */
+    const handleAddCamera = async () => {
+        if (!newCamera.name || !newCamera.bankName || !newCamera.branch) {
             alert("Please fill in all required fields");
             return;
         }
 
-        const camera = {
-            id: cameras.length + 1,
-            name: newCamera.name,
-            status: "online",
-            location: newCamera.location,
-            lastActive: "Just now"
-        };
+        const result = await createCamera(newCamera);
 
-        setCameras(prev => [camera, ...prev]);
-        setShowAddCamera(false);
-        setNewCamera({
-            name: "",
-            location: "",
-            ipAddress: "",
-            username: "",
-            password: "",
-            streamUrl: ""
-        });
+        if (result.success) {
+            setShowAddCamera(false);
+            setNewCamera({
+                name: "",
+                bankName: "",
+                district: "",
+                province: "",
+                branch: "",
+                latitude: "",
+                longitude: "",
+                address: "",
+                status: "online",
+                streamUrl: ""
+            });
+        } else {
+            alert(result.message);
+        }
+    };
+
+    const handleEditCamera = async () => {
+        if (!editingCamera.name || !editingCamera.bankName || !editingCamera.branch) {
+            alert("Please fill in all required fields");
+            return;
+        }
+
+        const result = await updateCamera(editingCamera._id, editingCamera);
+
+        if (result.success) {
+            setShowEditCamera(false);
+            setEditingCamera(null);
+        } else {
+            alert(result.message);
+        }
+    };
+
+    const handleDeleteCamera = async (cameraId) => {
+        if (window.confirm("Are you sure you want to delete this camera?")) {
+            const result = await deleteCamera(cameraId);
+
+            if (!result.success) {
+                alert(result.message);
+            }
+        }
     };
 
     const handleInputChange = (field, value) => {
@@ -172,10 +270,57 @@ export default function CameraManagement() {
         }));
     };
 
+    const handleEditInputChange = (field, value) => {
+        setEditingCamera(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const openEditModal = (camera) => {
+        setEditingCamera({
+            _id: camera._id,
+            name: camera.name,
+            bankName: camera.bankName,
+            district: camera.district,
+            province: camera.province,
+            branch: camera.branch,
+            latitude: camera.location?.latitude || "",
+            longitude: camera.location?.longitude || "",
+            address: camera.address,
+            status: camera.status,
+            streamUrl: camera.streamUrl || ""
+        });
+        setShowEditCamera(true);
+    };
+
+    const formatLastActive = (lastAvailableTime) => {
+        if (!lastAvailableTime) return "Never";
+
+        const now = new Date();
+        const lastActive = new Date(lastAvailableTime);
+        const diffMs = now - lastActive;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return "Just now";
+        if (diffMins < 60) return `${diffMins} min ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    };
+
     return (
         <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
             {/* Header */}
             <Header title={"Camera Management"} />
+
+            {/* Error Message */}
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    {error}
+                </div>
+            )}
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -227,71 +372,114 @@ export default function CameraManagement() {
                     </div>
 
                     <div className="flex gap-2 w-full lg:w-auto">
+                        {isAdmin && (
+                            <button
+                                onClick={() => setShowAddCamera(true)}
+                                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                            >
+                                {Icon.add}
+                                Add Camera
+                            </button>
+                        )}
                         <button
-                            onClick={() => setShowAddCamera(true)}
-                            className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                        >
-                            {Icon.add}
-                            Add Camera
-                        </button>
-                        <button
-                            onClick={() => {
-                                // Refresh logic here
-                                console.log("Refreshing cameras...");
-                            }}
-                            className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                            onClick={fetchCameras}
+                            disabled={loading}
+                            className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
                         >
                             {Icon.refresh}
-                            Refresh
+                            {loading ? "Loading..." : "Refresh"}
                         </button>
                     </div>
                 </div>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+                <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading cameras...</p>
+                </div>
+            )}
+
             {/* Cameras Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {filteredCameras.map(camera => (
-                    <div key={camera.id} className="rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 overflow-hidden">
-                        {/* Camera Header */}
-                        <div className="bg-[#102a56] text-white px-5 py-4 flex items-center justify-between">
-                            <h4 className="font-semibold text-lg">{camera.name}</h4>
-                            <StatusBadge status={camera.status} />
-                        </div>
+            {!loading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {filteredCameras.map(camera => (
+                        <div key={camera._id} className="rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 overflow-hidden">
+                            {/* Camera Header */}
+                            <div className="bg-[#102a56] text-white px-5 py-4 flex items-center justify-between">
+                                <h4 className="font-semibold text-lg">{camera.name}</h4>
+                                <StatusBadge status={camera.status} />
+                            </div>
 
-                        {/* Camera Details */}
-                        <div className="px-5 py-4">
-                            <p className="text-gray-900 font-medium mb-2">{camera.location}</p>
+                            {/* Camera Details */}
+                            <div className="px-5 py-4">
+                                <p className="text-gray-900 font-medium mb-2">{camera._id} - {camera.bankName} </p>
+                                <p className="text-gray-900 font-medium mb-2">{camera.branch}</p>
+                                <p className="text-sm text-gray-600 mb-3">{camera.address}</p>
 
-                            <div className="space-y-3 text-sm text-gray-600">
-                                <div className="flex justify-between">
-                                    <span>Last Active:</span>
-                                    <span className="font-medium">{camera.lastActive}</span>
+                                <div className="space-y-2 text-sm text-gray-600">
+                                    <div className="flex justify-between">
+                                        <span>District:</span>
+                                        <span className="font-medium">{camera.district}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>streamUrl:</span>
+                                        <span className="font-medium">{camera.streamUrl}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Province:</span>
+                                        <span className="font-medium">{camera.province}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Last Active:</span>
+                                        <span className="font-medium">{formatLastActive(camera.lastAvailableTime)}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Action Buttons */}
-                        <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between text-sm">
-                            <button
-                                onClick={() => navigate("/loading", {
-                                    state: { to: "/dashboard/live-feeds", delayMs: 700, cameraId: camera.id }
-                                })}
-                                disabled={camera.status === "offline"}
-                                className={`inline-flex items-center gap-2 ${camera.status === "offline"
-                                    ? "text-gray-400 cursor-not-allowed"
-                                    : "text-blue-700 hover:text-blue-900"
-                                    }`}
-                            >
-                                {Icon.eye}
-                                <span className="font-medium">View Live</span>
-                            </button>
+                            {/* Action Buttons */}
+                            <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between text-sm">
+                                <button
+                                    onClick={() => navigate("/loading", {
+                                        state: { to: "/dashboard/live-feeds", delayMs: 700, cameraId: camera._id }
+                                    })}
+                                    disabled={camera.status === "offline"}
+                                    className={`inline-flex items-center gap-2 ${camera.status === "offline"
+                                        ? "text-gray-400 cursor-not-allowed"
+                                        : "text-blue-700 hover:text-blue-900"
+                                        }`}
+                                >
+                                    {Icon.eye}
+                                    <span className="font-medium">View Live</span>
+                                </button>
+
+                                {isAdmin && (
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => openEditModal(camera)}
+                                            className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                        >
+                                            {Icon.edit}
+                                            <span className="font-medium">Edit</span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteCamera(camera._id)}
+                                            className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
+                                        >
+                                            {Icon.delete}
+                                            <span className="font-medium">Delete</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {/* Empty State */}
-            {filteredCameras.length === 0 && (
+            {!loading && filteredCameras.length === 0 && (
                 <div className="text-center py-12">
                     <div className="text-gray-400 mb-4">
                         <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -329,7 +517,7 @@ export default function CameraManagement() {
                         </div>
 
                         {/* Modal Body */}
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Camera Name *
@@ -345,18 +533,112 @@ export default function CameraManagement() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Location *
+                                    Bank Name *
                                 </label>
                                 <input
                                     type="text"
-                                    value={newCamera.name}
-                                    onChange={(e) => handleInputChange("location", e.target.value)}
+                                    value={newCamera.bankName}
+                                    onChange={(e) => handleInputChange("bankName", e.target.value)}
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="e.g., Front Entrance Camera"
+                                    placeholder="e.g., ABC Bank"
                                 />
                             </div>
 
                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Branch *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.branch}
+                                    onChange={(e) => handleInputChange("branch", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Main Branch"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    District
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.district}
+                                    onChange={(e) => handleInputChange("district", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Colombo"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Province
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.province}
+                                    onChange={(e) => handleInputChange("province", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Western Province"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Address
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCamera.address}
+                                    onChange={(e) => handleInputChange("address", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 123 Main Street"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Latitude
+                                </label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={newCamera.latitude}
+                                    onChange={(e) => handleInputChange("latitude", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 6.9271"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Longitude
+                                </label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={newCamera.longitude}
+                                    onChange={(e) => handleInputChange("longitude", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 79.8612"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Status
+                                </label>
+                                <select
+                                    value={newCamera.status}
+                                    onChange={(e) => handleInputChange("status", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="online">Online</option>
+                                    <option value="offline">Offline</option>
+                                </select>
+                            </div>
+
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Stream URL
                                 </label>
@@ -365,7 +647,7 @@ export default function CameraManagement() {
                                     value={newCamera.streamUrl}
                                     onChange={(e) => handleInputChange("streamUrl", e.target.value)}
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="e.g., rtsp://192.168.1.100:554/stream1"
+                                    placeholder="e.g., http://192.168.1.10:8080/stream"
                                 />
                             </div>
                         </div>
@@ -383,6 +665,176 @@ export default function CameraManagement() {
                                 className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 Add Camera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Camera Modal */}
+            {showEditCamera && editingCamera && (
+                <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">Edit Camera</h3>
+                            <button
+                                onClick={() => setShowEditCamera(false)}
+                                className="text-white hover:text-gray-200 transition-colors"
+                            >
+                                {Icon.close}
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Camera Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.name}
+                                    onChange={(e) => handleEditInputChange("name", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Front Entrance Camera"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Bank Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.bankName}
+                                    onChange={(e) => handleEditInputChange("bankName", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., ABC Bank"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Branch *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.branch}
+                                    onChange={(e) => handleEditInputChange("branch", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Main Branch"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    District
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.district}
+                                    onChange={(e) => handleEditInputChange("district", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Colombo"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Province
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.province}
+                                    onChange={(e) => handleEditInputChange("province", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., Western Province"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Address
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.address}
+                                    onChange={(e) => handleEditInputChange("address", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 123 Main Street"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Latitude
+                                </label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={editingCamera.latitude}
+                                    onChange={(e) => handleEditInputChange("latitude", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 6.9271"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Longitude
+                                </label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    value={editingCamera.longitude}
+                                    onChange={(e) => handleEditInputChange("longitude", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., 79.8612"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Status
+                                </label>
+                                <select
+                                    value={editingCamera.status}
+                                    onChange={(e) => handleEditInputChange("status", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="online">Online</option>
+                                    <option value="offline">Offline</option>
+                                </select>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Stream URL
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingCamera.streamUrl}
+                                    onChange={(e) => handleEditInputChange("streamUrl", e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g., http://192.168.1.10:8080/stream"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+                            <button
+                                onClick={() => setShowEditCamera(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditCamera}
+                                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Update Camera
                             </button>
                         </div>
                     </div>
