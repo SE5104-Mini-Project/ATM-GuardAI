@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const icon = {
   atm: (
@@ -45,10 +47,9 @@ const HistoryIcon = () => (
   </svg>
 );
 
-const cardBase =
-  "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
+const cardBase = "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
 
-function LocationCard({ name, status, address, cameras, lastAlert }) {
+function LocationCard({ name, status, address, cameras, lastAlert, cameraId }) {
   const pill = status === "Alert" ? "bg-red-500 text-white" : "bg-green-500 text-white";
   return (
     <div className={`overflow-hidden ring-1 ring-gray-200 ${cardBase}`}>
@@ -69,10 +70,9 @@ function LocationCard({ name, status, address, cameras, lastAlert }) {
         </div>
       </div>
       <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between text-sm">
-        {/* 👉 route via Loading with target */}
         <Link
           to="/loading"
-          state={{ to: "/dashboard/live-feeds", delayMs: 700 }}
+          state={{ to: `/dashboard/live-feeds?camera=${cameraId}`, delayMs: 700 }}
           className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800"
         >
           <EyeIcon />
@@ -92,44 +92,143 @@ function LocationCard({ name, status, address, cameras, lastAlert }) {
 }
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalATMs: 0,
+    activeAlerts: 0,
+    camerasOnline: 0,
+    pendingReviews: 0
+  });
+  const [recentAlerts, setRecentAlerts] = useState([]);
+  const [atmLocations, setAtmLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const stats = { totalATMs: 24, activeAlerts: 5, camerasOnline: 22, pendingReviews: 12 };
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  const recentAlerts = [
-    {
-      id: 1,
-      type: "mask",
-      title: "Mask Detected",
-      description: "Individual detected wearing facial covering",
-      location: "ATM #12 - City Branch",
-      time: "10:23 AM",
-      action: "Review",
-    },
-    {
-      id: 2,
-      type: "helmet",
-      title: "Helmet Detected",
-      description: "Individual detected wearing helmet",
-      location: "ATM #07 - Main Street",
-      time: "09:45 AM",
-      action: "Review",
-    },
-    {
-      id: 3,
-      type: "resolved",
-      title: "False Alarm - Resolved",
-      description: "Medical mask correctly identified",
-      location: "ATM #15 - Hospital Branch",
-      time: "08:30 AM",
-      action: "Details",
-    },
-  ];
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const atmLocations = [
-    { id: 1, name: "ATM #12 - City Branch", status: "Alert", address: "123 Main Street, City Center", lastAlert: "10:23 AM", cameras: 2 },
-    { id: 2, name: "ATM #07 - Main Street", status: "Alert", address: "456 Oak Avenue, Downtown", lastAlert: "09:45 AM", cameras: 2 },
-    { id: 3, name: "ATM #15 - Hospital Branch", status: "Online", address: "789 Medical Plaza, Health District", lastAlert: "08:30 AM", cameras: 3 },
-  ];
+      const [camerasResponse, alertsResponse] = await Promise.all([
+        axios.get('http://localhost:3001/api/cameras'),
+        axios.get('http://localhost:3001/api/alerts')
+      ]);
+
+      const cameras = camerasResponse.data.data || [];
+      const alerts = alertsResponse.data.data?.alerts || [];
+
+      // Calculate stats
+      const totalATMs = cameras.length;
+      const onlineCameras = cameras.filter(camera => camera.status === "online").length;
+      const activeAlerts = alerts.filter(alert => alert.status === "open").length;
+      const pendingReviews = alerts.filter(alert => alert.status === "open").length;
+
+      setStats({
+        totalATMs,
+        activeAlerts,
+        camerasOnline: onlineCameras,
+        pendingReviews
+      });
+
+      // Process recent alerts (last 3 open alerts)
+      const processedAlerts = alerts
+        .filter(alert => alert.status === "open")
+        .slice(0, 3)
+        .map(alert => {
+          let type = "normal";
+          let title = "Face Detected";
+          let description = "Individual detected";
+
+          if (alert.type === "with mask") {
+            type = "mask";
+            title = "Mask Detected";
+            description = "Individual detected wearing facial covering";
+          } else if (alert.type === "with helmet") {
+            type = "helmet";
+            title = "Helmet Detected";
+            description = "Individual detected wearing helmet";
+          }
+
+          const alertTime = new Date(alert.createdTime);
+          const timeString = alertTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          return {
+            id: alert._id,
+            type,
+            title,
+            description,
+            location: alert.cameraId?.name || "Unknown Location",
+            time: timeString,
+            action: "Review",
+          };
+        });
+
+      setRecentAlerts(processedAlerts);
+
+      // Process ATM locations
+      const processedLocations = cameras.slice(0, 3).map(camera => {
+        const cameraAlerts = alerts.filter(alert => alert.cameraId?._id === camera._id);
+        const latestAlert = cameraAlerts
+          .filter(alert => alert.status === "open")
+          .sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime))[0];
+
+        const hasActiveAlert = cameraAlerts.some(alert => alert.status === "open");
+
+        let lastAlertTime = "No alerts";
+        if (latestAlert) {
+          const alertTime = new Date(latestAlert.createdTime);
+          lastAlertTime = alertTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        return {
+          id: camera._id,
+          name: camera.name,
+          status: hasActiveAlert ? "Alert" : "Online",
+          address: camera.address,
+          lastAlert: lastAlertTime,
+          cameras: 1,
+          cameraId: camera._id
+        };
+      });
+
+      setAtmLocations(processedLocations);
+
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      setError("Failed to load dashboard data. Please try again later.");
+
+      // Set fallback data
+      setStats({ totalATMs: 0, activeAlerts: 0, camerasOnline: 0, pendingReviews: 0 });
+      setRecentAlerts([]);
+      setAtmLocations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRetry = () => {
+    fetchDashboardData();
+  };
+
+  if (error && !loading) {
+    return (
+      <div className="px-3 sm:px-6 pt-6">
+        <Header title={"Security Dashboard"} />
+        <div className="flex flex-col justify-center items-center h-64 space-y-4">
+          <div className="text-lg text-red-600">{error}</div>
+          <button
+            onClick={handleRetry}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-3 sm:px-6 pt-6">
@@ -154,90 +253,116 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Content */}
-      <div className="py-6">
-        {/* Recent Alerts */}
-        <section className={`${cardBase} mb-6`}>
-          <div className="flex items-center justify-between p-6 pb-3">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Alerts</h3>
+      {loading && (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+        </div>
+      )}
 
-            {/* 👉 go via Loading with redirect target */}
-            <Link
-              to="/loading"
-              state={{ to: "/dashboard/alerts", delayMs: 700 }}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              View All
-            </Link>
-          </div>
-
-          <div className="px-6 pb-6 space-y-3">
-            {recentAlerts.map((a) => (
-              <div
-                key={a.id}
-                className={`relative rounded-xl border pl-4 pr-3 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow hover:shadow-md transition-shadow duration-300
-                  ${a.type === "resolved"
-                    ? "border-green-400 bg-green-50"
-                    : a.type === "helmet"
-                      ? "border-amber-400 bg-amber-50"
-                      : "border-rose-400 bg-rose-50"}`}
-              >
-                {/* Colored strip */}
-                <div
-                  className={`absolute top-0 left-0 h-full w-2 rounded-l-xl
-                    ${a.type === "resolved" ? "bg-green-500" : a.type === "helmet" ? "bg-amber-500" : "bg-rose-500"}`}
-                ></div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0 pl-3">
-                  <p className="font-semibold text-gray-900">{a.title}</p>
-                  <p className="text-sm text-gray-700">{a.description}</p>
-                  <div className="mt-1 text-xs text-gray-600 flex flex-wrap items-center gap-3">
-                    <span className="truncate">{a.location}</span>
-                    <span className="flex items-center gap-1">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 8v5l4 2" />
-                        <circle cx="12" cy="12" r="9" />
-                      </svg>
-                      {a.time}
-                    </span>
-                  </div>
-                </div>
-
+      {!loading && (
+        <>
+          {/* Content */}
+          <div className="py-6">
+            {/* Recent Alerts */}
+            <section className={`${cardBase} mb-6`}>
+              <div className="flex items-center justify-between p-6 pb-3">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Alerts</h3>
                 <Link
                   to="/loading"
                   state={{ to: "/dashboard/alerts", delayMs: 700 }}
-                  className="sm:ml-3 shrink-0 bg-blue-700 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-900 transition-colors"
+                  className="text-sm text-blue-600 hover:underline"
                 >
-                  {a.action}
+                  View All
                 </Link>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* ATM Locations */}
-        <section className={`-mx-3 sm:-mx-6 rounded-none sm:rounded-2xl ${cardBase}`}>
-          <div className="flex items-center justify-between px-3 sm:px-6 pt-6 pb-3">
-            <h3 className="text-lg font-semibold text-gray-900">ATM Locations</h3>
+              <div className="px-6 pb-6 space-y-3">
+                {recentAlerts.length > 0 ? (
+                  recentAlerts.map((a) => (
+                    <div
+                      key={a.id}
+                      className={`relative rounded-xl border pl-4 pr-3 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow hover:shadow-md transition-shadow duration-300
+                          ${a.type === "resolved"
+                          ? "border-green-400 bg-green-50"
+                          : a.type === "helmet"
+                            ? "border-amber-400 bg-amber-50"
+                            : a.type === "mask"
+                              ? "border-orange-400 bg-orange-50"
+                              : "border-rose-400 bg-rose-50"}`}
+                    >
+                      {/* Colored strip */}
+                      <div
+                        className={`absolute top-0 left-0 h-full w-2 rounded-l-xl
+                            ${a.type === "resolved" ? "bg-green-500"
+                            : a.type === "helmet" ? "bg-amber-500"
+                              : a.type === "mask" ? "bg-orange-500"
+                                : "bg-rose-500"}`}
+                      ></div>
 
-            {/* 👉 go via Loading with redirect target */}
-            <Link
-              to="/loading"
-              state={{ to: "/dashboard/locations", delayMs: 700 }}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              View Map
-            </Link>
-          </div>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 pl-3">
+                        <p className="font-semibold text-gray-900">{a.title}</p>
+                        <p className="text-sm text-gray-700">{a.description}</p>
+                        <div className="mt-1 text-xs text-gray-600 flex flex-wrap items-center gap-3">
+                          <span className="truncate">{a.location}</span>
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M12 8v5l4 2" />
+                              <circle cx="12" cy="12" r="9" />
+                            </svg>
+                            {a.time}
+                          </span>
+                        </div>
+                      </div>
 
-          <div className="px-3 sm:px-6 pb-6 grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
-            {atmLocations.map((atm) => (
-              <LocationCard key={atm.id} {...atm} />
-            ))}
+                      <Link
+                        to="/loading"
+                        state={{ to: "/dashboard/alerts", delayMs: 700 }}
+                        className="sm:ml-3 shrink-0 bg-blue-700 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-900 transition-colors"
+                      >
+                        {a.action}
+                      </Link>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No active alerts found
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* ATM Locations */}
+            <div className="py-6">
+              <section className={`-mx-3 sm:-mx-6 rounded-none sm:rounded-2xl ${cardBase}`}>
+                <div className="flex items-center justify-between px-3 sm:px-6 pt-6 pb-3">
+                  <h3 className="text-lg font-semibold text-gray-900">ATM Locations</h3>
+                  <Link
+                    to="/loading"
+                    state={{ to: "/dashboard/camera-management", delayMs: 700 }}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    View All
+                  </Link>
+                </div>
+
+                <div className="px-3 sm:px-6 pb-6 grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
+                  {atmLocations.length > 0 ? (
+                    atmLocations.map((atm) => (
+                      <LocationCard key={atm.id} {...atm} />
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                      No camera locations found
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
           </div>
-        </section>
-      </div>
+        </>
+      )}
     </div>
   );
 }
