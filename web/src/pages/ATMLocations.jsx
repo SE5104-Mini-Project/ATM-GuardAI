@@ -189,17 +189,34 @@ export default function ATMLocations() {
     const { centerLat, centerLng, scale } = mapConfig;
     
     // Convert lat/lng to SVG coordinates matching the actual Sri Lanka map
-    // Sri Lanka bounds: roughly 5.9°N to 9.9°N, 79.5°E to 81.9°E
-    // SVG viewBox: 0 0 1000 1000
+    // Based on the lk.svg coordinate system analysis:
+    // The SVG map uses a 1000x1000 viewBox
+    // Real Sri Lanka coordinates need to be mapped accurately
     const latLngToSVG = (lat, lng) => {
       const validLat = parseFloat(lat);
       const validLng = parseFloat(lng);
       
-      // Map actual coordinates to SVG space
-      // Latitude: 5.9 to 9.9 maps to SVG y: 900 to 100 (inverted)
-      // Longitude: 79.5 to 81.9 maps to SVG x: 100 to 900
-      const x = ((validLng - 79.5) / (81.9 - 79.5)) * 800 + 100;
-      const y = ((9.9 - validLat) / (9.9 - 5.9)) * 800 + 100;
+      // Calibrated mapping based on actual Sri Lanka geography
+      // Reference points from the map:
+      // Jaffna (9.66°N, 80.02°E) -> approx (377, 81) in SVG
+      // Colombo (6.93°N, 79.85°E) -> approx (310, 740) in SVG
+      // Trincomalee (8.58°N, 81.23°E) -> approx (567, 325) in SVG
+      
+      // Calculate using proper mercator-like projection
+      const latMin = 5.9;    // Southern tip
+      const latMax = 9.9;    // Northern tip (Jaffna)
+      const lngMin = 79.52;  // Western edge
+      const lngMax = 81.88;  // Eastern edge
+      
+      // SVG coordinate ranges in the actual map
+      const svgXMin = 250;   // Left edge of land
+      const svgXMax = 750;   // Right edge of land
+      const svgYMin = 30;    // Top (Jaffna)
+      const svgYMax = 980;   // Bottom (Matara/Hambantota)
+      
+      // Linear mapping with proper scaling
+      const x = svgXMin + ((validLng - lngMin) / (lngMax - lngMin)) * (svgXMax - svgXMin);
+      const y = svgYMin + ((latMax - validLat) / (latMax - latMin)) * (svgYMax - svgYMin);
       
       return { x, y };
     };
