@@ -143,6 +143,7 @@ export default function Dashboard() {
       // Process recent alerts (last 3 open alerts)
       const processedAlerts = alerts
         .filter(alert => alert.status === "open")
+        .sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime))
         .slice(0, 3)
         .map(alert => {
           let type = "normal";
@@ -162,12 +163,23 @@ export default function Dashboard() {
           const alertTime = new Date(alert.createdTime);
           const timeString = alertTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+          // Find camera info from cameras array if not populated
+          let cameraName = "Unknown Location";
+          if (alert.cameraId) {
+            if (typeof alert.cameraId === 'object' && alert.cameraId.name) {
+              cameraName = alert.cameraId.name;
+            } else if (typeof alert.cameraId === 'string') {
+              const camera = cameras.find(c => c._id === alert.cameraId);
+              cameraName = camera?.name || alert.cameraId;
+            }
+          }
+
           return {
             id: alert._id,
             type,
             title,
             description,
-            location: alert.cameraId?.name || "Unknown Location",
+            location: cameraName,
             time: timeString,
             action: "Review",
           };
