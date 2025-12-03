@@ -207,6 +207,7 @@ def generate_frames(camera_id):
         stream_url = 0
 
     cap = cv2.VideoCapture(stream_url)
+    alert_manager = AlertManager()  # Create alert manager instance
     
     
     if not cap.isOpened():
@@ -231,6 +232,10 @@ def generate_frames(camera_id):
             conf = float(np.max(preds))
             label = CLASSES[int(np.argmax(preds))]
             draw_box_and_label(frame, x, y, w, h, label, conf)
+            
+            # Send alert if confidence is high and not a normal face
+            if conf >= CONFIDENCE_THRESHOLD and label != "normal face":
+                alert_manager.send_alert(camera_id, label, conf, frame=frame.copy())
 
         ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
         if not ret:

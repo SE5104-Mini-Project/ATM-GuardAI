@@ -105,6 +105,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    
+    // Refresh every 5 seconds
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
