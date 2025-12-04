@@ -12,6 +12,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Rescaling
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
+import requests   # ← Added for Node.js API alerts
 
 
 # ------------- Configuration -------------
@@ -71,52 +72,58 @@ class AlertManager:
         self.active_alerts[key] = now
         return True
 
+    # -------- UPDATED HERE (Node.js API Integration) --------
     def send_alert(self, camera_id, alert_type, confidence, frame=None):
         if not self._can_alert(camera_id, alert_type):
             return False
 
         current_time = datetime.now()
-        alert_id = f"alert_{camera_id}{current_time.strftime('%Y%m%d%H%M%S')}"
 
-        camera_info = next((cam for cam in CAMERAS if cam["_id"] == camera_id), {})
-        
-        alert = {
-            "id": alert_id,
-            "type": alert_type,
-            "severity": "high" if alert_type in ["with mask", "with helmet"] else "medium",
-            "status": "open",
-            "description": f"Detected: {alert_type}",
-            "camera": camera_info.get("name", f"Camera {camera_id}"),
-            "location": camera_info.get("address", "unknown"),
-            "bankName": camera_info.get("bankName", "unknown"),
-            "branch": camera_info.get("branch", "unknown"),
-            "time": current_time.strftime("%Y-%m-%d %I:%M:%S %p"),
-            "confidence": float(confidence),
-            "timestamp": current_time.isoformat()
-        }
-
-        print("[ALERT]", json.dumps(alert, indent=2))
-
-        active_alerts.append(alert)
-        
-        if camera_id not in camera_status:
-            camera_status[camera_id] = {"status": "online", "last_frame": None, "alerts": []}
-        camera_status[camera_id]["alerts"].append(alert)
-
-        if len(active_alerts) > 50:
-            active_alerts.pop(0)
+        # Save image first
+        alert_id = f"alert_{camera_id}_{current_time.strftime('%Y%m%d%H%M%S')}"
+        image_path = None
 
         if frame is not None:
             filename = f"{alert_id}.jpg"
             path = os.path.join("alert_images", filename)
             try:
                 cv2.imwrite(path, frame)
-                alert["image_path"] = path
+                image_path = path
                 print(f"[INFO] Alert image saved: {filename}")
             except Exception as e:
                 print(f"[WARNING] Failed to save alert image: {e}")
 
-        return True
+        # Prepare alert data for Node.js API
+        alert_data = {
+            "type": alert_type,
+            "severity": "high" if alert_type in ["with mask", "with helmet"] else "medium",
+            "description": f"Detected: {alert_type} with {confidence*100:.1f}% confidence",
+            "cameraId": camera_id,
+            "confidence": float(confidence * 100),  # Convert to percentage
+            "imagePath": image_path
+        }
+
+        # Send to Node.js API
+        try:
+            response = requests.post(
+                'http://localhost:3001/api/alerts',
+                json=alert_data,
+                timeout=5
+            )
+
+            if response.status_code == 201:
+                print(f"[SUCCESS] Alert sent to API: {alert_data['type']}")
+                return True
+            else:
+                print(f"[ERROR] Failed to send alert. Status: {response.status_code}")
+                print(f"Response: {response.text}")
+                return False
+
+        except requests.exceptions.RequestException as e:
+            print(f"[ERROR] Failed to send alert to API: {e}")
+            return False
+    # --------------------------------------------------------
+
 
 
 # ------------- Utility Functions -------------
@@ -189,6 +196,7 @@ def process_camera_frame(camera_id, alert_manager):
 
     return frame, alerts
 
+
 def generate_frames(camera_id):
     stream_url = get_camera_source(camera_id)
     print(stream_url)
@@ -199,6 +207,7 @@ def generate_frames(camera_id):
         stream_url = 0
 
     cap = cv2.VideoCapture(stream_url)
+    alert_manager = AlertManager()  # Create alert manager instance
     
     
     if not cap.isOpened():
@@ -223,6 +232,10 @@ def generate_frames(camera_id):
             conf = float(np.max(preds))
             label = CLASSES[int(np.argmax(preds))]
             draw_box_and_label(frame, x, y, w, h, label, conf)
+            
+            # Send alert if confidence is high and not a normal face
+            if conf >= CONFIDENCE_THRESHOLD and label != "normal face":
+                alert_manager.send_alert(camera_id, label, conf, frame=frame.copy())
 
         ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
         if not ret:
