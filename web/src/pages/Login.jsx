@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
@@ -9,19 +8,20 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, verifyAuth } = useContext(AuthContext);
+  const { login, verifyAuth, authError, clearAuthError } = useContext(AuthContext);
 
   const from = location.state?.from?.pathname || "/dashboard";
   const inboundError = location.state?.error;
 
-
   /* -------------- handle Submit with Loading -------------- */
-  async function handleSubmitWithRedirect(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setError("");
+    clearAuthError();
 
     if (!email || !password) {
       setError("Please enter both email and password");
@@ -30,22 +30,9 @@ export default function Login() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:3001/api/users/login",
-        { email, password },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const result = await login(email, password);
 
-      if (response.data.success) {
-        const { user } = response.data.data;
-
-        login(user);
-
+      if (result.success) {
         await verifyAuth();
 
         navigate("/loading", {
@@ -55,33 +42,34 @@ export default function Login() {
             next: from,
           },
         });
+      } else {
+        setError(result.message);
       }
     } catch (error) {
-      console.error("Login error:", error);
-      if (error.response) {
-        setError(error.response.data.message || "Login failed.");
-      } else {
-        setError("Network error. Please try again.");
-      }
+      console.error("Login submission error:", error);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
-
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
     if (error) setError("");
+    if (authError) clearAuthError();
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
     if (error) setError("");
+    if (authError) clearAuthError();
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  const displayError = authError || error || inboundError;
 
   return (
     /* -------------- Main Container -------------- */
@@ -100,7 +88,6 @@ export default function Login() {
         {/* -------------- Login Card Container -------------- */}
         <div className="flex-1 flex items-center justify-center p-10 rounded-xl text-center text-white">
           <div className="w-full max-w-sm p-10 bg-[#101826] rounded-2xl shadow-xl">
-
             {/* -------------- Title -------------- */}
             <h1 className="text-3xl font-bold mb-1 text-center pb-2">Sign in</h1>
             <p className="text-xs text-teal-400 text-center mb-6 tracking-wide">
@@ -108,20 +95,14 @@ export default function Login() {
             </p>
 
             {/* -------------- Error Messages -------------- */}
-            {inboundError && (
+            {displayError && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-md text-sm text-red-300 text-center">
-                {inboundError}
-              </div>
-            )}
-
-            {error && !inboundError && (
-              <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-md text-sm text-red-300 text-center">
-                {error}
+                {displayError}
               </div>
             )}
 
             {/* -------------- Login Form -------------- */}
-            <form onSubmit={handleSubmitWithRedirect} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email Input */}
               <div>
                 <input
@@ -158,13 +139,38 @@ export default function Login() {
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
                     </svg>
                   ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
                     </svg>
                   )}
                 </button>
@@ -193,15 +199,30 @@ export default function Login() {
               {/* -------------- Submit Button -------------- */}
               <button
                 type="submit"
-                onClick={handleSubmitWithRedirect}
                 disabled={loading || !email || !password}
                 className="w-full cursor-pointer py-3 rounded-md bg-gradient-to-r from-cyan-400 to-blue-500 hover:opacity-90 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] disabled:hover:scale-100"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Signing in...
                   </div>
@@ -223,16 +244,25 @@ export default function Login() {
 
             {/* -------------- Footer Notes -------------- */}
             <p className="mt-6 text-[11px] text-gray-400 text-center">
-              This system contains sensitive information. Ensure your credentials are
-              protected at all times.
+              This system contains sensitive information. Ensure your credentials
+              are protected at all times.
             </p>
             <p className="text-xs text-teal-400 text-center mt-2 flex items-center justify-center gap-1">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
               </svg>
               Connection is encrypted
             </p>
-
           </div>
         </div>
       </div>
