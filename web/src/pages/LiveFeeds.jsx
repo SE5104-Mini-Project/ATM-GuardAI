@@ -82,10 +82,11 @@ export default function LiveFeeds() {
       return () => clearInterval(interval);
     }, [recording]);
 
-    // Set up video stream - using camera._id instead of camera.id
+    // Set up video stream - using AI service for detection
     useEffect(() => {
       if (camera.status === 'online') {
-        setStreamUrl(`http://localhost:3001/api/liveFeeds/video_feed/${camera._id}`);
+        // Use AI service directly for real-time detection
+        setStreamUrl(`http://localhost:5000/video_feed/${camera._id}`);
         setStreamError(false);
       }
     }, [camera._id, camera.status]);

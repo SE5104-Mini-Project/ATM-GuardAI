@@ -158,10 +158,18 @@ def process_camera_frame(camera_id, alert_manager):
         print(f"[ERROR] No stream URL found for camera: {camera_id}")
         return None, []
 
+    # Handle local webcam or integer index
+    if stream_url == "0":
+        stream_url = 0
+    elif isinstance(stream_url, str) and stream_url.isdigit():
+        stream_url = int(stream_url)
+
     cap = cv2.VideoCapture(stream_url)
     
-    if stream_url.startswith('rtsp://'):
+    # Set timeout for network streams (RTSP, HTTP)
+    if isinstance(stream_url, str) and (stream_url.startswith('rtsp://') or stream_url.startswith('http://')):
         cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 10000)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Reduce lag for IP cameras
     
     if not cap.isOpened():
         print(f"[ERROR] Could not open camera stream: {stream_url}")
@@ -199,19 +207,28 @@ def process_camera_frame(camera_id, alert_manager):
 
 def generate_frames(camera_id):
     stream_url = get_camera_source(camera_id)
-    print(stream_url)
+    print(f"[INFO] Camera {camera_id} stream URL: {stream_url}")
+    
     if not stream_url:
         print(f"[ERROR] No stream URL found for camera: {camera_id}")
         return
+    
+    # Handle local webcam (0) or integer index
     if stream_url == "0":
         stream_url = 0
+    elif isinstance(stream_url, str) and stream_url.isdigit():
+        stream_url = int(stream_url)
 
     cap = cv2.VideoCapture(stream_url)
     alert_manager = AlertManager()  # Create alert manager instance
     
+    # Set buffer size for IP cameras to reduce lag
+    if isinstance(stream_url, str):
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     
     if not cap.isOpened():
         print(f"[ERROR] Could not open camera stream: {stream_url}")
+        print(f"[HINT] For IP cameras, ensure the stream URL is accessible and device is on same network")
         return
     
     print(f"[INFO] Started streaming from: {stream_url}")
