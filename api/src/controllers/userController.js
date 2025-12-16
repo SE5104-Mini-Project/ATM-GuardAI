@@ -20,6 +20,14 @@ export const register = async (req, res) => {
             });
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a valid email address'
+            });
+        }
+
         if (password.length < 6) {
             return res.status(400).json({
                 success: false,
@@ -39,25 +47,15 @@ export const register = async (req, res) => {
             name,
             email,
             password,
-            role: role || 'user'
+            role: role || 'user',
+            status: 'Active' 
         });
 
         await user.save();
 
-        const token = generateToken(user._id);
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 
-        });
-
-        await user.updateLastLogin();
-
         res.status(201).json({
             success: true,
-            message: 'User registered successfully',
+            message: 'User registered successfully. Please login to continue.',
             data: {
                 user: {
                     id: user._id,
@@ -65,16 +63,33 @@ export const register = async (req, res) => {
                     email: user.email,
                     role: user.role,
                     status: user.status,
-                    lastLogin: user.lastLogin
+                    createdAt: user.createdAt
                 }
             }
         });
     } catch (error) {
         console.error('Register error:', error);
+
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                message: 'Validation error',
+                errors: messages
+            });
+        }
+
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email already exists'
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: 'Error registering user',
-            error: error.message
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
 };
