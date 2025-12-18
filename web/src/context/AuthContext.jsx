@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const AuthContext = createContext();
 
@@ -8,15 +9,48 @@ export function AuthProvider({ children }) {
 
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [authError, setAuthError] = useState("");
 
     const clearAuth = useCallback(() => {
         setCurrentUser(null);
+        setAuthError("");
+    }, []);
+
+    const login = useCallback(async (email, password) => {
+        try {
+            setAuthError("");
+            const response = await axios.post(
+                "http://localhost:3001/api/users/login",
+                { email, password },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.data.success) {
+                const { user } = response.data.data;
+                setCurrentUser(user);
+                return { success: true, user };
+            }
+            return { success: false, message: response.data.message };
+        } catch (error) {
+            console.error("Login error:", error);
+            let errorMessage = "Network error. Please try again.";
+            if (error.response) {
+                errorMessage = error.response.data.message || "Login failed.";
+            }
+            setAuthError(errorMessage);
+            return { success: false, message: errorMessage };
+        }
     }, []);
 
     const verifyAuth = useCallback(async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/users/profile', {
-                credentials: 'include'
+            const response = await fetch("http://localhost:3001/api/users/profile", {
+                credentials: "include",
             });
 
             if (response.ok) {
@@ -30,11 +64,25 @@ export function AuthProvider({ children }) {
             clearAuth();
             return false;
         } catch (error) {
-            console.error('Auth verification error:', error);
+            console.error("Auth verification error:", error);
             clearAuth();
             return false;
         }
     }, [clearAuth]);
+
+    const logout = useCallback(async () => {
+        try {
+            await fetch("http://localhost:3001/api/users/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+        } catch (error) {
+            console.error("Logout API call failed:", error);
+        } finally {
+            navigate("/login");
+            clearAuth();
+        }
+    }, [clearAuth, navigate]);
 
     useEffect(() => {
         verifyAuth().finally(() => {
@@ -42,36 +90,15 @@ export function AuthProvider({ children }) {
         });
     }, [verifyAuth]);
 
-    const login = (userData) => {
-        setCurrentUser(userData);
-    };
-
-    const logout = useCallback(async () => {
-        try {
-            await fetch('http://localhost:3001/api/users/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-        } catch (error) {
-            console.error('Logout API call failed:', error);
-        } finally {
-            navigate('/login');
-            clearAuth();
-        }
-    }, [clearAuth]);
-
-
-    const updateUser = (userData) => {
-        setCurrentUser(prev => ({ ...prev, ...userData }));
-    };
-
     const value = {
         currentUser,
-        setCurrentUser: updateUser,
+        setCurrentUser,
         login,
         logout,
         loading,
-        verifyAuth
+        verifyAuth,
+        authError,
+        clearAuthError: () => setAuthError(""),
     };
 
     return (
