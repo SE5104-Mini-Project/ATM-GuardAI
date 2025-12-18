@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { AuthContext } from "../context/AuthContext";
+import Notification, { NOTIFICATION_TYPES } from "../components/Notification";
 
 export default function CameraManagement() {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function CameraManagement() {
     const [cameras, setCameras] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [notifications, setNotifications] = useState([]);
     const [newCamera, setNewCamera] = useState({
         name: "",
         bankName: "",
@@ -26,6 +28,59 @@ export default function CameraManagement() {
     });
 
     const isAdmin = currentUser?.role === "admin";
+
+    /* ---------- Helper function to add notifications ---------- */
+    const addNotification = (data) => {
+        const id = Date.now() + Math.random();
+        setNotifications(prev => [...prev, { id, ...data }]);
+        
+        if (data.duration && data.duration > 0) {
+            setTimeout(() => {
+                setNotifications(prev => prev.filter(n => n.id !== id));
+            }, data.duration);
+        }
+    };
+
+    /* ---------- Notification helper functions ---------- */
+    const notifySuccess = (message, options = {}) => {
+        addNotification({
+            type: NOTIFICATION_TYPES.SUCCESS,
+            message,
+            title: "Success",
+            duration: 3000,
+            ...options
+        });
+    };
+
+    const notifyError = (message, options = {}) => {
+        addNotification({
+            type: NOTIFICATION_TYPES.ERROR,
+            message,
+            title: "Error",
+            duration: 5000,
+            ...options
+        });
+    };
+
+    const notifyWarning = (message, options = {}) => {
+        addNotification({
+            type: NOTIFICATION_TYPES.WARNING,
+            message,
+            title: "Warning",
+            duration: 4000,
+            ...options
+        });
+    };
+
+    const notifyInfo = (message, options = {}) => {
+        addNotification({
+            type: NOTIFICATION_TYPES.INFO,
+            message,
+            title: "Info",
+            duration: 4000,
+            ...options
+        });
+    };
 
     /* ---------- Icons ---------- */
     const Icon = {
@@ -84,7 +139,6 @@ export default function CameraManagement() {
         )
     };
 
-    /* ---------- API Functions ---------- */
     const API_BASE = "http://localhost:3001/api";
 
     const fetchCameras = async () => {
@@ -95,11 +149,14 @@ export default function CameraManagement() {
 
             if (result.success) {
                 setCameras(result.data);
+                setError("");
             } else {
                 setError("Failed to fetch cameras");
+                notifyError("Failed to fetch cameras. Please try again.");
             }
         } catch (err) {
             setError("Error connecting to server");
+            notifyError("Unable to connect to server. Please check your connection.");
             console.error("Error fetching cameras:", err);
         } finally {
             setLoading(false);
@@ -118,12 +175,14 @@ export default function CameraManagement() {
             const result = await response.json();
 
             if (result.success) {
-                await fetchCameras();
+                notifySuccess("Camera added successfully!");
                 return { success: true, data: result.data };
             } else {
+                notifyError(result.message || "Failed to add camera");
                 return { success: false, message: result.message };
             }
         } catch (err) {
+            notifyError("Error creating camera. Please try again.");
             return { success: false, message: "Error creating camera", err };
         }
     };
@@ -140,12 +199,14 @@ export default function CameraManagement() {
             const result = await response.json();
 
             if (result.success) {
-                await fetchCameras();
+                notifySuccess("Camera updated successfully!");
                 return { success: true, data: result.data };
             } else {
+                notifyError(result.message || "Failed to update camera");
                 return { success: false, message: result.message };
             }
         } catch (err) {
+            notifyError("Error updating camera. Please try again.");
             return { success: false, message: "Error updating camera", err };
         }
     };
@@ -158,12 +219,14 @@ export default function CameraManagement() {
             const result = await response.json();
 
             if (result.success) {
-                await fetchCameras();
+                notifySuccess("Camera deleted successfully!");
                 return { success: true };
             } else {
+                notifyError(result.message || "Failed to delete camera");
                 return { success: false, message: result.message };
             }
         } catch (err) {
+            notifyError("Error deleting camera. Please try again.");
             return { success: false, message: "Error deleting camera", err };
         }
     };
@@ -212,13 +275,16 @@ export default function CameraManagement() {
     /* ---------- Camera Management Functions ---------- */
     const handleAddCamera = async () => {
         if (!newCamera.name || !newCamera.bankName || !newCamera.branch) {
-            alert("Please fill in all required fields");
+            notifyWarning("Please fill in all required fields (Camera Name, Bank Name, and Branch)", {
+                title: "Missing Information"
+            });
             return;
         }
 
         const result = await createCamera(newCamera);
 
         if (result.success) {
+            await fetchCameras();
             setShowAddCamera(false);
             setNewCamera({
                 name: "",
@@ -232,33 +298,49 @@ export default function CameraManagement() {
                 status: "online",
                 streamUrl: ""
             });
-        } else {
-            alert(result.message);
         }
     };
 
     const handleEditCamera = async () => {
         if (!editingCamera.name || !editingCamera.bankName || !editingCamera.branch) {
-            alert("Please fill in all required fields");
+            notifyWarning("Please fill in all required fields (Camera Name, Bank Name, and Branch)", {
+                title: "Missing Information"
+            });
             return;
         }
 
         const result = await updateCamera(editingCamera._id, editingCamera);
 
         if (result.success) {
+            await fetchCameras();
             setShowEditCamera(false);
             setEditingCamera(null);
-        } else {
-            alert(result.message);
         }
     };
 
     const handleDeleteCamera = async (cameraId) => {
+        notifyWarning(
+            "Are you sure you want to delete this camera? This action cannot be undone.",
+            {
+                title: "Confirm Delete",
+                duration: 0, // No auto-dismiss
+                showCloseButton: true,
+                position: "top-center",
+                onClose: async () => {
+                    const result = await deleteCamera(cameraId);
+                    if (result.success) {
+                        await fetchCameras();
+                    }
+                }
+            }
+        );
+    };
+
+    const confirmDeleteCamera = async (cameraId) => {
         if (window.confirm("Are you sure you want to delete this camera?")) {
             const result = await deleteCamera(cameraId);
-
-            if (!result.success) {
-                alert(result.message);
+            if (result.success) {
+                await fetchCameras();
             }
         }
     };
@@ -310,17 +392,30 @@ export default function CameraManagement() {
         return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     };
 
+    const handleRefresh = async () => {
+        notifyInfo("Refreshing camera list...", { duration: 2000 });
+        await fetchCameras();
+    };
+
     return (
         <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+            {/* Render Notifications */}
+            {notifications.map((notification) => (
+                <Notification
+                    key={notification.id}
+                    {...notification}
+                    position={notification.position || "top-right"}
+                    onClose={() => {
+                        setNotifications(prev => prev.filter(n => n.id !== notification.id));
+                        if (notification.onClose) {
+                            notification.onClose();
+                        }
+                    }}
+                />
+            ))}
+            
             {/* Header */}
             <Header title={"Camera Management"} />
-
-            {/* Error Message */}
-            {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
-                </div>
-            )}
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -382,7 +477,7 @@ export default function CameraManagement() {
                             </button>
                         )}
                         <button
-                            onClick={fetchCameras}
+                            onClick={handleRefresh}
                             disabled={loading}
                             className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
                         >
@@ -464,7 +559,7 @@ export default function CameraManagement() {
                                             <span className="font-medium">Edit</span>
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteCamera(camera._id)}
+                                            onClick={() => confirmDeleteCamera(camera._id)}
                                             className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
                                         >
                                             {Icon.delete}
@@ -493,6 +588,7 @@ export default function CameraManagement() {
                         onClick={() => {
                             setSearchQuery("");
                             setStatusFilter("all");
+                            notifyInfo("All filters cleared", { duration: 2000 });
                         }}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                     >

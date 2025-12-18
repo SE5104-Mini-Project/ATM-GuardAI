@@ -30,6 +30,14 @@ const icon = {
       <path d="M12 7v5l3 2"></path>
     </svg>
   ),
+  refresh: (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+      <path d="M21 3v5h-5"></path>
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+      <path d="M3 21v-5h5"></path>
+    </svg>
+  ),
 };
 
 const EyeIcon = () => (
@@ -105,13 +113,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-    
-    // Refresh every 5 seconds
-    const interval = setInterval(() => {
-      fetchDashboardData();
-    }, 5000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -232,6 +233,10 @@ export default function Dashboard() {
     fetchDashboardData();
   };
 
+  const handleRefresh = () => {
+    fetchDashboardData();
+  };
+
   if (error && !loading) {
     return (
       <div className="px-3 sm:px-6 pt-6">
@@ -287,13 +292,23 @@ export default function Dashboard() {
             <section className={`${cardBase} mb-6`}>
               <div className="flex items-center justify-between p-6 pb-3">
                 <h3 className="text-lg font-semibold text-gray-900">Recent Alerts</h3>
-                <Link
-                  to="/loading"
-                  state={{ to: "/dashboard/alerts", delayMs: 700 }}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  View All
-                </Link>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleRefresh}
+                    disabled={loading}
+                    className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    {icon.refresh}
+                    {loading ? "Loading..." : "Refresh"}
+                  </button>
+                  <Link
+                    to="/loading"
+                    state={{ to: "/dashboard/alerts", delayMs: 700 }}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    View All
+                  </Link>
+                </div>
               </div>
 
               <div className="px-6 pb-6 space-y-3">
@@ -357,13 +372,23 @@ export default function Dashboard() {
               <section className={`-mx-3 sm:-mx-6 rounded-none sm:rounded-2xl ${cardBase}`}>
                 <div className="flex items-center justify-between px-3 sm:px-6 pt-6 pb-3">
                   <h3 className="text-lg font-semibold text-gray-900">ATM Locations</h3>
-                  <Link
-                    to="/loading"
-                    state={{ to: "/dashboard/camera-management", delayMs: 700 }}
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    View All
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleRefresh}
+                      disabled={loading}
+                      className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                      {icon.refresh}
+                      {loading ? "Loading..." : "Refresh"}
+                    </button>
+                    <Link
+                      to="/loading"
+                      state={{ to: "/dashboard/camera-management", delayMs: 700 }}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      View All
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="px-3 sm:px-6 pb-6 grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
