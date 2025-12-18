@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { UserContext } from "../context/UserContext";
 import Header from "../components/Header";
 
 const roleOptions = [
@@ -15,11 +16,20 @@ const statusOptions = [
 ];
 
 export default function Users() {
-  const { currentUser } = useContext(AuthContext);
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const {
+    users,
+    loading,
+    error,
+    success,
+    isAdmin,
+    fetchUsers,
+    createUser,
+    updateUser,
+    deleteUser,
+    clearError,
+    clearSuccess
+  } = useContext(UserContext);
+
   const [showAddUser, setShowAddUser] = useState(false);
   const [showEditUser, setShowEditUser] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -31,7 +41,10 @@ export default function Users() {
     password: ""
   });
 
-  const isAdmin = currentUser?.role === "admin";
+  // Filters
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   /* ---------- Icons ---------- */
   const Icon = {
@@ -90,112 +103,38 @@ export default function Users() {
     )
   };
 
-  /* ---------- API Functions ---------- */
-  const API_BASE = "http://localhost:3001/api";
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/users`, {
-        credentials: 'include'
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        setUsers(result.data.users || []);
-      } else {
-        setError("Failed to fetch users");
-      }
-    } catch (err) {
-      setError("Error connecting to server");
-      console.error("Error fetching users:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createUser = async (userData) => {
-    try {
-      const response = await fetch(`${API_BASE}/users/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-        body: JSON.stringify(userData),
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUsers();
-        return { success: true, data: result.data };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error creating user", err };
-    }
-  };
-
-  const updateUser = async (userId, userData) => {
-    try {
-      const response = await fetch(`${API_BASE}/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-        body: JSON.stringify(userData),
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUsers();
-        return { success: true, data: result.data };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error updating user", err };
-    }
-  };
-
-  const deleteUser = async (userId) => {
-    try {
-      const response = await fetch(`${API_BASE}/users/${userId}`, {
-        method: "DELETE",
-        credentials: 'include'
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUsers();
-        return { success: true };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error deleting user", err };
-    }
-  };
-
   /* ---------- Effects ---------- */
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
-  /* ---------- Filters ---------- */
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  // Auto-clear messages after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        clearError();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
 
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        clearSuccess();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, clearSuccess]);
+
+  /* ---------- Filter Functions ---------- */
   const filteredUsers = users.filter(user => {
     const matchesStatus = statusFilter === "all" || user.status === statusFilter;
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
     const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user._id.toLowerCase().includes(searchQuery.toLowerCase());
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user._id?.toLowerCase().includes(searchQuery.toLowerCase());
     
     return matchesStatus && matchesRole && matchesSearch;
   });
@@ -207,6 +146,7 @@ export default function Users() {
     suspended: users.filter(u => u.status === "Suspended").length,
   };
 
+  /* ---------- Component Functions ---------- */
   const StatusBadge = ({ status }) => {
     const config = {
       Active: { 
@@ -262,23 +202,16 @@ export default function Users() {
       return;
     }
 
-    const result = await createUser(newUser);
+    await createUser(newUser);
 
-    if (result.success) {
-      setShowAddUser(false);
-      setNewUser({
-        name: "",
-        email: "",
-        role: "user",
-        status: "Active",
-        password: ""
-      });
-      setSuccess("User created successfully");
-      setTimeout(() => setSuccess(""), 5000);
-    } else {
-      setError(result.message);
-      setTimeout(() => setError(""), 5000);
-    }
+    setShowAddUser(false);
+    setNewUser({
+      name: "",
+      email: "",
+      role: "user",
+      status: "Active",
+      password: ""
+    });
   };
 
   const handleEditUser = async () => {
@@ -287,34 +220,19 @@ export default function Users() {
       return;
     }
 
-    const result = await updateUser(editingUser._id, {
+    await updateUser(editingUser._id, {
       name: editingUser.name,
       role: editingUser.role,
       status: editingUser.status
     });
 
-    if (result.success) {
-      setShowEditUser(false);
-      setEditingUser(null);
-      setSuccess("User updated successfully");
-      setTimeout(() => setSuccess(""), 5000);
-    } else {
-      setError(result.message);
-      setTimeout(() => setError(""), 5000);
-    }
+    setShowEditUser(false);
+    setEditingUser(null);
   };
 
   const handleDeleteUser = async (userId) => {
     if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-      const result = await deleteUser(userId);
-
-      if (result.success) {
-        setSuccess("User deleted successfully");
-        setTimeout(() => setSuccess(""), 5000);
-      } else {
-        setError(result.message);
-        setTimeout(() => setError(""), 5000);
-      }
+      await deleteUser(userId);
     }
   };
 
@@ -363,6 +281,12 @@ export default function Users() {
     if (!dateString) return 'Never';
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setRoleFilter("all");
   };
 
   return (
@@ -498,7 +422,7 @@ export default function Users() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
                           <span className="text-blue-600 font-medium text-sm">
-                            {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                            {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                           </span>
                         </div>
                         <div className="ml-4">
@@ -555,11 +479,7 @@ export default function Users() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
               <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
               <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setStatusFilter("all");
-                  setRoleFilter("all");
-                }}
+                onClick={clearFilters}
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
                 Clear all filters

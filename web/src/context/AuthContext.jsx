@@ -4,6 +4,8 @@ import axios from "axios";
 
 export const AuthContext = createContext();
 
+const API_BASE = "http://localhost:3001";
+
 export function AuthProvider({ children }) {
     const navigate = useNavigate();
 
@@ -19,8 +21,9 @@ export function AuthProvider({ children }) {
     const login = useCallback(async (email, password) => {
         try {
             setAuthError("");
+
             const response = await axios.post(
-                "http://localhost:3001/api/users/login",
+                `${API_BASE}/api/users/login`,
                 { email, password },
                 {
                     withCredentials: true,
@@ -35,13 +38,16 @@ export function AuthProvider({ children }) {
                 setCurrentUser(user);
                 return { success: true, user };
             }
+
             return { success: false, message: response.data.message };
         } catch (error) {
             console.error("Login error:", error);
+
             let errorMessage = "Network error. Please try again.";
             if (error.response) {
                 errorMessage = error.response.data.message || "Login failed.";
             }
+
             setAuthError(errorMessage);
             return { success: false, message: errorMessage };
         }
@@ -49,7 +55,7 @@ export function AuthProvider({ children }) {
 
     const verifyAuth = useCallback(async () => {
         try {
-            const response = await fetch("http://localhost:3001/api/users/profile", {
+            const response = await fetch(`${API_BASE}/api/users/profile`, {
                 credentials: "include",
             });
 
@@ -72,15 +78,15 @@ export function AuthProvider({ children }) {
 
     const logout = useCallback(async () => {
         try {
-            await fetch("http://localhost:3001/api/users/logout", {
+            await fetch(`${API_BASE}/api/users/logout`, {
                 method: "POST",
                 credentials: "include",
             });
         } catch (error) {
             console.error("Logout API call failed:", error);
         } finally {
-            navigate("/login");
             clearAuth();
+            navigate("/login");
         }
     }, [clearAuth, navigate]);
 

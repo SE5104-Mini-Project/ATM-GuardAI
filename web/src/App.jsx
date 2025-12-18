@@ -4,6 +4,8 @@ import "./index.css";
 
 import DashboardLayout from "./layout/DashboardLayout";
 
+import Opening from "./components/Opening";
+
 // Pages
 import Dashboard from "./pages/Dashboard";
 import LiveFeeds from "./pages/LiveFeeds";
@@ -16,7 +18,6 @@ import Users from "./pages/Users";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Loading from "./pages/Loading";
-import Opening from "./pages/Opening";
 
 import { AuthContext } from "./context/AuthContext";
 
