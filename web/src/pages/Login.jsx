@@ -1,30 +1,87 @@
 import { useContext, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import Notification from "../components/Notification";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   
   const navigate = useNavigate();
   const location = useLocation();
   const { login, verifyAuth, authError, clearAuthError } = useContext(AuthContext);
+  
+  const [notifications, setNotifications] = useState([]);
 
   const from = location.state?.from?.pathname || "/dashboard";
   const inboundError = location.state?.error;
+
+  // Helper function to add notifications
+  const addNotification = (data) => {
+    const id = Date.now() + Math.random();
+    setNotifications(prev => [...prev, { id, ...data }]);
+    
+    // Auto-remove if duration is set
+    if (data.duration && data.duration > 0) {
+      setTimeout(() => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+      }, data.duration);
+    }
+  };
+
+  // Notification helper functions
+  const notifySuccess = (message, options = {}) => {
+    addNotification({
+      type: "success",
+      message,
+      title: "Success",
+      duration: 2000,
+      ...options
+    });
+  };
+
+  const notifyError = (message, options = {}) => {
+    addNotification({
+      type: "error",
+      message,
+      title: "Error",
+      duration: 5000,
+      ...options
+    });
+  };
+
+  const notifyWarning = (message, options = {}) => {
+    addNotification({
+      type: "warning",
+      message,
+      title: "Warning",
+      duration: 4000,
+      ...options
+    });
+  };
+
+  const notifyInfo = (message, options = {}) => {
+    addNotification({
+      type: "info",
+      message,
+      title: "Info",
+      duration: 4000,
+      ...options
+    });
+  };
 
   /* -------------- handle Submit with Loading -------------- */
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setError("");
     clearAuthError();
 
     if (!email || !password) {
-      setError("Please enter both email and password");
+      notifyWarning("Please enter both email and password", {
+        title: "Missing Information"
+      });
       setLoading(false);
       return;
     }
@@ -34,20 +91,34 @@ export default function Login() {
 
       if (result.success) {
         await verifyAuth();
-
-        navigate("/loading", {
-          replace: true,
-          state: {
-            mode: "signin",
-            next: from,
-          },
+        
+        // Show success notification
+        notifySuccess("Login successful! Redirecting...", {
+          title: "Welcome back!",
+          duration: 2000
         });
+
+        // Small delay to show the notification
+        setTimeout(() => {
+          navigate("/loading", {
+            replace: true,
+            state: {
+              mode: "signin",
+              next: from,
+            },
+          });
+        }, 500);
+
       } else {
-        setError(result.message);
+        notifyError(result.message || "Invalid credentials", {
+          title: "Login Failed"
+        });
       }
     } catch (error) {
       console.error("Login submission error:", error);
-      setError("An unexpected error occurred. Please try again.");
+      notifyError("An unexpected error occurred. Please try again.", {
+        title: "System Error"
+      });
     } finally {
       setLoading(false);
     }
@@ -55,13 +126,11 @@ export default function Login() {
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
-    if (error) setError("");
     if (authError) clearAuthError();
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
-    if (error) setError("");
     if (authError) clearAuthError();
   };
 
@@ -69,7 +138,13 @@ export default function Login() {
     setShowPassword(!showPassword);
   };
 
-  const displayError = authError || error || inboundError;
+  // Show inbound error as notification if present
+  if (inboundError && !authError) {
+    notifyError(inboundError, {
+      title: "Access Denied"
+    });
+    navigate(location.pathname, { replace: true, state: {} });
+  }
 
   return (
     /* -------------- Main Container -------------- */
@@ -82,6 +157,18 @@ export default function Login() {
         backgroundRepeat: "no-repeat",
       }}
     >
+      {/* Render Notifications */}
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          {...notification}
+          position={notification.position || "top-right"}
+          onClose={() => {
+            setNotifications(prev => prev.filter(n => n.id !== notification.id));
+          }}
+        />
+      ))}
+      
       <div className="main flex w-full min-h-screen items-center justify-center">
         <div className="flex-1"></div>
 
@@ -94,12 +181,7 @@ export default function Login() {
               SECURE DASHBOARD ACCESS
             </p>
 
-            {/* -------------- Error Messages -------------- */}
-            {displayError && (
-              <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-md text-sm text-red-300 text-center">
-                {displayError}
-              </div>
-            )}
+            {/* Removed inline error display since we're using notifications */}
 
             {/* -------------- Login Form -------------- */}
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -188,7 +270,12 @@ export default function Login() {
                 </label>
                 <button
                   type="button"
-                  onClick={() => navigate("/reset-password")}
+                  onClick={() => {
+                    notifyInfo("Password reset feature coming soon!", {
+                      title: "Feature Notice"
+                    });
+                    // navigate("/reset-password");
+                  }}
                   disabled={loading}
                   className="text-teal-400 hover:text-teal-300 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
@@ -233,12 +320,18 @@ export default function Login() {
             </form>
 
             {/* -------------- Demo Credentials Hint -------------- */}
-            <div className="mt-6 p-3 bg-blue-900/30 border border-blue-700 rounded-md">
+            <div className="mt-6 p-3 bg-blue-900/30 border border-blue-700 rounded-md cursor-pointer"
+              onClick={() => {
+                notifyInfo("Use: admin@example.com / password123", {
+                  title: "Demo Credentials",
+                  position: "top-center"
+                });
+              }}>
               <p className="text-xs text-blue-300 text-center mb-2">
                 💡 Demo Credentials
               </p>
               <p className="text-[10px] text-blue-400 text-center">
-                Use any registered email/password from your database
+                Click to view demo credentials
               </p>
             </div>
 
