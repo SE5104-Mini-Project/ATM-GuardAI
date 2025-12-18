@@ -1,7 +1,7 @@
-import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { UserContext } from "../context/UserContext";
 import Header from "../components/Header";
+import Notification from "../components/Notification";
 
 const roleOptions = [
   { label: "Administrator", value: "admin" },
@@ -45,6 +45,62 @@ export default function Users() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Notifications state
+  const [notifications, setNotifications] = useState([]);
+
+  /* ---------- Notification Functions ---------- */
+  const addNotification = useCallback((data) => {
+    const id = Date.now() + Math.random();
+    setNotifications(prev => [...prev, { id, ...data }]);
+    
+    // Auto-remove if duration is set
+    if (data.duration && data.duration > 0) {
+      setTimeout(() => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+      }, data.duration);
+    }
+  }, []);
+
+  const notifySuccess = useCallback((message, options = {}) => {
+    addNotification({
+      type: "success",
+      message,
+      title: "Success",
+      duration: 3000,
+      ...options
+    });
+  }, [addNotification]);
+
+  const notifyError = useCallback((message, options = {}) => {
+    addNotification({
+      type: "error",
+      message,
+      title: "Error",
+      duration: 5000,
+      ...options
+    });
+  }, [addNotification]);
+
+  const notifyWarning = useCallback((message, options = {}) => {
+    addNotification({
+      type: "warning",
+      message,
+      title: "Warning",
+      duration: 4000,
+      ...options
+    });
+  }, [addNotification]);
+
+  const notifyInfo = useCallback((message, options = {}) => {
+    addNotification({
+      type: "info",
+      message,
+      title: "Info",
+      duration: 4000,
+      ...options
+    });
+  }, [addNotification]);
 
   /* ---------- Icons ---------- */
   const Icon = {
@@ -108,24 +164,25 @@ export default function Users() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Auto-clear messages after 5 seconds
+  // Show error notification when context error changes
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => {
-        clearError();
-      }, 5000);
-      return () => clearTimeout(timer);
+      notifyError(error, {
+        title: "User Management Error"
+      });
+      clearError();
     }
-  }, [error, clearError]);
+  }, [error, notifyError, clearError]);
 
+  // Show success notification when context success changes
   useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => {
-        clearSuccess();
-      }, 5000);
-      return () => clearTimeout(timer);
+      notifySuccess(success, {
+        title: "Operation Successful"
+      });
+      clearSuccess();
     }
-  }, [success, clearSuccess]);
+  }, [success, notifySuccess, clearSuccess]);
 
   /* ---------- Filter Functions ---------- */
   const filteredUsers = users.filter(user => {
@@ -193,48 +250,91 @@ export default function Users() {
   /* ---------- User Management Functions ---------- */
   const handleAddUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.password) {
-      alert("Please fill in all required fields");
+      notifyWarning("Please fill in all required fields", {
+        title: "Missing Information"
+      });
       return;
     }
 
     if (newUser.password.length < 6) {
-      alert("Password must be at least 6 characters long");
+      notifyWarning("Password must be at least 6 characters long", {
+        title: "Password Requirement"
+      });
       return;
     }
 
-    await createUser(newUser);
-
-    setShowAddUser(false);
-    setNewUser({
-      name: "",
-      email: "",
-      role: "user",
-      status: "Active",
-      password: ""
-    });
+    try {
+      const result = await createUser(newUser);
+      
+      if (result && result.success) {
+        setShowAddUser(false);
+        setNewUser({
+          name: "",
+          email: "",
+          role: "user",
+          status: "Active",
+          password: ""
+        });
+        
+        notifySuccess("User created successfully!", {
+          title: "User Added"
+        });
+      }
+    } catch (error) {
+      notifyError("Failed to create user. Please try again.", {
+        title: "Creation Failed"
+      });
+    }
   };
 
   const handleEditUser = async () => {
     if (!editingUser.name || !editingUser.email) {
-      alert("Please fill in all required fields");
+      notifyWarning("Please fill in all required fields", {
+        title: "Missing Information"
+      });
       return;
     }
 
-    await updateUser(editingUser._id, {
-      name: editingUser.name,
-      role: editingUser.role,
-      status: editingUser.status
-    });
+    try {
+      const result = await updateUser(editingUser._id, {
+        name: editingUser.name,
+        role: editingUser.role,
+        status: editingUser.status
+      });
 
-    setShowEditUser(false);
-    setEditingUser(null);
-  };
-
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-      await deleteUser(userId);
+      if (result && result.success) {
+        setShowEditUser(false);
+        setEditingUser(null);
+        
+        notifySuccess("User updated successfully!", {
+          title: "User Updated"
+        });
+      }
+    } catch (error) {
+      notifyError("Failed to update user. Please try again.", {
+        title: "Update Failed"
+      });
     }
   };
+
+const handleDeleteUser = async (userId) => {
+  const confirmed = window.confirm("Are you sure you want to delete this user?");
+  if (!confirmed) return;
+
+  try {
+    const result = await deleteUser(userId);
+    if (result && result.success) {
+      notifySuccess("User deleted successfully!", {
+        title: "User Deleted"
+      });
+    }
+  } catch (error) {
+    notifyError("Failed to delete user. Please try again.", {
+      title: "Deletion Failed"
+    });
+  }
+};
+
 
   const handleInputChange = (field, value) => {
     setNewUser(prev => ({
@@ -287,24 +387,43 @@ export default function Users() {
     setSearchQuery("");
     setStatusFilter("all");
     setRoleFilter("all");
+    notifyInfo("All filters have been cleared", {
+      title: "Filters Cleared"
+    });
+  };
+
+  const handleRefresh = async () => {
+    try {
+      await fetchUsers();
+      notifySuccess("Users list refreshed successfully", {
+        title: "Refresh Complete"
+      });
+    } catch (error) {
+      notifyError("Failed to refresh users list", {
+        title: "Refresh Failed"
+      });
+    }
   };
 
   return (
-    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900 relative">
+      {/* Render Notifications */}
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          {...notification}
+          position={notification.position || "top-right"}
+          onClose={() => {
+            setNotifications(prev => prev.filter(n => n.id !== notification.id));
+            if (notification.onClose) {
+              notification.onClose();
+            }
+          }}
+        />
+      ))}
+      
       {/* Header */}
       <Header title={"User Management"} />
-
-      {/* Messages */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
-          {success}
-        </div>
-      )}
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -314,7 +433,10 @@ export default function Users() {
           { label: "Inactive", value: stats.inactive, color: "bg-gray-50 text-gray-600 ring-gray-200" },
           { label: "Suspended", value: stats.suspended, color: "bg-red-50 text-red-600 ring-red-200" },
         ].map((stat, index) => (
-          <div key={index} className="rounded-2xl bg-white shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200">
+          <div 
+            key={index} 
+            className="rounded-2xl bg-white shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200 hover:shadow-xl transition-shadow duration-200 cursor-pointer"
+          >
             <div className={`rounded-xl p-3 ring-1 ${stat.color}`}>
               {Icon.user}
             </div>
@@ -380,7 +502,7 @@ export default function Users() {
               </button>
             )}
             <button
-              onClick={fetchUsers}
+              onClick={handleRefresh}
               disabled={loading}
               className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
@@ -420,7 +542,15 @@ export default function Users() {
                   <tr key={user._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div 
+                          className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center cursor-pointer"
+                          onClick={() => {
+                            notifyInfo(`User ID: ${user._id}`, {
+                              title: "User Details",
+                              position: "top-center"
+                            });
+                          }}
+                        >
                           <span className="text-blue-600 font-medium text-sm">
                             {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                           </span>
@@ -447,14 +577,14 @@ export default function Users() {
                         <div className="flex gap-3">
                           <button
                             onClick={() => openEditModal(user)}
-                            className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                            className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 hover:scale-105 transition-transform"
                           >
                             {Icon.edit}
                             <span>Edit</span>
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user._id)}
-                            className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
+                            className="text-red-600 hover:text-red-800 inline-flex items-center gap-1 hover:scale-105 transition-transform"
                           >
                             {Icon.delete}
                             <span>Delete</span>
@@ -480,25 +610,46 @@ export default function Users() {
               <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
               <button
                 onClick={clearFilters}
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-blue-600 hover:text-blue-800 font-medium hover:underline"
               >
                 Clear all filters
               </button>
             </div>
           )}
+
+          {/* Table Footer Stats */}
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div className="flex justify-between items-center text-sm text-gray-600">
+              <span>
+                Showing <span className="font-medium">{filteredUsers.length}</span> of{" "}
+                <span className="font-medium">{users.length}</span> users
+              </span>
+              <button
+                onClick={() => {
+                  notifyInfo(`Filters: Status = ${statusFilter}, Role = ${roleFilter}, Search = "${searchQuery}"`, {
+                    title: "Current Filter Settings",
+                    position: "top-center"
+                  });
+                }}
+                className="text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                View filter details
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Add User Modal */}
       {showAddUser && (
-        <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
               <h3 className="text-lg font-semibold">Add New User</h3>
               <button
                 onClick={() => setShowAddUser(false)}
-                className="text-white hover:text-gray-200 transition-colors"
+                className="text-white hover:text-gray-200 transition-colors hover:scale-110"
               >
                 {Icon.close}
               </button>
@@ -543,6 +694,9 @@ export default function Users() {
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Minimum 6 characters"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Password must be at least 6 characters long
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -586,7 +740,7 @@ export default function Users() {
             <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
               <button
                 onClick={() => setShowAddUser(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hover:bg-gray-100 rounded-lg"
               >
                 Cancel
               </button>
@@ -603,14 +757,14 @@ export default function Users() {
 
       {/* Edit User Modal */}
       {showEditUser && editingUser && (
-        <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
               <h3 className="text-lg font-semibold">Edit User</h3>
               <button
                 onClick={() => setShowEditUser(false)}
-                className="text-white hover:text-gray-200 transition-colors"
+                className="text-white hover:text-gray-200 transition-colors hover:scale-110"
               >
                 {Icon.close}
               </button>
@@ -685,7 +839,7 @@ export default function Users() {
             <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
               <button
                 onClick={() => setShowEditUser(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hover:bg-gray-100 rounded-lg"
               >
                 Cancel
               </button>

@@ -181,7 +181,6 @@ export default function Login() {
               SECURE DASHBOARD ACCESS
             </p>
 
-            {/* Removed inline error display since we're using notifications */}
 
             {/* -------------- Login Form -------------- */}
             <form onSubmit={handleSubmit} className="space-y-4">
