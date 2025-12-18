@@ -2,18 +2,27 @@ import { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { AuthContext } from "../context/AuthContext";
+import { CameraContext } from "../context/CameraContext";
 import Notification, { NOTIFICATION_TYPES } from "../components/Notification";
 
 export default function CameraManagement() {
     const navigate = useNavigate();
     const { currentUser } = useContext(AuthContext);
+    const {
+        cameras,
+        loading,
+        error,
+        fetchCameras,
+        createCamera,
+        updateCamera,
+        deleteCamera,
+        stats,
+        isAdmin: contextIsAdmin
+    } = useContext(CameraContext);
+    
     const [showAddCamera, setShowAddCamera] = useState(false);
     const [showEditCamera, setShowEditCamera] = useState(false);
     const [editingCamera, setEditingCamera] = useState(null);
-    const [cameras, setCameras] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [notifications, setNotifications] = useState([]);
     const [newCamera, setNewCamera] = useState({
         name: "",
         bankName: "",
@@ -26,6 +35,10 @@ export default function CameraManagement() {
         status: "online",
         streamUrl: ""
     });
+
+    const [notifications, setNotifications] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const isAdmin = currentUser?.role === "admin";
 
@@ -139,107 +152,12 @@ export default function CameraManagement() {
         )
     };
 
-    const API_BASE = "http://localhost:3001/api";
-
-    const fetchCameras = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch(`${API_BASE}/cameras`);
-            const result = await response.json();
-
-            if (result.success) {
-                setCameras(result.data);
-                setError("");
-            } else {
-                setError("Failed to fetch cameras");
-                notifyError("Failed to fetch cameras. Please try again.");
-            }
-        } catch (err) {
-            setError("Error connecting to server");
-            notifyError("Unable to connect to server. Please check your connection.");
-            console.error("Error fetching cameras:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const createCamera = async (cameraData) => {
-        try {
-            const response = await fetch(`${API_BASE}/cameras`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(cameraData),
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                notifySuccess("Camera added successfully!");
-                return { success: true, data: result.data };
-            } else {
-                notifyError(result.message || "Failed to add camera");
-                return { success: false, message: result.message };
-            }
-        } catch (err) {
-            notifyError("Error creating camera. Please try again.");
-            return { success: false, message: "Error creating camera", err };
-        }
-    };
-
-    const updateCamera = async (cameraId, cameraData) => {
-        try {
-            const response = await fetch(`${API_BASE}/cameras/${cameraId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(cameraData),
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                notifySuccess("Camera updated successfully!");
-                return { success: true, data: result.data };
-            } else {
-                notifyError(result.message || "Failed to update camera");
-                return { success: false, message: result.message };
-            }
-        } catch (err) {
-            notifyError("Error updating camera. Please try again.");
-            return { success: false, message: "Error updating camera", err };
-        }
-    };
-
-    const deleteCamera = async (cameraId) => {
-        try {
-            const response = await fetch(`${API_BASE}/cameras/${cameraId}`, {
-                method: "DELETE",
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                notifySuccess("Camera deleted successfully!");
-                return { success: true };
-            } else {
-                notifyError(result.message || "Failed to delete camera");
-                return { success: false, message: result.message };
-            }
-        } catch (err) {
-            notifyError("Error deleting camera. Please try again.");
-            return { success: false, message: "Error deleting camera", err };
-        }
-    };
-
     /* ---------- Effects ---------- */
     useEffect(() => {
         fetchCameras();
-    }, []);
+    }, [fetchCameras]);
 
     /* ---------- Filters ---------- */
-    const [statusFilter, setStatusFilter] = useState("all");
-    const [searchQuery, setSearchQuery] = useState("");
-
     const filteredCameras = useMemo(() => {
         return cameras.filter(camera => {
             const matchesStatus = statusFilter === "all" || camera.status === statusFilter;
@@ -251,12 +169,6 @@ export default function CameraManagement() {
             return matchesStatus && matchesSearch;
         });
     }, [cameras, statusFilter, searchQuery]);
-
-    const stats = {
-        total: cameras.length,
-        online: cameras.filter(c => c.status === "online").length,
-        offline: cameras.filter(c => c.status === "offline").length,
-    };
 
     const StatusBadge = ({ status }) => {
         const config = {
@@ -284,7 +196,7 @@ export default function CameraManagement() {
         const result = await createCamera(newCamera);
 
         if (result.success) {
-            await fetchCameras();
+            notifySuccess("Camera added successfully!");
             setShowAddCamera(false);
             setNewCamera({
                 name: "",
@@ -298,6 +210,8 @@ export default function CameraManagement() {
                 status: "online",
                 streamUrl: ""
             });
+        } else {
+            notifyError(result.message || "Failed to add camera");
         }
     };
 
@@ -312,35 +226,21 @@ export default function CameraManagement() {
         const result = await updateCamera(editingCamera._id, editingCamera);
 
         if (result.success) {
-            await fetchCameras();
+            notifySuccess("Camera updated successfully!");
             setShowEditCamera(false);
             setEditingCamera(null);
+        } else {
+            notifyError(result.message || "Failed to update camera");
         }
     };
 
     const handleDeleteCamera = async (cameraId) => {
-        notifyWarning(
-            "Are you sure you want to delete this camera? This action cannot be undone.",
-            {
-                title: "Confirm Delete",
-                duration: 0, // No auto-dismiss
-                showCloseButton: true,
-                position: "top-center",
-                onClose: async () => {
-                    const result = await deleteCamera(cameraId);
-                    if (result.success) {
-                        await fetchCameras();
-                    }
-                }
-            }
-        );
-    };
-
-    const confirmDeleteCamera = async (cameraId) => {
         if (window.confirm("Are you sure you want to delete this camera?")) {
             const result = await deleteCamera(cameraId);
             if (result.success) {
-                await fetchCameras();
+                notifySuccess("Camera deleted successfully!");
+            } else {
+                notifyError(result.message || "Failed to delete camera");
             }
         }
     };
@@ -559,7 +459,7 @@ export default function CameraManagement() {
                                             <span className="font-medium">Edit</span>
                                         </button>
                                         <button
-                                            onClick={() => confirmDeleteCamera(camera._id)}
+                                            onClick={() => handleDeleteCamera(camera._id)}
                                             className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
                                         >
                                             {Icon.delete}
