@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState, useContext } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import Header from "../components/Header";
 import { AuthContext } from "../context/AuthContext";
+import { useAlerts } from "../context/AlertsContext";
 
-/* ========== Tiny inline icons ========== */
 const Icon = {
   bell: (
     <svg viewBox="0 0 24 24" className="w-6 h-6 text-gray-500" fill="currentColor">
@@ -88,100 +88,47 @@ const STATUS_FILTERS = ["All Alerts", "Open Alerts", "Resolved Alerts"];
 const TYPE_FILTERS = ["All Types", "Mask Detections", "Helmet Detections"];
 const SEVERITY_FILTERS = ["All Severities", "High", "Medium", "Low"];
 
-const API_BASE = "http://localhost:3001/api";
-
 export default function Alerts() {
   const { currentUser } = useContext(AuthContext);
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All Alerts");
-  const [typeFilter, setTypeFilter] = useState("All Types");
-  const [severityFilter, setSeverityFilter] = useState("All Severities");
+  const {
+    alerts,
+    loading,
+    error,
+    statusFilter,
+    setStatusFilter,
+    typeFilter,
+    setTypeFilter,
+    severityFilter,
+    setSeverityFilter,
+    selectedAlert,
+    setSelectedAlert,
+    updateLoading,
+    fetchAlerts,
+    deleteAlert,
+    resolveAlert,
+    clearFilters,
+    clearError
+  } = useAlerts();
+
   const [entered, setEntered] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [selectedAlert, setSelectedAlert] = useState(null);
-  const [updateLoading, setUpdateLoading] = useState(false);
   const [showResolveConfirm, setShowResolveConfirm] = useState(false);
 
   const statusDdRef = useRef(null);
   const typeDdRef = useRef(null);
   const severityDdRef = useRef(null);
 
-  /* ---------- API Functions ---------- */
-  const fetchAlerts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/alerts`);
-      const result = await response.json();
-
-      if (result.success) {
-        setAlerts(result.data.alerts || []);
-      } else {
-        setError("Failed to fetch alerts");
-      }
-    } catch (err) {
-      setError("Error connecting to server");
-      console.error("Error fetching alerts:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateAlert = async (alertId, updateData) => {
-    try {
-      setUpdateLoading(true);
-      const response = await fetch(`${API_BASE}/alerts/${alertId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchAlerts();
-        return { success: true, data: result.data };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error updating alert", err };
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
-
-  const deleteAlert = async (alertId) => {
-    try {
-      const response = await fetch(`${API_BASE}/alerts/${alertId}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchAlerts();
-        return { success: true };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error deleting alert", err };
-    }
-  };
-
   /* ---------- Effects ---------- */
   useEffect(() => {
     fetchAlerts();
     const t = setTimeout(() => setEntered(true), 40);
     return () => clearTimeout(t);
-  }, []);
+  }, [fetchAlerts]);
 
-  // Close dropdowns on outside click / ESC
+  // Close dropdowns on outside click 
   useEffect(() => {
     const onClick = (e) => {
       if (statusDdRef.current && !statusDdRef.current.contains(e.target)) setStatusOpen(false);
@@ -239,12 +186,7 @@ export default function Alerts() {
 
   /* ---------- Alert Management Functions ---------- */
   const handleResolveAlert = async (alert) => {
-    const updateData = {
-      status: "resolved",
-      resolvedBy: currentUser?._id || null
-    };
-
-    const result = await updateAlert(alert._id, updateData);
+    const result = await resolveAlert(alert, currentUser);
 
     if (result.success) {
       setShowUpdateModal(false);
@@ -338,13 +280,6 @@ export default function Alerts() {
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
       <Header title={"Alerts"} />
-
-      {/* Error Message */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
 
       {/* ===== Section title + filters ===== */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -583,11 +518,7 @@ export default function Alerts() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">No alerts found</h3>
           <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
           <button
-            onClick={() => {
-              setStatusFilter("All Alerts");
-              setTypeFilter("All Types");
-              setSeverityFilter("All Severities");
-            }}
+            onClick={clearFilters}
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
             Clear all filters

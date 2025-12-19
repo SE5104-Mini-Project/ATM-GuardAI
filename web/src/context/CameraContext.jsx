@@ -1,4 +1,5 @@
 import { createContext, useState, useCallback, useContext } from "react";
+import axios from "axios";
 import { AuthContext } from "./AuthContext";
 
 export const CameraContext = createContext();
@@ -15,8 +16,8 @@ export function CameraProvider({ children }) {
         try {
             setLoading(true);
             setError("");
-            const response = await fetch(`${API_BASE}/cameras`);
-            const result = await response.json();
+            const response = await axios.get(`${API_BASE}/cameras`);
+            const result = response.data;
 
             if (result.success) {
                 setCameras(result.data);
@@ -37,14 +38,8 @@ export function CameraProvider({ children }) {
     const createCamera = useCallback(async (cameraData) => {
         try {
             setLoading(true);
-            const response = await fetch(`${API_BASE}/cameras`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(cameraData),
-            });
-            const result = await response.json();
+            const response = await axios.post(`${API_BASE}/cameras`, cameraData);
+            const result = response.data;
 
             if (result.success) {
                 setCameras(prev => [...prev, result.data]);
@@ -62,14 +57,8 @@ export function CameraProvider({ children }) {
     const updateCamera = useCallback(async (cameraId, cameraData) => {
         try {
             setLoading(true);
-            const response = await fetch(`${API_BASE}/cameras/${cameraId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(cameraData),
-            });
-            const result = await response.json();
+            const response = await axios.put(`${API_BASE}/cameras/${cameraId}`, cameraData);
+            const result = response.data;
 
             if (result.success) {
                 setCameras(prev => prev.map(camera => 
@@ -89,10 +78,8 @@ export function CameraProvider({ children }) {
     const deleteCamera = useCallback(async (cameraId) => {
         try {
             setLoading(true);
-            const response = await fetch(`${API_BASE}/cameras/${cameraId}`, {
-                method: "DELETE",
-            });
-            const result = await response.json();
+            const response = await axios.delete(`${API_BASE}/cameras/${cameraId}`);
+            const result = response.data;
 
             if (result.success) {
                 setCameras(prev => prev.filter(camera => camera._id !== cameraId));

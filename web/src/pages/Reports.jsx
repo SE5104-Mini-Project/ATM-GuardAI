@@ -1,5 +1,7 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useContext } from "react";
 import Header from "../components/Header";
+import { useAlerts } from "../context/AlertsContext";
+import { CameraContext } from "../context/CameraContext";
 
 export default function Reports() {
   const Icon = {
@@ -22,11 +24,7 @@ export default function Reports() {
     ),
   };
 
-  // State for data and filters
-  const [alerts, setAlerts] = useState([]);
-  const [cameras, setCameras] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // State for filters
   const [activeTab, setActiveTab] = useState("alerts");
 
   // Filters
@@ -44,50 +42,32 @@ export default function Reports() {
   // Generate button state
   const [generatedAt, setGeneratedAt] = useState(new Date());
 
-  // Fetch cameras on component mount
+  // Use contexts
+  const {
+    alerts,
+    loading: alertsLoading,
+    error: alertsError,
+    fetchAlerts,
+    setError: setAlertsError
+  } = useAlerts();
+
+  const {
+    cameras,
+    loading: camerasLoading,
+    error: camerasError,
+    fetchCameras
+  } = useContext(CameraContext);
+
+  // Fetch data on component mount and tab change
   useEffect(() => {
     fetchCameras();
   }, []);
 
-  const fetchCameras = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:3001/api/cameras');
-      if (!response.ok) throw new Error('Failed to fetch cameras');
-      const result = await response.json();
-      if (result.success) {
-        setCameras(result.data || []);
-      } else {
-        throw new Error(result.message || 'Failed to fetch cameras');
-      }
-    } catch (err) {
-      console.error('Error fetching cameras:', err);
-      setError('Failed to load cameras: ' + err.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (activeTab === "alerts") {
+      fetchAlerts();
     }
-  };
-
-  const fetchAlerts = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await fetch('http://localhost:3001/api/alerts');
-      if (!response.ok) throw new Error('Failed to fetch alerts');
-      const result = await response.json();
-      if (result.success) {
-        setAlerts(result.data.alerts || []);
-        setGeneratedAt(new Date());
-      } else {
-        throw new Error(result.message || 'Failed to fetch alerts');
-      }
-    } catch (err) {
-      console.error('Error fetching alerts:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [activeTab, fetchAlerts]);
 
   // Apply filters to alerts
   const filteredAlerts = useMemo(() => {
@@ -207,8 +187,10 @@ export default function Reports() {
   const onGenerate = () => {
     if (activeTab === "alerts") {
       fetchAlerts();
+      setGeneratedAt(new Date());
     } else {
       fetchCameras();
+      setGeneratedAt(new Date());
     }
   };
 
@@ -357,6 +339,10 @@ export default function Reports() {
     return new Date(lastAvailableTime).toLocaleDateString();
   };
 
+  // Combined loading state and error handling
+  const isLoading = alertsLoading || camerasLoading;
+  const error = alertsError || camerasError;
+
   return (
     <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
       {/* Header */}
@@ -391,7 +377,7 @@ export default function Reports() {
         {/* top-right export */}
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-slate-600">
-            {loading && "Loading data..."}
+            {isLoading && "Loading data..."}
             {error && <span className="text-red-600">Error: {error}</span>}
           </div>
           <button
@@ -530,23 +516,23 @@ export default function Reports() {
         <div className="mt-5">
           <button
             onClick={onGenerate}
-            disabled={loading}
+            disabled={isLoading}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm px-3 py-2 shadow"
           >
             <span className="grid place-items-center">{Icon.play}</span>
-            {loading ? "Loading..." : `Generate ${activeTab === "alerts" ? "Alerts" : "Cameras"} Report`}
+            {isLoading ? "Loading..." : `Generate ${activeTab === "alerts" ? "Alerts" : "Cameras"} Report`}
           </button>
         </div>
       </div>
 
-      {loading && (
+      {isLoading && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading alerts...</p>
+          <p className="mt-4 text-gray-600">Loading {activeTab === "alerts" ? "alerts" : "cameras"}...</p>
         </div>
       )}
 
-      {!loading && (
+      {!isLoading && (
         <>
           {/* Data Tables */}
           {activeTab === "alerts" ? (
@@ -596,7 +582,7 @@ export default function Reports() {
                     {filteredAlerts.length === 0 ? (
                       <tr>
                         <td colSpan="10" className="px-4 py-8 text-center text-slate-500">
-                          {loading ? "Loading alerts..." : "No alerts found for the selected filters"}
+                          {isLoading ? "Loading alerts..." : "No alerts found for the selected filters"}
                         </td>
                       </tr>
                     ) : (
@@ -728,7 +714,7 @@ export default function Reports() {
                     {filteredCameras.length === 0 ? (
                       <tr>
                         <td colSpan="9" className="px-4 py-8 text-center text-slate-500">
-                          {loading ? "Loading cameras..." : "No cameras found for the selected filters"}
+                          {isLoading ? "Loading cameras..." : "No cameras found for the selected filters"}
                         </td>
                       </tr>
                     ) : (

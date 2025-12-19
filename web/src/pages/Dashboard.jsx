@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { useAlerts } from "../context/AlertsContext";
 
 const icon = {
   atm: (
@@ -108,27 +108,30 @@ export default function Dashboard() {
   });
   const [recentAlerts, setRecentAlerts] = useState([]);
   const [atmLocations, setAtmLocations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [camerasLoading, setCamerasLoading] = useState(true);
+  const [camerasError, setCamerasError] = useState(null);
+  
+  // Use the AlertsContext
+  const { alerts, loading: alertsLoading, error: alertsError, fetchAlerts } = useAlerts();
 
   useEffect(() => {
     fetchDashboardData();
+    // Fetch alerts from context
+    fetchAlerts();
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setCamerasLoading(true);
+      setCamerasError(null);
 
-      const [camerasResponse, alertsResponse] = await Promise.all([
-        axios.get('http://localhost:3001/api/cameras'),
-        axios.get('http://localhost:3001/api/alerts')
-      ]);
+      const camerasResponse = await fetch('http://localhost:3001/api/cameras');
+      if (!camerasResponse.ok) {
+        throw new Error('Failed to fetch cameras data');
+      }
+      const camerasData = await camerasResponse.json();
+      const cameras = camerasData.data || [];
 
-      const cameras = camerasResponse.data.data || [];
-      const alerts = alertsResponse.data.data?.alerts || [];
-
-      // Calculate stats
       const totalATMs = cameras.length;
       const onlineCameras = cameras.filter(camera => camera.status === "online").length;
       const activeAlerts = alerts.filter(alert => alert.status === "open").length;
@@ -141,7 +144,6 @@ export default function Dashboard() {
         pendingReviews
       });
 
-      // Process recent alerts (last 3 open alerts)
       const processedAlerts = alerts
         .filter(alert => alert.status === "open")
         .sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime))
@@ -164,7 +166,6 @@ export default function Dashboard() {
           const alertTime = new Date(alert.createdTime);
           const timeString = alertTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-          // Find camera info from cameras array if not populated
           let cameraName = "Unknown Location";
           if (alert.cameraId) {
             if (typeof alert.cameraId === 'object' && alert.cameraId.name) {
@@ -190,7 +191,16 @@ export default function Dashboard() {
 
       // Process ATM locations
       const processedLocations = cameras.slice(0, 3).map(camera => {
-        const cameraAlerts = alerts.filter(alert => alert.cameraId?._id === camera._id);
+        const cameraAlerts = alerts.filter(alert => {
+          if (alert.cameraId) {
+            if (typeof alert.cameraId === 'object') {
+              return alert.cameraId._id === camera._id;
+            }
+            return alert.cameraId === camera._id;
+          }
+          return false;
+        });
+        
         const latestAlert = cameraAlerts
           .filter(alert => alert.status === "open")
           .sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime))[0];
@@ -218,24 +228,29 @@ export default function Dashboard() {
 
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
-      setError("Failed to load dashboard data. Please try again later.");
+      setCamerasError("Failed to load dashboard data. Please try again later.");
 
       // Set fallback data
       setStats({ totalATMs: 0, activeAlerts: 0, camerasOnline: 0, pendingReviews: 0 });
       setRecentAlerts([]);
       setAtmLocations([]);
     } finally {
-      setLoading(false);
+      setCamerasLoading(false);
     }
   };
 
   const handleRetry = () => {
     fetchDashboardData();
+    fetchAlerts(); 
   };
 
   const handleRefresh = () => {
     fetchDashboardData();
+    fetchAlerts();
   };
+
+  const loading = camerasLoading || alertsLoading;
+  const error = camerasError || alertsError;
 
   if (error && !loading) {
     return (
