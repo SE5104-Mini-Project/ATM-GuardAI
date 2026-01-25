@@ -14,3 +14,14 @@ It uses advanced computer vision and deep learning models to detect suspicious a
 - Abnormal face patterns (potential threats)
 
 The system provides real-time alerts to security personnel through a centralized dashboard, enabling rapid response.
+
+---
+
+## Tech Stack
+
+### Frontend
+- React 19 with Vite
+- TailwindCSS 4
+- Leaflet (map integration)
+- Axios (API communication)
+- Firebase (authentication & services)
