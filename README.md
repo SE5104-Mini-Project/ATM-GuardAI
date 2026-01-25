@@ -1,11 +1,3 @@
-# ATM-GuardAI (Monorepo)
+# ATM-GuardAI: AI-Powered Surveillance System 🎥🔒
 
-- `web/` – React + Vite dashboard  
-- `api/` – Express API + Socket.IO + MongoDB  
-- `ai_service/` – FastAPI + TensorFlow/OpenCV  
-- `infra/` – Docker Compose for local dev
-
-## Dev quickstart
-```bash
-cd infra
-docker compose up --build
+> A comprehensive AI-driven surveillance solution for ATM security with real-time threat detection using Deep Learning
