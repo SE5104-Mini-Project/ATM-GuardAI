@@ -48,3 +48,11 @@ The system provides real-time alerts to security personnel through a centralized
 - WebSocket (Socket.IO)
 - MJPEG Streaming
 
+---
+
+## Development Environment
+
+- Operating System: Windows 10 / Windows 11
+- IDE: Visual Studio Code
+- Version Control: Git and GitHub
+
