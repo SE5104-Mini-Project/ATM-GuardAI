@@ -17,34 +17,11 @@ The system provides real-time alerts to security personnel through a centralized
 
 ---
 
----
-
-## Technologies and Tools Used
-
-### Artificial Intelligence & Computer Vision
-- TensorFlow – Deep learning framework
-- OpenCV – Computer vision and video processing
-- YOLOv5 – Object detection
-- FaceNet – Face recognition
-
-### Programming Language (AI/ML Service)
-- Python 3.11
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB
+## Tech Stack
 
 ### Frontend
-- React.js
-- Vite
-- Tailwind CSS
-
-### Authentication & Security
-- JWT (JSON Web Token)
-- bcryptjs
-
-### Real-time Communication
-- WebSocket (Socket.IO)
-- MJPEG Streaming
-
+- React 19 with Vite
+- TailwindCSS 4
+- Leaflet (map integration)
+- Axios (API communication)
+- Firebase (authentication & services)
