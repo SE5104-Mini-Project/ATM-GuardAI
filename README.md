@@ -56,15 +56,3 @@ The system provides real-time alerts to security personnel through a centralized
 - IDE: Visual Studio Code
 - Version Control: Git and GitHub
 
----
-
-## Project Structure
-
-ATM-GuardAI/
-├── web/            # React frontend
-├── api/            # Node.js backend API
-├── ai_service/     # Python AI/ML service
-├── contracts/      # API schemas and documentation
-├── README.md
-└── SECURITY.md
-
