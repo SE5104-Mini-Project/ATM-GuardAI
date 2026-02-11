@@ -17,11 +17,3 @@ The system provides real-time alerts to security personnel through a centralized
 
 ---
 
-## Tech Stack
-
-### Frontend
-- React 19 with Vite
-- TailwindCSS 4
-- Leaflet (map integration)
-- Axios (API communication)
-- Firebase (authentication & services)
