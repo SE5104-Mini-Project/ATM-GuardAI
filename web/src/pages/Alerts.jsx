@@ -59,20 +59,20 @@ const Icon = {
 /* ========== Style tokens ========== */
 const STYLE = {
   high: {
-    card: "bg-rose-50 border border-rose-300",
-    rail: "bg-rose-500",
+    card: "bg-purple-100 border border-purple-700",
+    rail: "bg-purple-800",
     button: "bg-indigo-600 hover:bg-indigo-700 text-white",
-    badge: "bg-rose-100 text-rose-800 border-rose-200"
+    badge: "bg-purple-100 text-purple-800 border-purple-200"
   },
   medium: {
-    card: "bg-amber-50 border border-amber-300",
+    card: "bg-amber-100 border border-amber-700",
     rail: "bg-amber-500",
     button: "bg-indigo-600 hover:bg-indigo-700 text-white",
     badge: "bg-amber-100 text-amber-800 border-amber-200"
   },
   low: {
-    card: "bg-blue-50 border border-blue-300",
-    rail: "bg-blue-500",
+    card: "bg-blue-50 border border-blue-700",
+    rail: "bg-blue-800",
     button: "bg-indigo-600 hover:bg-indigo-700 text-white",
     badge: "bg-blue-100 text-blue-800 border-blue-200"
   },
