@@ -2,9 +2,11 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-const cardBase = "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
+const cardBase =
+  "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
 
-const btnClass = "inline-flex items-center justify-center transition rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 h-8 w-8 border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 focus:ring-red-400";
+const btnClass =
+  "inline-flex items-center justify-center transition rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 h-8 w-8 border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 focus:ring-red-400";
 
 export default function Header({ title }) {
   const { currentUser, logout, loading } = useContext(AuthContext);
@@ -17,21 +19,31 @@ export default function Header({ title }) {
 
   if (loading) {
     return (
-      <div className={`px-6 py-4 mb-6 flex items-center justify-between ${cardBase}`}>
+      <div
+        className={`px-6 py-4 mb-6 flex items-center justify-between ${cardBase}`}
+      >
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        <span className="text-gray-500 text-sm">Checking authentication...</span>
+        <span className="text-gray-500 text-sm">
+          Checking authentication...
+        </span>
       </div>
     );
   }
 
   return (
-    <div className={`px-6 py-4 mb-6 flex items-center justify-between ${cardBase}`}>
+    <div
+      className={`px-6 py-4 mb-6 flex items-center justify-between ${cardBase}`}
+    >
       <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
 
       <div className="flex items-center gap-6">
         {/* Notifications */}
         <div className="relative">
-          <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+          <svg
+            className="w-6 h-6 text-gray-500"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
           </svg>
 
@@ -63,24 +75,40 @@ export default function Header({ title }) {
           </span>
 
           {/* Logout */}
-          <button
-            className={btnClass}
-            aria-label="Logout"
-            title="Logout"
-            onClick={handleLogout}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          <div className="relative group">
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-full
+               bg-white/80 backdrop-blur-md
+               border border-red-400
+               shadow-sm
+               hover:bg-red-100 hover:border-red-500
+               hover:shadow-md
+               transition-all duration-200 active:scale-95"
             >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <path d="M16 17l5-5-5-5" />
-              <path d="M21 12H9" />
-            </svg>
-          </button>
+              <svg
+                className="w-4 h-4 text-red-700 transition group-hover:translate-x-0.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+
+            {/* Tooltip */}
+            <div
+              className="absolute right-0 mt-2 px-3 py-1.5 
+               bg-gray-900 text-white text-xs rounded-md
+               opacity-0 group-hover:opacity-100
+               translate-y-1 group-hover:translate-y-0
+               transition-all duration-200 pointer-events-none"
+            >
+              Logout
+            </div>
+          </div>
         </div>
       </div>
     </div>
