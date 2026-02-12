@@ -487,30 +487,34 @@ export default function Dashboard() {
             </section>
 
             {/* ATM Locations */}
-            <div className="py-6">
-              <section
-                className={`-mx-3 sm:-mx-6 rounded-none sm:rounded-2xl ${cardBase}`}
-              >
-                <div className="flex items-center justify-between px-3 sm:px-6 pt-6 pb-3">
-                  <h3 className="text-lg font-semibold text-gray-900">
+            <div className="py-8">
+              <section className="bg-white rounded-2xl shadow-md border border-gray-100">
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 pt-6 pb-4">
+                  <h3 className="text-xl font-bold text-gray-900">
                     ATM Locations
                   </h3>
+
                   <Link
                     to="/loading"
                     state={{ to: "/dashboard/camera-management", delayMs: 700 }}
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-800 transition"
                   >
                     View All
                   </Link>
                 </div>
 
-                <div className="px-3 sm:px-6 pb-6 grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
+                {/* Divider */}
+                <div className="border-t border-gray-100"></div>
+
+                {/* Grid */}
+                <div className="px-6 py-6 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
                   {atmLocations.length > 0 ? (
                     atmLocations.map((atm) => (
                       <LocationCard key={atm.id} {...atm} />
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-8 text-gray-500">
+                    <div className="col-span-full text-center py-12 text-gray-500">
                       No camera locations found
                     </div>
                   )}
