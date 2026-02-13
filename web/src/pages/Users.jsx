@@ -607,14 +607,14 @@ export default function Users() {
                   )}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-gray-50 space-y-3">
                 {filteredUsers.map((user) => (
                   <tr
                     key={user._id}
-                    className="group hover:bg-gray-50 transition-all duration-200"
+                    className="group bg-white border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all duration-200"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
+                    <td className="px-6 py-5 whitespace-nowrap relative">
+                      <div className="flex items-center pl-3 border-l-4 border-transparent group-hover:border-blue-500 transition-all">
                         <div className="relative flex-shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
                           <span className="text-sm">
                             {user.name
@@ -639,20 +639,20 @@ export default function Users() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-5 whitespace-nowrap">
                       <RoleBadge role={user.role} />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(user.lastLogin)}
                       <div className="text-xs text-gray-400">
                         {formatLastLogin(user.lastLogin)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-5 whitespace-nowrap">
                       <StatusBadge status={user.status} />
                     </td>
                     {isAdmin && (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEditModal(user)}
