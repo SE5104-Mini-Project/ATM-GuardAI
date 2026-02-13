@@ -600,11 +600,14 @@ export default function Users() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-50">
+                  <tr
+                    key={user._id}
+                    className="group hover:bg-gray-50 transition-all duration-200"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 font-medium text-sm">
+                        <div className="relative flex-shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
+                          <span className="text-sm">
                             {user.name
                               .split(" ")
                               .map((n) => n[0])
@@ -612,6 +615,7 @@ export default function Users() {
                               .toUpperCase()}
                           </span>
                         </div>
+
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
                             {user.name}
