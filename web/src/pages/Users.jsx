@@ -269,7 +269,7 @@ export default function Users() {
   const StatusBadge = ({ status }) => {
     const config = {
       Active: {
-        class: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        class: "bg-emerald-50 text-emerald-700 border-emerald-200",
         text: "Active",
         icon: Icon.active,
       },
@@ -289,7 +289,7 @@ export default function Users() {
 
     return (
       <div
-        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${configItem.class}`}
+        className={`inline-flex items-center gap-1 px-3 py-1.5 shadow-sm rounded-full text-xs font-medium border ${configItem.class}`}
       >
         {configItem.icon}
         {configItem.text}
@@ -299,14 +299,23 @@ export default function Users() {
 
   const RoleBadge = ({ role }) => {
     const config = {
-      admin: { class: "bg-purple-100 text-purple-800", text: "Admin" },
-      moderator: { class: "bg-blue-100 text-blue-800", text: "Moderator" },
-      user: { class: "bg-gray-100 text-gray-800", text: "User" },
+      admin: {
+        class: "bg-purple-50 text-purple-700 border border-purple-100",
+        text: "Admin",
+      },
+      moderator: {
+        class: "bg-blue-50 text-blue-700 border border-blue-100",
+        text: "Moderator",
+      },
+      user: {
+        class: "bg-gray-50 text-gray-600 border border-gray-100",
+        text: "User",
+      },
     };
 
     return (
       <span
-        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config[role]?.class || config.user.class}`}
+        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config[role]?.class || config.user.class}`}
       >
         {config[role]?.text || "User"}
       </span>
@@ -615,17 +624,18 @@ export default function Users() {
                               .toUpperCase()}
                           </span>
                         </div>
-
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-semibold text-gray-900">
                             {user.name}
                           </div>
-                          <div className="text-sm text-gray-500">
+
+                          <div className="text-sm text-gray-500 group-hover:text-gray-700 transition">
                             {user.email}
                           </div>
-                          <div className="text-xs text-gray-400 font-mono">
+
+                          <span className="inline-block mt-1 text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-md font-mono">
                             {user._id}
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </td>
@@ -643,20 +653,19 @@ export default function Users() {
                     </td>
                     {isAdmin && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-3">
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEditModal(user)}
-                            className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                            className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition"
                           >
                             {Icon.edit}
-                            <span>Edit</span>
                           </button>
+
                           <button
                             onClick={() => handleDeleteUser(user._id)}
-                            className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
+                            className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition"
                           >
                             {Icon.delete}
-                            <span>Delete</span>
                           </button>
                         </div>
                       </td>
