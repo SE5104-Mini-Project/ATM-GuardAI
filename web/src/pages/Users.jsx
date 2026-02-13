@@ -28,7 +28,7 @@ export default function Users() {
     email: "",
     role: "user",
     status: "Active",
-    password: ""
+    password: "",
   });
 
   const isAdmin = currentUser?.role === "admin";
@@ -36,31 +36,65 @@ export default function Users() {
   /* ---------- Icons ---------- */
   const Icon = {
     user: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-6 h-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
         <circle cx="12" cy="7" r="4"></circle>
       </svg>
     ),
     active: (
-      <svg className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+      <svg
+        className="w-4 h-4 text-emerald-500"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
         <circle cx="12" cy="12" r="10" />
-        <path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+        <path
+          d="M9 12l2 2 4-4"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </svg>
     ),
     inactive: (
-      <svg className="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+      <svg
+        className="w-4 h-4 text-gray-500"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
         <circle cx="12" cy="12" r="10" />
         <path d="M8 12h8" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
     suspended: (
-      <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+      <svg
+        className="w-4 h-4 text-red-500"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
         <circle cx="12" cy="12" r="10" />
-        <path d="M15 9l-6 6m0-6l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+        <path
+          d="M15 9l-6 6m0-6l6 6"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </svg>
     ),
     refresh: (
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
         <path d="M21 3v5h-5"></path>
         <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
@@ -68,26 +102,50 @@ export default function Users() {
       </svg>
     ),
     add: (
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M12 5v14m-7-7h14" />
       </svg>
     ),
     close: (
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-5 h-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M18 6L6 18M6 6l12 12" />
       </svg>
     ),
     edit: (
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
       </svg>
     ),
     delete: (
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
       </svg>
-    )
+    ),
   };
 
   /* ---------- API Functions ---------- */
@@ -97,7 +155,7 @@ export default function Users() {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE}/users`, {
-        credentials: 'include'
+        credentials: "include",
       });
       const result = await response.json();
 
@@ -121,7 +179,7 @@ export default function Users() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(userData),
       });
       const result = await response.json();
@@ -144,7 +202,7 @@ export default function Users() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(userData),
       });
       const result = await response.json();
@@ -164,7 +222,7 @@ export default function Users() {
     try {
       const response = await fetch(`${API_BASE}/users/${userId}`, {
         method: "DELETE",
-        credentials: 'include'
+        credentials: "include",
       });
       const result = await response.json();
 
@@ -189,47 +247,50 @@ export default function Users() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsers = users.filter(user => {
-    const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+  const filteredUsers = users.filter((user) => {
+    const matchesStatus =
+      statusFilter === "all" || user.status === statusFilter;
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user._id.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesStatus && matchesRole && matchesSearch;
   });
 
   const stats = {
     total: users.length,
-    active: users.filter(u => u.status === "Active").length,
-    inactive: users.filter(u => u.status === "Inactive").length,
-    suspended: users.filter(u => u.status === "Suspended").length,
+    active: users.filter((u) => u.status === "Active").length,
+    inactive: users.filter((u) => u.status === "Inactive").length,
+    suspended: users.filter((u) => u.status === "Suspended").length,
   };
 
   const StatusBadge = ({ status }) => {
     const config = {
-      Active: { 
-        class: "bg-emerald-100 text-emerald-800 border-emerald-200", 
+      Active: {
+        class: "bg-emerald-100 text-emerald-800 border-emerald-200",
         text: "Active",
-        icon: Icon.active
+        icon: Icon.active,
       },
-      Inactive: { 
-        class: "bg-gray-100 text-gray-800 border-gray-200", 
+      Inactive: {
+        class: "bg-gray-100 text-gray-800 border-gray-200",
         text: "Inactive",
-        icon: Icon.inactive
+        icon: Icon.inactive,
       },
-      Suspended: { 
-        class: "bg-red-100 text-red-800 border-red-200", 
+      Suspended: {
+        class: "bg-red-100 text-red-800 border-red-200",
         text: "Suspended",
-        icon: Icon.suspended
-      }
+        icon: Icon.suspended,
+      },
     };
 
     const configItem = config[status] || config.Inactive;
 
     return (
-      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${configItem.class}`}>
+      <div
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${configItem.class}`}
+      >
         {configItem.icon}
         {configItem.text}
       </div>
@@ -240,11 +301,13 @@ export default function Users() {
     const config = {
       admin: { class: "bg-purple-100 text-purple-800", text: "Admin" },
       moderator: { class: "bg-blue-100 text-blue-800", text: "Moderator" },
-      user: { class: "bg-gray-100 text-gray-800", text: "User" }
+      user: { class: "bg-gray-100 text-gray-800", text: "User" },
     };
 
     return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config[role]?.class || config.user.class}`}>
+      <span
+        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config[role]?.class || config.user.class}`}
+      >
         {config[role]?.text || "User"}
       </span>
     );
@@ -271,7 +334,7 @@ export default function Users() {
         email: "",
         role: "user",
         status: "Active",
-        password: ""
+        password: "",
       });
       setSuccess("User created successfully");
       setTimeout(() => setSuccess(""), 5000);
@@ -290,7 +353,7 @@ export default function Users() {
     const result = await updateUser(editingUser._id, {
       name: editingUser.name,
       role: editingUser.role,
-      status: editingUser.status
+      status: editingUser.status,
     });
 
     if (result.success) {
@@ -305,7 +368,11 @@ export default function Users() {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this user? This action cannot be undone.",
+      )
+    ) {
       const result = await deleteUser(userId);
 
       if (result.success) {
@@ -319,16 +386,16 @@ export default function Users() {
   };
 
   const handleInputChange = (field, value) => {
-    setNewUser(prev => ({
+    setNewUser((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleEditInputChange = (field, value) => {
-    setEditingUser(prev => ({
+    setEditingUser((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -338,7 +405,7 @@ export default function Users() {
       name: user.name,
       email: user.email,
       role: user.role,
-      status: user.status
+      status: user.status,
     });
     setShowEditUser(true);
   };
@@ -355,14 +422,15 @@ export default function Users() {
 
     if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Never';
+    if (!dateString) return "Never";
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   };
 
   return (
@@ -385,12 +453,31 @@ export default function Users() {
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total Users", value: stats.total, color: "bg-blue-50 text-blue-600 ring-blue-200" },
-          { label: "Active", value: stats.active, color: "bg-emerald-50 text-emerald-600 ring-emerald-200" },
-          { label: "Inactive", value: stats.inactive, color: "bg-gray-50 text-gray-600 ring-gray-200" },
-          { label: "Suspended", value: stats.suspended, color: "bg-red-50 text-red-600 ring-red-200" },
+          {
+            label: "Total Users",
+            value: stats.total,
+            color: "bg-blue-50 text-blue-600 ring-blue-200",
+          },
+          {
+            label: "Active",
+            value: stats.active,
+            color: "bg-emerald-50 text-emerald-600 ring-emerald-200",
+          },
+          {
+            label: "Inactive",
+            value: stats.inactive,
+            color: "bg-gray-50 text-gray-600 ring-gray-200",
+          },
+          {
+            label: "Suspended",
+            value: stats.suspended,
+            color: "bg-red-50 text-red-600 ring-red-200",
+          },
         ].map((stat, index) => (
-          <div key={index} className="rounded-2xl bg-white shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200">
+          <div
+            key={index}
+            className="rounded-2xl bg-white shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200"
+          >
             <div className={`rounded-xl p-3 ring-1 ${stat.color}`}>
               {Icon.user}
             </div>
@@ -403,20 +490,28 @@ export default function Users() {
       </div>
 
       {/* Controls Bar */}
-      <div className="rounded-2xl bg-white shadow-lg p-4 mb-6 ring-1 ring-gray-200">
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          {/* LEFT SIDE — Search + Filters */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
             {/* Search */}
-            <div className="relative flex-1 sm:flex-none">
+            <div className="relative">
               <input
                 type="text"
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64 rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-72 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 pl-11 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
               />
-              <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="absolute left-4 top-3 h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
               </svg>
             </div>
 
@@ -424,7 +519,7 @@ export default function Users() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
             >
               <option value="all">All Status</option>
               <option value="Active">Active</option>
@@ -436,7 +531,7 @@ export default function Users() {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
             >
               <option value="all">All Roles</option>
               <option value="admin">Admin</option>
@@ -445,20 +540,22 @@ export default function Users() {
             </select>
           </div>
 
-          <div className="flex gap-2 w-full lg:w-auto">
+          {/* RIGHT SIDE — Buttons */}
+          <div className="flex gap-3 w-full lg:w-auto">
             {isAdmin && (
               <button
                 onClick={() => setShowAddUser(true)}
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
               >
                 {Icon.add}
                 Add User
               </button>
             )}
+
             <button
               onClick={fetchUsers}
               disabled={loading}
-              className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 border border-gray-200 bg-white text-gray-700 px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:bg-gray-50 hover:shadow-md transition-all disabled:opacity-50"
             >
               {Icon.refresh}
               {loading ? "Loading..." : "Refresh"}
@@ -482,29 +579,49 @@ export default function Users() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Last Login
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
                   {isAdmin && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map(user => (
+                {filteredUsers.map((user) => (
                   <tr key={user._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
                           <span className="text-blue-600 font-medium text-sm">
-                            {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                            {user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                          <div className="text-xs text-gray-400 font-mono">{user._id}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {user.email}
+                          </div>
+                          <div className="text-xs text-gray-400 font-mono">
+                            {user._id}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -513,7 +630,9 @@ export default function Users() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(user.lastLogin)}
-                      <div className="text-xs text-gray-400">{formatLastLogin(user.lastLogin)}</div>
+                      <div className="text-xs text-gray-400">
+                        {formatLastLogin(user.lastLogin)}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={user.status} />
@@ -548,12 +667,26 @@ export default function Users() {
           {filteredUsers.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                <svg
+                  className="w-16 h-16 mx-auto"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
-              <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No users found
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Try adjusting your search or filter criteria
+              </p>
               <button
                 onClick={() => {
                   setSearchQuery("");
@@ -619,7 +752,9 @@ export default function Users() {
                 <input
                   type="password"
                   value={newUser.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Minimum 6 characters"
                 />
@@ -635,7 +770,7 @@ export default function Users() {
                     onChange={(e) => handleInputChange("role", e.target.value)}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {roleOptions.map(option => (
+                    {roleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -649,10 +784,12 @@ export default function Users() {
                   </label>
                   <select
                     value={newUser.status}
-                    onChange={(e) => handleInputChange("status", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("status", e.target.value)
+                    }
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {statusOptions.map(option => (
+                    {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -705,7 +842,9 @@ export default function Users() {
                 <input
                   type="text"
                   value={editingUser.name}
-                  onChange={(e) => handleEditInputChange("name", e.target.value)}
+                  onChange={(e) =>
+                    handleEditInputChange("name", e.target.value)
+                  }
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter full name"
                 />
@@ -721,7 +860,9 @@ export default function Users() {
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-100 text-gray-500"
                   disabled
                 />
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Email cannot be changed
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -731,10 +872,12 @@ export default function Users() {
                   </label>
                   <select
                     value={editingUser.role}
-                    onChange={(e) => handleEditInputChange("role", e.target.value)}
+                    onChange={(e) =>
+                      handleEditInputChange("role", e.target.value)
+                    }
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {roleOptions.map(option => (
+                    {roleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -748,10 +891,12 @@ export default function Users() {
                   </label>
                   <select
                     value={editingUser.status}
-                    onChange={(e) => handleEditInputChange("status", e.target.value)}
+                    onChange={(e) =>
+                      handleEditInputChange("status", e.target.value)
+                    }
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {statusOptions.map(option => (
+                    {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
