@@ -311,13 +311,13 @@ export default function CameraManagement() {
     };
 
     return (
-        <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+        <div className="px-3 sm:px-6 pt-6 pb-10 min-h-screen bg-gray-50 dark:bg-gray-900 text-slate-900 dark:text-gray-100">
             {/* Header */}
             <Header title={"Camera Management"} />
 
             {/* Error Message */}
             {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300">
                     {error}
                 </div>
             )}
@@ -329,20 +329,20 @@ export default function CameraManagement() {
                     { label: "Online", value: stats.online, color: "bg-emerald-50 text-emerald-600 ring-emerald-200" },
                     { label: "Offline", value: stats.offline, color: "bg-red-50 text-red-600 ring-red-200" },
                 ].map((stat, index) => (
-                    <div key={index} className="rounded-2xl bg-white shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200">
+                    <div key={index} className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200 dark:ring-gray-700">
                         <div className={`rounded-xl p-3 ring-1 ${stat.color}`}>
                             {Icon.camera}
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">{stat.label}</p>
-                            <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Controls Bar */}
-            <div className="rounded-2xl bg-white shadow-lg p-4 mb-6 ring-1 ring-gray-200">
+            <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg p-4 mb-6 ring-1 ring-gray-200 dark:ring-gray-700">
                 <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                     <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
                         {/* Search */}
@@ -352,9 +352,9 @@ export default function CameraManagement() {
                                 placeholder="Search cameras..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full sm:w-64 rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full sm:w-64 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 pl-10 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
-                            <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
@@ -363,7 +363,7 @@ export default function CameraManagement() {
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="all">All Status</option>
                             <option value="online">Online</option>
@@ -384,7 +384,7 @@ export default function CameraManagement() {
                         <button
                             onClick={fetchCameras}
                             disabled={loading}
-                            className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center gap-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                         >
                             {Icon.refresh}
                             {loading ? "Loading..." : "Refresh"}
@@ -397,7 +397,7 @@ export default function CameraManagement() {
             {loading && (
                 <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading cameras...</p>
+                    <p className="mt-4 text-gray-600 dark:text-gray-300">Loading cameras...</p>
                 </div>
             )}
 
@@ -405,20 +405,20 @@ export default function CameraManagement() {
             {!loading && (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     {filteredCameras.map(camera => (
-                        <div key={camera._id} className="rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 overflow-hidden">
+                        <div key={camera._id} className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden">
                             {/* Camera Header */}
-                            <div className="bg-[#102a56] text-white px-5 py-4 flex items-center justify-between">
+                            <div className="bg-[#102a56] dark:bg-gray-700 text-white px-5 py-4 flex items-center justify-between">
                                 <h4 className="font-semibold text-lg">{camera.name}</h4>
                                 <StatusBadge status={camera.status} />
                             </div>
 
                             {/* Camera Details */}
                             <div className="px-5 py-4">
-                                <p className="text-gray-900 font-medium mb-2">{camera._id} - {camera.bankName} </p>
-                                <p className="text-gray-900 font-medium mb-2">{camera.branch}</p>
-                                <p className="text-sm text-gray-600 mb-3">{camera.address}</p>
+                                <p className="text-gray-900 dark:text-gray-100 font-medium mb-2">{camera._id} - {camera.bankName} </p>
+                                <p className="text-gray-900 dark:text-gray-100 font-medium mb-2">{camera.branch}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{camera.address}</p>
 
-                                <div className="space-y-2 text-sm text-gray-600">
+                                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                                     <div className="flex justify-between">
                                         <span>District:</span>
                                         <span className="font-medium">{camera.district}</span>
@@ -439,7 +439,7 @@ export default function CameraManagement() {
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between text-sm">
+                            <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm">
                                 <button
                                     onClick={() => navigate("/loading", {
                                         state: { to: "/dashboard/live-feeds", delayMs: 700, cameraId: camera._id }
@@ -447,7 +447,7 @@ export default function CameraManagement() {
                                     disabled={camera.status === "offline"}
                                     className={`inline-flex items-center gap-2 ${camera.status === "offline"
                                         ? "text-gray-400 cursor-not-allowed"
-                                        : "text-blue-700 hover:text-blue-900"
+                                        : "text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                                         }`}
                                 >
                                     {Icon.eye}
@@ -458,14 +458,14 @@ export default function CameraManagement() {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => openEditModal(camera)}
-                                            className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center gap-1"
                                         >
                                             {Icon.edit}
                                             <span className="font-medium">Edit</span>
                                         </button>
                                         <button
                                             onClick={() => handleDeleteCamera(camera._id)}
-                                            className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
+                                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 inline-flex items-center gap-1"
                                         >
                                             {Icon.delete}
                                             <span className="font-medium">Delete</span>
@@ -481,14 +481,14 @@ export default function CameraManagement() {
             {/* Empty State */}
             {!loading && filteredCameras.length === 0 && (
                 <div className="text-center py-12">
-                    <div className="text-gray-400 mb-4">
+                    <div className="text-gray-400 dark:text-gray-500 mb-4">
                         <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No cameras found</h3>
-                    <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No cameras found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
                     <button
                         onClick={() => {
                             setSearchQuery("");
@@ -504,9 +504,9 @@ export default function CameraManagement() {
             {/* Add Camera Modal */}
             {showAddCamera && (
                 <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                         {/* Modal Header */}
-                        <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                        <div className="bg-[#102a56] dark:bg-gray-700 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
                             <h3 className="text-lg font-semibold">Add New Camera</h3>
                             <button
                                 onClick={() => setShowAddCamera(false)}
@@ -519,85 +519,85 @@ export default function CameraManagement() {
                         {/* Modal Body */}
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Camera Name *
                                 </label>
                                 <input
                                     type="text"
                                     value={newCamera.name}
                                     onChange={(e) => handleInputChange("name", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Front Entrance Camera"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Bank Name *
                                 </label>
                                 <input
                                     type="text"
                                     value={newCamera.bankName}
                                     onChange={(e) => handleInputChange("bankName", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., ABC Bank"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Branch *
                                 </label>
                                 <input
                                     type="text"
                                     value={newCamera.branch}
                                     onChange={(e) => handleInputChange("branch", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Main Branch"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     District
                                 </label>
                                 <input
                                     type="text"
                                     value={newCamera.district}
                                     onChange={(e) => handleInputChange("district", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Colombo"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Province
                                 </label>
                                 <input
                                     type="text"
                                     value={newCamera.province}
                                     onChange={(e) => handleInputChange("province", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Western Province"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Address
                                 </label>
                                 <input
                                     type="text"
                                     value={newCamera.address}
                                     onChange={(e) => handleInputChange("address", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., 123 Main Street"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Latitude
                                 </label>
                                 <input
@@ -605,13 +605,13 @@ export default function CameraManagement() {
                                     step="any"
                                     value={newCamera.latitude}
                                     onChange={(e) => handleInputChange("latitude", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., 6.9271"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Longitude
                                 </label>
                                 <input
@@ -619,19 +619,19 @@ export default function CameraManagement() {
                                     step="any"
                                     value={newCamera.longitude}
                                     onChange={(e) => handleInputChange("longitude", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., 79.8612"
                                 />
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Status
                                 </label>
                                 <select
                                     value={newCamera.status}
                                     onChange={(e) => handleInputChange("status", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     <option value="online">Online</option>
                                     <option value="offline">Offline</option>
@@ -639,24 +639,24 @@ export default function CameraManagement() {
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Stream URL
                                 </label>
                                 <input
                                     type="text"
                                     value={newCamera.streamUrl}
                                     onChange={(e) => handleInputChange("streamUrl", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., http://192.168.1.10:8080/stream"
                                 />
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
                             <button
                                 onClick={() => setShowAddCamera(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 Cancel
                             </button>
@@ -674,9 +674,9 @@ export default function CameraManagement() {
             {/* Edit Camera Modal */}
             {showEditCamera && editingCamera && (
                 <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                         {/* Modal Header */}
-                        <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                        <div className="bg-[#102a56] dark:bg-gray-700 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
                             <h3 className="text-lg font-semibold">Edit Camera</h3>
                             <button
                                 onClick={() => setShowEditCamera(false)}
@@ -689,85 +689,85 @@ export default function CameraManagement() {
                         {/* Modal Body */}
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Camera Name *
                                 </label>
                                 <input
                                     type="text"
                                     value={editingCamera.name}
                                     onChange={(e) => handleEditInputChange("name", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Front Entrance Camera"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Bank Name *
                                 </label>
                                 <input
                                     type="text"
                                     value={editingCamera.bankName}
                                     onChange={(e) => handleEditInputChange("bankName", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., ABC Bank"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Branch *
                                 </label>
                                 <input
                                     type="text"
                                     value={editingCamera.branch}
                                     onChange={(e) => handleEditInputChange("branch", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Main Branch"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     District
                                 </label>
                                 <input
                                     type="text"
                                     value={editingCamera.district}
                                     onChange={(e) => handleEditInputChange("district", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Colombo"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Province
                                 </label>
                                 <input
                                     type="text"
                                     value={editingCamera.province}
                                     onChange={(e) => handleEditInputChange("province", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., Western Province"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Address
                                 </label>
                                 <input
                                     type="text"
                                     value={editingCamera.address}
                                     onChange={(e) => handleEditInputChange("address", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., 123 Main Street"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Latitude
                                 </label>
                                 <input
@@ -775,13 +775,13 @@ export default function CameraManagement() {
                                     step="any"
                                     value={editingCamera.latitude}
                                     onChange={(e) => handleEditInputChange("latitude", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., 6.9271"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Longitude
                                 </label>
                                 <input
@@ -789,19 +789,19 @@ export default function CameraManagement() {
                                     step="any"
                                     value={editingCamera.longitude}
                                     onChange={(e) => handleEditInputChange("longitude", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., 79.8612"
                                 />
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Status
                                 </label>
                                 <select
                                     value={editingCamera.status}
                                     onChange={(e) => handleEditInputChange("status", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     <option value="online">Online</option>
                                     <option value="offline">Offline</option>
@@ -809,24 +809,24 @@ export default function CameraManagement() {
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Stream URL
                                 </label>
                                 <input
                                     type="text"
                                     value={editingCamera.streamUrl}
                                     onChange={(e) => handleEditInputChange("streamUrl", e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="e.g., http://192.168.1.10:8080/stream"
                                 />
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
                             <button
                                 onClick={() => setShowEditCamera(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 Cancel
                             </button>

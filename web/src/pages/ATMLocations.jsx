@@ -161,7 +161,7 @@ export default function ATMLocations() {
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
     
-    // Calculate scale to fit all points
+    // Calculate scale to fit all points 
     const latRange = maxLat - minLat;
     const lngRange = maxLng - minLng;
     
@@ -328,25 +328,25 @@ export default function ATMLocations() {
 
   function LocationCard({ loc }) {
     return (
-      <div className="rounded-2xl bg-white shadow-lg">
-        <div className="flex items-center justify-between px-5 py-3 rounded-t-2xl bg-[#102a56] text-white">
+      <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg">
+        <div className="flex items-center justify-between px-5 py-3 rounded-t-2xl bg-[#102a56] dark:bg-gray-700 text-white">
           <h4 className="font-semibold">{loc.name}</h4>
           {statusPill(loc.status)}
         </div>
 
         <div className="px-5 py-4">
-          <p className="text-sm font-medium text-slate-700 mb-1">{loc.bankName}</p>
-          <div className="text-sm text-slate-800">{loc.address}</div>
-          <div className="mt-2 text-xs text-slate-600">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{loc.bankName}</p>
+          <div className="text-sm text-slate-800 dark:text-slate-400">{loc.address}</div>
+          <div className="mt-2 text-xs text-slate-600 dark:text-slate-400">
             <span className="font-medium">District:</span> {loc.district} | <span className="font-medium">Province:</span> {loc.region}
           </div>
-          <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
+          <div className="mt-3 flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
             <span className="inline-flex items-center gap-2">{Icon.cam} {loc.cameras} Camera</span>
             <span className="inline-flex items-center gap-2">{Icon.clock} {loc.lastAlert}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
+        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700 text-sm">
           {/* ⤵️ Show Loading then go to /dashboard/live-feeds */}
           <button
             onClick={() =>
@@ -358,7 +358,7 @@ export default function ATMLocations() {
             className={`inline-flex items-center gap-2 ${
               loc.status === "offline" 
                 ? "text-gray-400 cursor-not-allowed" 
-                : "text-blue-700 hover:text-blue-900"
+                : "text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
             }`}
           >
             {Icon.live} View Live
@@ -371,7 +371,7 @@ export default function ATMLocations() {
                 state: { to: "/dashboard/reports", delayMs: 900, from: "atm-locations", atmId: loc.id }
               })
             }
-            className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900"
+            className="inline-flex items-center gap-2 text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
           >
             {Icon.history} History
           </button>
@@ -381,7 +381,7 @@ export default function ATMLocations() {
   }
 
   return (
-    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+    <div className="px-3 sm:px-6 pt-6 pb-10 min-h-screen bg-gray-50 dark:bg-gray-900 text-slate-900 dark:text-gray-100">
       {/* Header */}
       <Header title={"ATM Locations"} />
 
@@ -389,7 +389,7 @@ export default function ATMLocations() {
       {loading && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading ATM locations...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading ATM locations...</p>
         </div>
       )}
 
@@ -397,11 +397,11 @@ export default function ATMLocations() {
         <>
           {/* Section title + top filter */}
           <div className="mb-2 flex items-center gap-3">
-            <h3 className="text-xl font-semibold">ATM Locations</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">ATM Locations</h3>
             <select
               value={statusFilterTop}
               onChange={(e) => setStatusFilterTop(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-lg border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option>All ATMs</option>
               <option>Online</option>
@@ -410,7 +410,7 @@ export default function ATMLocations() {
           </div>
 
           {/* Map with controls */}
-          <div className="relative rounded-2xl border border-slate-200 bg-white shadow-lg overflow-hidden min-h-[420px]">
+          <div className="relative rounded-2xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg overflow-hidden min-h-[420px]\">
             <MockMap 
               locations={filtered} 
               selected={selectedATM}
@@ -418,15 +418,15 @@ export default function ATMLocations() {
             />
 
             {/* Map Controls Panel */}
-            <div className="absolute right-4 top-4 w-64 rounded-xl bg-white shadow-lg border border-slate-200">
-              <div className="px-4 py-3 border-b border-slate-100 font-semibold">Map Controls</div>
+            <div className="absolute right-4 top-4 w-64 rounded-xl bg-white dark:bg-gray-800 shadow-lg border border-slate-200 dark:border-gray-700">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-gray-700 font-semibold text-gray-900 dark:text-white">Map Controls</div>
               <div className="p-4 space-y-3 text-sm">
                 <label className="block">
-                  <span className="text-slate-600">Filter by Status:</span>
+                  <span className="text-slate-600 dark:text-slate-400">Filter by Status:</span>
                   <select
                     value={statusFilterMap}
                     onChange={(e) => setStatusFilterMap(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="mt-1 w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option>All ATMs</option>
                     <option>Online</option>
@@ -435,11 +435,11 @@ export default function ATMLocations() {
                 </label>
 
                 <label className="block">
-                  <span className="text-slate-600">Filter by Region:</span>
+                  <span className="text-slate-600 dark:text-slate-400">Filter by Region:</span>
                   <select
                     value={regionFilter}
                     onChange={(e) => setRegionFilter(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="mt-1 w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option>All Regions</option>
                     {availableRegions.map(region => (
@@ -449,9 +449,9 @@ export default function ATMLocations() {
                 </label>
 
                 {/* Legend */}
-                <div className="pt-3 border-t border-slate-200">
-                  <div className="text-xs font-semibold text-slate-600 mb-2">Legend</div>
-                  <div className="space-y-1 text-xs">
+                <div className="pt-3 border-t border-slate-200 dark:border-gray-700">
+                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Legend</div>
+                  <div className="space-y-1 text-xs text-gray-900 dark:text-gray-100">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
                       <span>Online</span>
@@ -471,19 +471,19 @@ export default function ATMLocations() {
 
             {/* Selected ATM Info Panel */}
             {selectedATM && (
-              <div className="absolute left-4 bottom-4 w-72 rounded-xl bg-white shadow-xl border border-slate-200">
-                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                  <h4 className="font-semibold text-sm">{selectedATM.name}</h4>
+              <div className="absolute left-4 bottom-4 w-72 rounded-xl bg-white dark:bg-gray-800 shadow-xl border border-slate-200 dark:border-gray-700">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-gray-700 flex items-center justify-between">
+                  <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{selectedATM.name}</h4>
                   <button 
                     onClick={() => setSelectedATM(null)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
-                <div className="p-4 space-y-2 text-xs">
+                <div className="p-4 space-y-2 text-xs text-gray-900 dark:text-gray-100">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">Status:</span>
                     {statusPill(selectedATM.status)}
@@ -522,8 +522,8 @@ export default function ATMLocations() {
 
           {/* List */}
           <div className="mt-6 mb-3 flex items-center justify-between">
-            <h3 className="text-xl font-semibold">ATM List</h3>
-            <button className="text-sm text-blue-700 hover:text-blue-900">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">ATM List</h3>
+            <button className="text-sm text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
               {filtered.length} ATMs
             </button>
           </div>
@@ -537,11 +537,11 @@ export default function ATMLocations() {
           {/* Empty State */}
           {filtered.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
+              <div className="text-gray-400 dark:text-gray-500 mb-4">
                 {Icon.mapPin}
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No ATMs found</h3>
-              <p className="text-gray-500 mb-4">Try adjusting your filters</p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No ATMs found</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">Try adjusting your filters</p>
               <button
                 onClick={() => {
                   setStatusFilterTop("All ATMs");
