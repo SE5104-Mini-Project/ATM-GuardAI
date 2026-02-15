@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { useState, useEffect } from "react";
@@ -84,14 +85,14 @@ const HistoryIcon = () => (
 );
 
 const cardBase =
-  "rounded-2xl bg-white shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
+  "rounded-2xl bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-xl";
 
 function LocationCard({ name, status, address, cameras, lastAlert, cameraId }) {
   const pill =
     status === "Alert" ? "bg-red-500 text-white" : "bg-green-500 text-white";
   return (
-    <div className={`overflow-hidden ring-1 ring-gray-200 ${cardBase}`}>
-      <div className="bg-[#0f2a56] text-white px-5 py-4 flex items-center justify-between">
+    <div className={`overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700 ${cardBase}`}>
+      <div className="bg-[#0f2a56] dark:bg-gray-700 text-white px-5 py-4 flex items-center justify-between">
         <h4 className="text-lg font-semibold">{name}</h4>
         <span
           className={`text-xs font-semibold px-3 py-1 rounded-full ${pill}`}
@@ -100,18 +101,18 @@ function LocationCard({ name, status, address, cameras, lastAlert, cameraId }) {
         </span>
       </div>
       <div className="px-5 py-4">
-        <p className="text-gray-900 font-semibold mb-1">{address}</p>
-        <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gray-200 pt-3 text-sm text-gray-600">
+        <p className="text-gray-900 dark:text-gray-100 font-semibold mb-1">{address}</p>
+        <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gray-200 dark:border-gray-700 pt-3 text-sm text-gray-600 dark:text-gray-300">
           <div className="flex items-center gap-1">
             <span className="font-medium">{cameras}</span> Cameras
           </div>
           <div className="text-right">
-            <span className="text-gray-500">Last alert:</span>{" "}
+            <span className="text-gray-500 dark:text-gray-400">Last alert:</span>{" "}
             <span className="font-medium">{lastAlert}</span>
           </div>
         </div>
       </div>
-      <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between text-sm">
+      <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm">
         <Link
           to="/loading"
           state={{
@@ -315,7 +316,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-3 sm:px-6 pt-6">
+    <div className="px-3 sm:px-6 pt-6 min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <Header title={"Security Dashboard"} />
 
@@ -359,8 +360,8 @@ export default function Dashboard() {
               {c.icon}
             </div>
             <div>
-              <p className="text-sm text-gray-500">{c.label}</p>
-              <p className={`text-3xl font-bold ${c.valueClass}`}>{c.value}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{c.label}</p>
+              <p className={`text-3xl font-bold ${c.valueClass} dark:text-white`}>{c.value}</p>
             </div>
           </div>
         ))}
@@ -369,7 +370,7 @@ export default function Dashboard() {
       {loading && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading dashboard data...</p>
         </div>
       )}
 
@@ -378,9 +379,9 @@ export default function Dashboard() {
           {/* Content */}
           <div className="py-6">
             {/* Recent Alerts */}
-            <section className="bg-white rounded-2xl shadow-md border border-gray-100 mb-8">
+            <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 mb-8">
               <div className="flex items-center justify-between p-6 pb-4">
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                   Recent Alerts
                 </h3>
                 <Link
@@ -396,27 +397,27 @@ export default function Dashboard() {
                 {recentAlerts.length > 0 ? (
                   recentAlerts.map((a) => {
                     let style = {
-                      bg: "bg-blue-100",
-                      border: "border-blue-400",
-                      iconBg: "bg-blue-700",
-                      badgeBg: "bg-blue-600",
+                      bg: "bg-blue-100 dark:bg-blue-900/30",
+                      border: "border-blue-400 dark:border-blue-600",
+                      iconBg: "bg-blue-700 dark:bg-blue-600",
+                      badgeBg: "bg-blue-600 dark:bg-blue-500",
                     };
 
                     if (a.type === "mask") {
                       style = {
-                        bg: "bg-purple-100",
-                        border: "border-purple-500",
-                        iconBg: "bg-purple-700",
-                        badgeBg: "bg-purple-600",
+                        bg: "bg-purple-100 dark:bg-purple-900/30",
+                        border: "border-purple-500 dark:border-purple-600",
+                        iconBg: "bg-purple-700 dark:bg-purple-600",
+                        badgeBg: "bg-purple-600 dark:bg-purple-500",
                       };
                     }
 
                     if (a.type === "helmet") {
                       style = {
-                        bg: "bg-green-100",
-                        border: "border-green-500",
-                        iconBg: "bg-green-700",
-                        badgeBg: "bg-green-600",
+                        bg: "bg-green-100 dark:bg-green-900/30",
+                        border: "border-green-500 dark:border-green-600",
+                        iconBg: "bg-green-700 dark:bg-green-600",
+                        badgeBg: "bg-green-600 dark:bg-green-500",
                       };
                     }
 
@@ -446,7 +447,7 @@ export default function Dashboard() {
                           {/* Text Content */}
                           <div>
                             <div className="flex items-center gap-3">
-                              <h4 className="font-semibold text-gray-900 text-base">
+                              <h4 className="font-semibold text-gray-900 dark:text-white text-base">
                                 {a.title}
                               </h4>
 
@@ -457,11 +458,11 @@ export default function Dashboard() {
                               </span>
                             </div>
 
-                            <p className="text-sm text-gray-700 mt-1">
+                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                               {a.description}
                             </p>
 
-                            <div className="text-xs text-gray-600 mt-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                               {a.location} • {a.time}
                             </div>
                           </div>
@@ -479,7 +480,7 @@ export default function Dashboard() {
                     );
                   })
                 ) : (
-                  <div className="text-center py-10 text-gray-500">
+                  <div className="text-center py-10 text-gray-500 dark:text-gray-400">
                     No active alerts found
                   </div>
                 )}
@@ -488,10 +489,10 @@ export default function Dashboard() {
 
             {/* ATM Locations */}
             <div className="py-8">
-              <section className="bg-white rounded-2xl shadow-md border border-gray-100">
+              <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 pt-6 pb-4">
-                  <h3 className="text-xl font-bold text-gray-900">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     ATM Locations
                   </h3>
 
@@ -505,7 +506,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Divider */}
-                <div className="border-t border-gray-100"></div>
+                <div className="border-t border-gray-100 dark:border-gray-700"></div>
 
                 {/* Grid */}
                 <div className="px-6 py-6 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
@@ -514,7 +515,7 @@ export default function Dashboard() {
                       <LocationCard key={atm.id} {...atm} />
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-12 text-gray-500">
+                    <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
                       No camera locations found
                     </div>
                   )}

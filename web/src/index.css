@@ -1,18 +1,14 @@
 @import "tailwindcss";
 
-/* Full-bleed root */
+/* Enable manual dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
 html, body, #root {
   height: 100%;
   width: 100%;
+  margin: 0;
 }
 
-body {
-  margin: 0;               /* remove default margins */
-  overflow-x: hidden;      /* stop horizontal scrollbars */
-  background-color: #f3f4f6; /* Tailwind gray-100 */
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+* {
+  box-sizing: border-box;
 }
-
-* { box-sizing: border-box; }
