@@ -59,28 +59,28 @@ const Icon = {
 /* ========== Style tokens ========== */
 const STYLE = {
   high: {
-    card: "bg-purple-100 border border-purple-700",
-    rail: "bg-purple-800",
+    card: "bg-purple-100 dark:bg-purple-900/30 border border-purple-700 dark:border-purple-600",
+    rail: "bg-purple-800 dark:bg-purple-600",
     button: "bg-indigo-600 hover:bg-indigo-700 text-white",
-    badge: "bg-purple-100 text-purple-800 border-purple-200"
+    badge: "bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700"
   },
   medium: {
-    card: "bg-amber-100 border border-amber-700",
-    rail: "bg-amber-500",
+    card: "bg-amber-100 dark:bg-amber-900/30 border border-amber-700 dark:border-amber-600",
+    rail: "bg-amber-500 dark:bg-amber-600",
     button: "bg-indigo-600 hover:bg-indigo-700 text-white",
-    badge: "bg-amber-100 text-amber-800 border-amber-200"
+    badge: "bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-700"
   },
   low: {
-    card: "bg-blue-50 border border-blue-700",
-    rail: "bg-blue-800",
+    card: "bg-blue-50 dark:bg-blue-900/30 border border-blue-700 dark:border-blue-600",
+    rail: "bg-blue-800 dark:bg-blue-600",
     button: "bg-indigo-600 hover:bg-indigo-700 text-white",
-    badge: "bg-blue-100 text-blue-800 border-blue-200"
+    badge: "bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700"
   },
   ok: {
-    card: "bg-emerald-50 border border-emerald-300",
-    rail: "bg-emerald-500",
+    card: "bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-300 dark:border-emerald-700",
+    rail: "bg-emerald-500 dark:bg-emerald-600",
     button: "bg-indigo-600 hover:bg-indigo-700 text-white",
-    badge: "bg-emerald-100 text-emerald-800 border-emerald-200"
+    badge: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-700"
   },
 };
 
@@ -321,8 +321,8 @@ export default function Alerts() {
 
   const StatusBadge = ({ status }) => {
     const config = {
-      open: { class: "bg-blue-100 text-blue-800 border-blue-200", text: "Open" },
-      resolved: { class: "bg-emerald-100 text-emerald-800 border-emerald-200", text: "Resolved" }
+      open: { class: "bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700", text: "Open" },
+      resolved: { class: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-700", text: "Resolved" }
     };
 
     const style = config[status] || config.open;
@@ -335,27 +335,27 @@ export default function Alerts() {
   };
 
   return (
-    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+    <div className="px-3 sm:px-6 pt-6 pb-10 min-h-screen bg-gray-50 dark:bg-gray-900 text-slate-900 dark:text-gray-100">
       {/* Header */}
       <Header title={"Alerts"} />
 
       {/* Error Message */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
 
       {/* ===== Section title + filters ===== */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <h3 className="text-xl font-semibold">Security Alerts</h3>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Security Alerts</h3>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           {/* Refresh Button */}
           <button
             onClick={fetchAlerts}
             disabled={loading}
-            className="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
           >
             {Icon.refresh}
             {loading ? "Loading..." : "Refresh"}
@@ -366,7 +366,7 @@ export default function Alerts() {
             <button
               type="button"
               onClick={() => setSeverityOpen((v) => !v)}
-              className={`flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm
+              className={`flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm shadow-sm
                           transition-all hover:shadow focus:outline-none focus:ring-2 focus:ring-indigo-500
                           ${severityOpen ? "ring-2 ring-indigo-500" : ""}`}
             >
@@ -374,7 +374,7 @@ export default function Alerts() {
               <span className={`transition-transform ${severityOpen ? "rotate-180" : ""}`}>{Icon.caret}</span>
             </button>
             <div
-              className={`absolute right-0 z-20 mt-2 w-full origin-top-right overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg
+              className={`absolute right-0 z-20 mt-2 w-full origin-top-right overflow-hidden rounded-lg border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg
                           transition-all duration-150
                           ${severityOpen ? "opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"}`}
             >
@@ -403,7 +403,7 @@ export default function Alerts() {
             <button
               type="button"
               onClick={() => setTypeOpen((v) => !v)}
-              className={`flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm
+              className={`flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm shadow-sm
                           transition-all hover:shadow focus:outline-none focus:ring-2 focus:ring-indigo-500
                           ${typeOpen ? "ring-2 ring-indigo-500" : ""}`}
             >
@@ -411,7 +411,7 @@ export default function Alerts() {
               <span className={`transition-transform ${typeOpen ? "rotate-180" : ""}`}>{Icon.caret}</span>
             </button>
             <div
-              className={`absolute right-0 z-20 mt-2 w-full origin-top-right overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg
+              className={`absolute right-0 z-20 mt-2 w-full origin-top-right overflow-hidden rounded-lg border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg
                           transition-all duration-150
                           ${typeOpen ? "opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"}`}
             >
@@ -424,11 +424,11 @@ export default function Alerts() {
                       setTypeFilter(opt);
                       setTypeOpen(false);
                     }}
-                    className={`flex cursor-pointer items-center justify-between px-3 py-2 text-sm
-                                hover:bg-slate-50 ${active ? "bg-slate-50 font-medium" : ""}`}
+                    className={`flex cursor-pointer items-center justify-between px-3 py-2 text-sm text-gray-900 dark:text-gray-100
+                                hover:bg-slate-50 dark:hover:bg-gray-700 ${active ? "bg-slate-50 dark:bg-gray-700 font-medium" : ""}`}
                   >
                     <span>{opt}</span>
-                    {active && <span className="text-indigo-600">{Icon.tick}</span>}
+                    {active && <span className="text-indigo-600 dark:text-indigo-400">{Icon.tick}</span>}
                   </div>
                 );
               })}
@@ -440,7 +440,7 @@ export default function Alerts() {
             <button
               type="button"
               onClick={() => setStatusOpen((v) => !v)}
-              className={`flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm
+              className={`flex w-full items-center justify-between gap-3 rounded-lg border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm shadow-sm
                           transition-all hover:shadow focus:outline-none focus:ring-2 focus:ring-indigo-500
                           ${statusOpen ? "ring-2 ring-indigo-500" : ""}`}
             >
@@ -448,7 +448,7 @@ export default function Alerts() {
               <span className={`transition-transform ${statusOpen ? "rotate-180" : ""}`}>{Icon.caret}</span>
             </button>
             <div
-              className={`absolute right-0 z-20 mt-2 w-full origin-top-right overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg
+              className={`absolute right-0 z-20 mt-2 w-full origin-top-right overflow-hidden rounded-lg border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg
                           transition-all duration-150
                           ${statusOpen ? "opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"}`}
             >
@@ -461,11 +461,11 @@ export default function Alerts() {
                       setStatusFilter(opt);
                       setStatusOpen(false);
                     }}
-                    className={`flex cursor-pointer items-center justify-between px-3 py-2 text-sm
-                                hover:bg-slate-50 ${active ? "bg-slate-50 font-medium" : ""}`}
+                    className={`flex cursor-pointer items-center justify-between px-3 py-2 text-sm text-gray-900 dark:text-gray-100
+                                hover:bg-slate-50 dark:hover:bg-gray-700 ${active ? "bg-slate-50 dark:bg-gray-700 font-medium" : ""}`}
                   >
                     <span>{opt}</span>
-                    {active && <span className="text-indigo-600">{Icon.tick}</span>}
+                    {active && <span className="text-indigo-600 dark:text-indigo-400">{Icon.tick}</span>}
                   </div>
                 );
               })}
@@ -478,7 +478,7 @@ export default function Alerts() {
       {loading && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading alerts...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading alerts...</p>
         </div>
       )}
 
@@ -502,19 +502,19 @@ export default function Alerts() {
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <h4 className="text-lg font-semibold leading-6">{getAlertTypeDisplay(alert.type)}</h4>
+                        <h4 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">{getAlertTypeDisplay(alert.type)}</h4>
                         <SeverityBadge severity={alert.severity} />
                         <StatusBadge status={alert.status} />
                         {alert.confidence > 0 && (
-                          <span className="text-sm text-slate-500">
+                          <span className="text-sm text-slate-500 dark:text-slate-400">
                             Confidence: {alert.confidence}%
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm text-slate-700 mb-3">{alert.description}</p>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 mb-3">{alert.description}</p>
 
-                      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600">
+                      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
                         {alert.cameraId && (
                           <span className="inline-flex items-center gap-1.5">
                             {Icon.cam} {alert.cameraId.name || `Camera ${alert.cameraId._id}`}
@@ -575,13 +575,13 @@ export default function Alerts() {
       {/* Empty State */}
       {!loading && filteredAlerts.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
+          <div className="text-gray-400 dark:text-gray-500 mb-4">
             <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No alerts found</h3>
-          <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No alerts found</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
           <button
             onClick={() => {
               setStatusFilter("All Alerts");
@@ -615,65 +615,65 @@ export default function Alerts() {
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Alert Type
                   </label>
-                  <p className="text-sm text-gray-900 font-medium">{getAlertTypeDisplay(selectedAlert.type)}</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{getAlertTypeDisplay(selectedAlert.type)}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Description
                   </label>
-                  <p className="text-sm text-gray-600">{selectedAlert.description}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{selectedAlert.description}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Camera
                   </label>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     {selectedAlert.cameraId?.name || `Camera ${selectedAlert.cameraId?._id}`}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Severity
                     </label>
                     <SeverityBadge severity={selectedAlert.severity} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Confidence
                     </label>
-                    <p className="text-sm text-gray-600">{selectedAlert.confidence}%</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedAlert.confidence}%</p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Detected
                   </label>
-                  <p className="text-sm text-gray-600">{formatTime(selectedAlert.createdTime)}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{formatTime(selectedAlert.createdTime)}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Resolved By
                   </label>
-                  <p className="text-sm text-gray-600">{currentUser?.name || "Current User"}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{currentUser?.name || "Current User"}</p>
                 </div>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
               <button
                 onClick={() => setShowUpdateModal(false)}
                 disabled={updateLoading}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -695,9 +695,9 @@ export default function Alerts() {
       {/* Resolve Confirmation Modal */}
       {showResolveConfirm && selectedAlert && (
         <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+            <div className="bg-[#102a56] dark:bg-gray-700 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
               <h3 className="text-lg font-semibold">Confirm Resolution</h3>
               <button
                 onClick={() => setShowResolveConfirm(false)}
@@ -718,19 +718,19 @@ export default function Alerts() {
                 </div>
               </div>
 
-              <h4 className="text-lg font-semibold text-center mb-2">Mark this alert as resolved?</h4>
+              <h4 className="text-lg font-semibold text-center mb-2 text-gray-900 dark:text-white">Mark this alert as resolved?</h4>
 
-              <div className="text-center text-gray-600 mb-6">
-                <p className="mb-2">Alert: <strong>{getAlertTypeDisplay(selectedAlert.type)}</strong></p>
-                <p>This action will be recorded under your name: <strong>{currentUser?.name || "Current User"}</strong></p>
+              <div className="text-center text-gray-600 dark:text-gray-400 mb-6">
+                <p className="mb-2">Alert: <strong className="text-gray-900 dark:text-white">{getAlertTypeDisplay(selectedAlert.type)}</strong></p>
+                <p>This action will be recorded under your name: <strong className="text-gray-900 dark:text-white">{currentUser?.name || "Current User"}</strong></p>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-4">
                 <div className="flex items-start">
                   <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
-                  <p className="text-sm text-yellow-800">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
                     Once resolved, this alert will be moved to the "Resolved Alerts" section and cannot be reopened.
                   </p>
                 </div>
@@ -738,11 +738,11 @@ export default function Alerts() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
               <button
                 onClick={() => setShowResolveConfirm(false)}
                 disabled={updateLoading}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
