@@ -269,17 +269,17 @@ export default function Users() {
   const StatusBadge = ({ status }) => {
     const config = {
       Active: {
-        class: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        class: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
         text: "Active",
         icon: Icon.active,
       },
       Inactive: {
-        class: "bg-gray-100 text-gray-800 border-gray-200",
+        class: "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600",
         text: "Inactive",
         icon: Icon.inactive,
       },
       Suspended: {
-        class: "bg-red-100 text-red-800 border-red-200",
+        class: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800",
         text: "Suspended",
         icon: Icon.suspended,
       },
@@ -300,15 +300,15 @@ export default function Users() {
   const RoleBadge = ({ role }) => {
     const config = {
       admin: {
-        class: "bg-purple-50 text-purple-700 border border-purple-100",
+        class: "bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-800",
         text: "Admin",
       },
       moderator: {
-        class: "bg-blue-50 text-blue-700 border border-blue-100",
+        class: "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800",
         text: "Moderator",
       },
       user: {
-        class: "bg-gray-50 text-gray-600 border border-gray-100",
+        class: "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-600",
         text: "User",
       },
     };
@@ -443,18 +443,18 @@ export default function Users() {
   };
 
   return (
-    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900 dark:text-white dark:bg-gray-900">
       {/* Header */}
       <Header title={"User Management"} />
 
       {/* Messages */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
       {success && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+        <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
           {success}
         </div>
       )}
@@ -485,21 +485,21 @@ export default function Users() {
         ].map((stat, index) => (
           <div
             key={index}
-            className="rounded-2xl bg-white shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200"
+            className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg p-5 flex items-center gap-4 ring-1 ring-gray-200 dark:ring-gray-700"
           >
             <div className={`rounded-xl p-3 ring-1 ${stat.color}`}>
               {Icon.user}
             </div>
             <div>
-              <p className="text-sm text-gray-500">{stat.label}</p>
-              <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Controls Bar */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-5 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           {/* LEFT SIDE — Search + Filters */}
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
@@ -510,10 +510,10 @@ export default function Users() {
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-72 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 pl-11 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                className="w-full sm:w-72 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white px-4 py-2.5 pl-11 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-gray-600 transition"
               />
               <svg
-                className="absolute left-4 top-3 h-4 w-4 text-gray-400"
+                className="absolute left-4 top-3 h-4 w-4 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -528,7 +528,7 @@ export default function Users() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+              className="rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-gray-600 transition"
             >
               <option value="all">All Status</option>
               <option value="Active">Active</option>
@@ -540,7 +540,7 @@ export default function Users() {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+              className="rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-gray-600 transition"
             >
               <option value="all">All Roles</option>
               <option value="admin">Admin</option>
@@ -554,7 +554,7 @@ export default function Users() {
             {isAdmin && (
               <button
                 onClick={() => setShowAddUser(true)}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
               >
                 {Icon.add}
                 Add User
@@ -564,7 +564,7 @@ export default function Users() {
             <button
               onClick={fetchUsers}
               disabled={loading}
-              className="inline-flex items-center gap-2 border border-gray-200 bg-white text-gray-700 px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:bg-gray-50 hover:shadow-md transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 hover:shadow-md transition-all disabled:opacity-50"
             >
               {Icon.refresh}
               {loading ? "Loading..." : "Refresh"}
@@ -576,45 +576,45 @@ export default function Users() {
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading users...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading users...</p>
         </div>
       )}
 
       {/* Users Table */}
       {!loading && (
-        <div className="rounded-2xl bg-white shadow-lg ring-1 ring-gray-200 overflow-hidden">
+        <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Role
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Last Login
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
                   {isAdmin && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   )}
                 </tr>
               </thead>
-              <tbody className="bg-gray-50 space-y-3">
+              <tbody className="bg-gray-50 dark:bg-gray-800 space-y-3">
                 {filteredUsers.map((user) => (
                   <tr
                     key={user._id}
-                    className="group bg-white border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all duration-200"
+                    className="group bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:shadow-sm transition-all duration-200"
                   >
                     <td className="px-6 py-5 whitespace-nowrap relative">
-                      <div className="flex items-center pl-3 border-l-4 border-transparent group-hover:border-blue-500 transition-all">
+                      <div className="flex items-center pl-3 border-l-4 border-transparent group-hover:border-blue-500 dark:group-hover:border-blue-400 transition-all">
                         <div className="relative flex-shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
                           <span className="text-sm">
                             {user.name
@@ -625,15 +625,15 @@ export default function Users() {
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-semibold text-gray-900">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white">
                             {user.name}
                           </div>
 
-                          <div className="text-sm text-gray-500 group-hover:text-gray-700 transition">
+                          <div className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition">
                             {user.email}
                           </div>
 
-                          <span className="inline-block mt-1 text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-md font-mono">
+                          <span className="inline-block mt-1 text-[11px] bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300 px-2 py-0.5 rounded-md font-mono">
                             {user._id}
                           </span>
                         </div>
@@ -642,9 +642,9 @@ export default function Users() {
                     <td className="px-6 py-5 whitespace-nowrap">
                       <RoleBadge role={user.role} />
                     </td>
-                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {formatDate(user.lastLogin)}
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-400 dark:text-gray-500">
                         {formatLastLogin(user.lastLogin)}
                       </div>
                     </td>
@@ -656,14 +656,14 @@ export default function Users() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEditModal(user)}
-                            className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition"
+                            className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 transition"
                           >
                             {Icon.edit}
                           </button>
 
                           <button
                             onClick={() => handleDeleteUser(user._id)}
-                            className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition"
+                            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition"
                           >
                             {Icon.delete}
                           </button>
@@ -679,7 +679,7 @@ export default function Users() {
           {/* Empty State */}
           {filteredUsers.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
+              <div className="text-gray-400 dark:text-gray-500 mb-4">
                 <svg
                   className="w-16 h-16 mx-auto"
                   fill="none"
@@ -694,10 +694,10 @@ export default function Users() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 No users found
               </h3>
-              <p className="text-gray-500 mb-4">
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
                 Try adjusting your search or filter criteria
               </p>
               <button
@@ -706,7 +706,7 @@ export default function Users() {
                   setStatusFilter("all");
                   setRoleFilter("all");
                 }}
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
               >
                 Clear all filters
               </button>
@@ -717,8 +717,8 @@ export default function Users() {
 
       {/* Add User Modal */}
       {showAddUser && (
-        <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
               <h3 className="text-lg font-semibold">Add New User</h3>
@@ -733,33 +733,33 @@ export default function Users() {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Full Name *
                 </label>
                 <input
                   type="text"
                   value={newUser.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter full name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Email Address *
                 </label>
                 <input
                   type="email"
                   value={newUser.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter email address"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Password *
                 </label>
                 <input
@@ -768,20 +768,20 @@ export default function Users() {
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Minimum 6 characters"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Role
                   </label>
                   <select
                     value={newUser.role}
                     onChange={(e) => handleInputChange("role", e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {roleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -792,7 +792,7 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Status
                   </label>
                   <select
@@ -800,7 +800,7 @@ export default function Users() {
                     onChange={(e) =>
                       handleInputChange("status", e.target.value)
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -813,16 +813,16 @@ export default function Users() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
               <button
                 onClick={() => setShowAddUser(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddUser}
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
               >
                 Add User
               </button>
@@ -833,8 +833,8 @@ export default function Users() {
 
       {/* Edit User Modal */}
       {showEditUser && editingUser && (
-        <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="bg-[#102a56] text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
               <h3 className="text-lg font-semibold">Edit User</h3>
@@ -849,7 +849,7 @@ export default function Users() {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Full Name *
                 </label>
                 <input
@@ -858,29 +858,29 @@ export default function Users() {
                   onChange={(e) =>
                     handleEditInputChange("name", e.target.value)
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter full name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={editingUser.email}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-100 text-gray-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
                   disabled
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Email cannot be changed
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Role
                   </label>
                   <select
@@ -888,7 +888,7 @@ export default function Users() {
                     onChange={(e) =>
                       handleEditInputChange("role", e.target.value)
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {roleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -899,7 +899,7 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Status
                   </label>
                   <select
@@ -907,7 +907,7 @@ export default function Users() {
                     onChange={(e) =>
                       handleEditInputChange("status", e.target.value)
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -920,16 +920,16 @@ export default function Users() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
               <button
                 onClick={() => setShowEditUser(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEditUser}
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
               >
                 Update User
               </button>

@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import { useLocation } from "react-router-dom";
 
 export default function LiveFeeds() {
-  const cardBase = "rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
+  const cardBase = "rounded-2xl bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
   const [feeds, setFeeds] = useState([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -151,7 +151,7 @@ export default function LiveFeeds() {
     return (
       <div className={cardBase}>
         {/* Card header */}
-        <div className="flex items-center justify-between px-5 py-3 rounded-t-2xl bg-[#102a56] text-white">
+        <div className="flex items-center justify-between px-5 py-3 rounded-t-2xl bg-[#102a56] dark:bg-gray-700 text-white">
           <h4 className="font-semibold">{camera.name}</h4>
           {camera.status === 'online' ? <LiveBadge /> : <OfflineBadge />}
         </div>
@@ -192,10 +192,10 @@ export default function LiveFeeds() {
         </div>
 
         {/* Footer actions */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
+        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700 text-sm">
           <button
             onClick={handleToggleFullscreen}
-            className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-900 disabled:text-gray-400 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 disabled:text-gray-400 disabled:cursor-not-allowed"
             aria-label={isFs ? "Exit Fullscreen" : "Enter Fullscreen"}
             disabled={camera.status === 'offline'}
           >
@@ -209,7 +209,7 @@ export default function LiveFeeds() {
               recording
                 ? "bg-red-600 text-white hover:bg-red-700"
                 : camera.status === 'online' 
-                  ? "text-blue-700 hover:text-blue-900" 
+                  ? "text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300" 
                   : "text-gray-400 cursor-not-allowed"
             }`}
             aria-pressed={recording}
@@ -232,23 +232,23 @@ export default function LiveFeeds() {
   // Loading state matching CameraManagement style
   if (loading) {
     return (
-      <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+      <div className="px-3 sm:px-6 pt-6 pb-10 min-h-screen bg-gray-50 dark:bg-gray-900 text-slate-900 dark:text-gray-100">
         <Header title={"Live Feeds"} />
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading cameras...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading cameras...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+    <div className="px-3 sm:px-6 pt-6 pb-10 min-h-screen bg-gray-50 dark:bg-gray-900 text-slate-900 dark:text-gray-100">
       {/* Header */}
       <Header title={"Live Feeds"}/>
 
       {/* Section title */}
-      <h3 className="text-xl font-semibold text-gray-900 mb-3">Live Camera Feeds</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Live Camera Feeds</h3>
 
       {/* Grid of cameras */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -260,16 +260,16 @@ export default function LiveFeeds() {
       {/* Empty State - matching CameraManagement style */}
       {!loading && displayedFeeds.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
+          <div className="text-gray-400 dark:text-gray-500 mb-4">
             <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             {selectedCameraId ? "Camera not found" : "No cameras available"}
           </h3>
-          <p className="text-gray-500 mb-4">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             {selectedCameraId 
               ? "The selected camera could not be found or is no longer available."
               : "There are no cameras configured in the system."}

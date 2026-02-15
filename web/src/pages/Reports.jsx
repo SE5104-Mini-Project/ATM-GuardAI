@@ -358,21 +358,21 @@ export default function Reports() {
   };
 
   return (
-    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900">
+    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900 dark:text-white dark:bg-gray-900">
       {/* Header */}
       <Header title={"Reports"} />
 
       {/* Reports & Analytics panel */}
-      <h3 className="text-xl font-semibold mb-3">Reports &amp; Analytics</h3>
+      <h3 className="text-xl font-semibold mb-3 dark:text-white">Reports &amp; Analytics</h3>
 
-      <div className="rounded-2xl bg-white shadow-lg border border-slate-200 p-5 mb-6">
+      <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-slate-200 dark:border-gray-700 p-5 mb-6">
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 mb-4">
+        <div className="flex border-b border-slate-200 dark:border-gray-700 mb-4">
           <button
             onClick={() => setActiveTab("alerts")}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === "alerts"
-              ? "border-blue-500 text-blue-600"
-              : "border-transparent text-slate-500 hover:text-slate-700"
+              ? "border-blue-500 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200"
               }`}
           >
             Alerts Report
@@ -380,8 +380,8 @@ export default function Reports() {
           <button
             onClick={() => setActiveTab("cameras")}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === "cameras"
-              ? "border-blue-500 text-blue-600"
-              : "border-transparent text-slate-500 hover:text-slate-700"
+              ? "border-blue-500 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200"
               }`}
           >
             Cameras Report
@@ -390,15 +390,15 @@ export default function Reports() {
 
         {/* top-right export */}
         <div className="flex justify-between items-center mb-4">
-          <div className="text-sm text-slate-600">
+          <div className="text-sm text-slate-600 dark:text-gray-400">
             {loading && "Loading data..."}
-            {error && <span className="text-red-600">Error: {error}</span>}
+            {error && <span className="text-red-600 dark:text-red-400">Error: {error}</span>}
           </div>
           <button
             onClick={exportAllData}
             disabled={(activeTab === "alerts" && filteredAlerts.length === 0) ||
               (activeTab === "cameras" && filteredCameras.length === 0)}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm px-3 py-2 shadow"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 disabled:bg-indigo-400 dark:disabled:bg-indigo-700 text-white text-sm px-3 py-2 shadow"
           >
             <span className="grid place-items-center">{Icon.download}</span>
             Export {activeTab === "alerts" ? "Alerts" : "Cameras"} Report
@@ -409,11 +409,11 @@ export default function Reports() {
         {activeTab === "alerts" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Time Period</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Time Period</label>
               <select
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>Last 24 Hours</option>
                 <option>Last 7 Days</option>
@@ -422,11 +422,11 @@ export default function Reports() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Camera</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Camera</label>
               <select
                 value={cameraFilter}
                 onChange={(e) => setCameraFilter(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All Cameras</option>
                 {cameras.map(camera => (
@@ -438,11 +438,11 @@ export default function Reports() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Alert Type</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Alert Type</label>
               <select
                 value={alertType}
                 onChange={(e) => setAlertType(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All Alerts</option>
                 <option>Mask</option>
@@ -452,11 +452,11 @@ export default function Reports() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Severity</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Severity</label>
               <select
                 value={severityFilter}
                 onChange={(e) => setSeverityFilter(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All Severities</option>
                 <option>High</option>
@@ -466,11 +466,11 @@ export default function Reports() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All Status</option>
                 <option>Open</option>
@@ -481,11 +481,11 @@ export default function Reports() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Camera Status</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Camera Status</label>
               <select
                 value={cameraStatusFilter}
                 onChange={(e) => setCameraStatusFilter(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All Status</option>
                 <option>Online</option>
@@ -494,11 +494,11 @@ export default function Reports() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Province</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Province</label>
               <select
                 value={cameraProvinceFilter}
                 onChange={(e) => setCameraProvinceFilter(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All Provinces</option>
                 {uniqueProvinces.map(province => (
@@ -510,11 +510,11 @@ export default function Reports() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">District</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">District</label>
               <select
                 value={cameraDistrictFilter}
                 onChange={(e) => setCameraDistrictFilter(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option>All Districts</option>
                 {uniqueDistricts.map(district => (
@@ -531,7 +531,7 @@ export default function Reports() {
           <button
             onClick={onGenerate}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm px-3 py-2 shadow"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-blue-400 disabled:dark:bg-blue-700 text-white text-sm px-3 py-2 shadow"
           >
             <span className="grid place-items-center">{Icon.play}</span>
             {loading ? "Loading..." : `Generate ${activeTab === "alerts" ? "Alerts" : "Cameras"} Report`}
@@ -541,8 +541,8 @@ export default function Reports() {
 
       {loading && (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading alerts...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading alerts...</p>
         </div>
       )}
 
@@ -551,12 +551,12 @@ export default function Reports() {
           {/* Data Tables */}
           {activeTab === "alerts" ? (
             /* Alerts Table */
-            <div className="rounded-2xl bg-white shadow-lg border border-slate-200">
+            <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-slate-200 dark:border-gray-700">
               <div className="px-5 pt-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="text-lg font-semibold">Detailed Alert Report - {period}</h4>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <h4 className="text-lg font-semibold dark:text-white">Detailed Alert Report - {period}</h4>
+                    <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">
                       Generated on:{" "}
                       {generatedAt.toLocaleString(undefined, {
                         year: "numeric",
@@ -569,7 +569,7 @@ export default function Reports() {
                       {" "}• Avg Confidence: {statistics.averageConfidence}%
                     </p>
                   </div>
-                  <div className="text-right text-sm text-slate-600">
+                  <div className="text-right text-sm text-slate-600 dark:text-gray-400">
                     <div>Severity: H({statistics.highSeverity}) M({statistics.mediumSeverity}) L({statistics.lowSeverity})</div>
                     <div>Status: Open({statistics.openAlerts}) Resolved({statistics.resolvedAlerts})</div>
                   </div>
@@ -595,24 +595,24 @@ export default function Reports() {
                   <tbody>
                     {filteredAlerts.length === 0 ? (
                       <tr>
-                        <td colSpan="10" className="px-4 py-8 text-center text-slate-500">
+                        <td colSpan="10" className="px-4 py-8 text-center text-slate-500 dark:text-gray-400">
                           {loading ? "Loading alerts..." : "No alerts found for the selected filters"}
                         </td>
                       </tr>
                     ) : (
                       filteredAlerts.map((alert) => (
-                        <tr key={alert._id} className="border-t border-slate-100 hover:bg-slate-50">
-                          <td className="px-4 py-3 font-mono text-xs">{alert._id}</td>
-                          <td className="px-4 py-3">
+                        <tr key={alert._id} className="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/50">
+                          <td className="px-4 py-3 font-mono text-xs dark:text-gray-300">{alert._id}</td>
+                          <td className="px-4 py-3 dark:text-gray-200">
                             <div>{formatDate(alert.createdTime || alert.createdAt)}</div>
-                            <div className="text-xs text-slate-500">{formatTime(alert.createdTime || alert.createdAt)}</div>
+                            <div className="text-xs text-slate-500 dark:text-gray-400">{formatTime(alert.createdTime || alert.createdAt)}</div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 dark:text-gray-200">
                             <div className="font-medium">{alert.cameraId?.name || 'N/A'}</div>
-                            <div className="text-xs text-slate-500">{alert.cameraId?.branch || 'N/A'}</div>
+                            <div className="text-xs text-slate-500 dark:text-gray-400">{alert.cameraId?.branch || 'N/A'}</div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-xs text-slate-500">
+                            <div className="text-xs text-slate-500 dark:text-gray-400">
                               {alert.cameraId?.location ?
                                 `${alert.cameraId.location.latitude?.toFixed(4) || 'N/A'}, ${alert.cameraId.location.longitude?.toFixed(4) || 'N/A'}` :
                                 'N/A'
@@ -621,33 +621,33 @@ export default function Reports() {
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.type === "with mask"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-orange-100 text-orange-800"
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
+                              : "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300"
                               }`}>
                               {alert.type === "with mask" ? "Mask" : "Helmet"}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.severity === "high"
-                              ? "bg-red-100 text-red-800"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
                               : alert.severity === "medium"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-green-100 text-green-800"
+                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
+                                : "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
                               }`}>
                               {alert.severity}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${alert.status === "open"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-green-100 text-green-800"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+                              : "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
                               }`}>
                               {alert.status}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-12 bg-slate-200 rounded-full h-2">
+                              <div className="w-12 bg-slate-200 dark:bg-gray-600 rounded-full h-2">
                                 <div
                                   className={`h-2 rounded-full ${(alert.confidence || 0) >= 80 ? "bg-green-500" :
                                     (alert.confidence || 0) >= 60 ? "bg-yellow-500" : "bg-red-500"
@@ -655,24 +655,24 @@ export default function Reports() {
                                   style={{ width: `${alert.confidence || 0}%` }}
                                 ></div>
                               </div>
-                              <span className="text-xs font-medium">{alert.confidence || 0}%</span>
+                              <span className="text-xs font-medium dark:text-gray-300">{alert.confidence || 0}%</span>
                             </div>
                           </td>
                           <td className="px-4 py-3 max-w-xs">
-                            <div className="text-sm">{alert.description || "No description"}</div>
+                            <div className="text-sm dark:text-gray-300">{alert.description || "No description"}</div>
                           </td>
                           <td className="px-4 py-3">
                             {alert.status === "resolved" ? (
                               <div>
-                                <div className="text-xs">
+                                <div className="text-xs dark:text-gray-300">
                                   By: {alert.resolvedBy?.name || 'System'}
                                 </div>
-                                <div className="text-xs text-slate-500">
+                                <div className="text-xs text-slate-500 dark:text-gray-400">
                                   {alert.resolvedTime ? formatDate(alert.resolvedTime) : 'N/A'}
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-xs text-slate-400">—</span>
+                              <span className="text-xs text-slate-400 dark:text-gray-500">—</span>
                             )}
                           </td>
                         </tr>
@@ -684,12 +684,12 @@ export default function Reports() {
             </div>
           ) : (
             /* Cameras Table */
-            <div className="rounded-2xl bg-white shadow-lg border border-slate-200">
+            <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-slate-200 dark:border-gray-700">
               <div className="px-5 pt-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="text-lg font-semibold">Camera Inventory Report</h4>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <h4 className="text-lg font-semibold dark:text-white">Camera Inventory Report</h4>
+                    <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">
                       Generated on:{" "}
                       {generatedAt.toLocaleString(undefined, {
                         year: "numeric",
@@ -702,7 +702,7 @@ export default function Reports() {
                       {" "}• Uptime: {cameraStatistics.uptimePercentage}%
                     </p>
                   </div>
-                  <div className="text-right text-sm text-slate-600">
+                  <div className="text-right text-sm text-slate-600 dark:text-gray-400">
                     <div>Online: {cameraStatistics.onlineCameras} • Offline: {cameraStatistics.offlineCameras}</div>
                     <div>Provinces: {cameraStatistics.uniqueProvinces} • Districts: {cameraStatistics.uniqueDistricts}</div>
                   </div>
@@ -727,41 +727,41 @@ export default function Reports() {
                   <tbody>
                     {filteredCameras.length === 0 ? (
                       <tr>
-                        <td colSpan="9" className="px-4 py-8 text-center text-slate-500">
+                        <td colSpan="9" className="px-4 py-8 text-center text-slate-500 dark:text-gray-400">
                           {loading ? "Loading cameras..." : "No cameras found for the selected filters"}
                         </td>
                       </tr>
                     ) : (
                       filteredCameras.map((camera) => (
-                        <tr key={camera._id} className="border-t border-slate-100 hover:bg-slate-50">
-                          <td className="px-4 py-3 font-mono text-xs">{camera._id}</td>
+                        <tr key={camera._id} className="border-t border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/50">
+                          <td className="px-4 py-3 font-mono text-xs dark:text-gray-300">{camera._id}</td>
                           <td className="px-4 py-3">
-                            <div className="font-medium">{camera.name}</div>
+                            <div className="font-medium dark:text-gray-200">{camera.name}</div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="font-medium">{camera.bankName}</div>
-                            <div className="text-xs text-slate-500">{camera.branch}</div>
+                            <div className="font-medium dark:text-gray-200">{camera.bankName}</div>
+                            <div className="text-xs text-slate-500 dark:text-gray-400">{camera.branch}</div>
                           </td>
                           <td className="px-4 py-3 max-w-xs">
-                            <div className="text-sm">{camera.address}</div>
+                            <div className="text-sm dark:text-gray-300">{camera.address}</div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-sm">{camera.province}</div>
-                            <div className="text-xs text-slate-500">{camera.district}</div>
+                            <div className="text-sm dark:text-gray-300">{camera.province}</div>
+                            <div className="text-xs text-slate-500 dark:text-gray-400">{camera.district}</div>
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${camera.status === "online"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                              : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
                               }`}>
                               {camera.status}
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-sm">{getLastActive(camera.lastAvailableTime)}</div>
+                            <div className="text-sm dark:text-gray-300">{getLastActive(camera.lastAvailableTime)}</div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-xs text-slate-500">
+                            <div className="text-xs text-slate-500 dark:text-gray-400">
                               {camera.location ?
                                 `${camera.location.latitude?.toFixed(6) || 'N/A'}, ${camera.location.longitude?.toFixed(6) || 'N/A'}` :
                                 'N/A'
@@ -769,7 +769,7 @@ export default function Reports() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-xs text-slate-500 truncate max-w-[200px]">
+                            <div className="text-xs text-slate-500 dark:text-gray-400 truncate max-w-[200px]">
                               {camera.streamUrl || 'N/A'}
                             </div>
                           </td>
