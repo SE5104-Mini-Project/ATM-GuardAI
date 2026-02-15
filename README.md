@@ -17,6 +17,7 @@ The system provides real-time alerts to security personnel through a centralized
 
 ---
 
+
 ## Technologies and Tools Used
 
 ### Artificial Intelligence & Computer Vision
@@ -45,3 +46,4 @@ The system provides real-time alerts to security personnel through a centralized
 ### Real-time Communication
 - WebSocket (Socket.IO)
 - MJPEG Streaming
+=======
