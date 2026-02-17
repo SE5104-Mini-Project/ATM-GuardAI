@@ -17,13 +17,13 @@ import ResetPassword from "./pages/ResetPassword";
 import Loading from "./pages/Loading";
 import Opening from "./pages/Opening";
 
-import { AuthContext } from "./context/AuthContext";
+import { AuthProvider, AuthContext } from "./context/AuthContext";
 
 // ---------------- PROTECTED ROUTE ---------------- //
 function ProtectedRoute({ children }) {
-  const { currentUser, loading } = useContext(AuthContext);
+  const { currentUser, authLoading } = useContext(AuthContext);
 
-  if (loading) {
+  if (authLoading) {
     return <Loading />;
   }
 
@@ -37,7 +37,7 @@ function ProtectedRoute({ children }) {
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
 
-  // Load saved theme
+  // Load saved theme on initial render
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
@@ -58,7 +58,7 @@ export default function App() {
   }, [darkMode]);
 
   return (
-    <>
+    <AuthProvider>
       {/* DARK MODE TOGGLE BUTTON */}
       <button
         onClick={() => setDarkMode(!darkMode)}
@@ -94,8 +94,9 @@ export default function App() {
           <Route path="users" element={<Users />} />
         </Route>
 
+        {/* Redirect unknown routes */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-    </>
+    </AuthProvider>
   );
 }

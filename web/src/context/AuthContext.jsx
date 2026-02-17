@@ -1,109 +1,98 @@
-import { createContext, useState, useEffect, useCallback } from "react";
+import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const AuthContext = createContext();
+
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export function AuthProvider({ children }) {
     const navigate = useNavigate();
 
     const [currentUser, setCurrentUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [authError, setAuthError] = useState("");
+    const [authLoading, setAuthLoading] = useState(true);
 
-    const clearAuth = useCallback(() => {
+    const clearAuth = () => {
         setCurrentUser(null);
-        setAuthError("");
-    }, []);
+        Cookies.remove("token");
+    };
 
-    const login = useCallback(async (email, password) => {
+    const login = async (email, password) => {
         try {
-            setAuthError("");
             const response = await axios.post(
-                "http://localhost:3001/api/users/login",
+                `${API_BASE_URL}/api/users/login`,
                 { email, password },
                 {
                     withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json" },
                 }
             );
 
             if (response.data.success) {
-                const { user } = response.data.data;
+                const { user, token } = response.data.data;
                 setCurrentUser(user);
+
+                Cookies.set("token", token, { expires: 7 });
+
+                navigate("/dashboard");
                 return { success: true, user };
+            } else {
+                return { success: false, message: response.data.message || "Login failed." };
             }
-            return { success: false, message: response.data.message };
         } catch (error) {
             console.error("Login error:", error);
-            let errorMessage = "Network error. Please try again.";
-            if (error.response) {
-                errorMessage = error.response.data.message || "Login failed.";
-            }
-            setAuthError(errorMessage);
-            return { success: false, message: errorMessage };
+            return { success: false, message: error.response?.data?.message || "Network error." };
         }
-    }, []);
+    };
 
-    const verifyAuth = useCallback(async () => {
+    const fetchCurrentUser = async () => {
+        const token = Cookies.get("token");
+        if (!token) {
+            setAuthLoading(false);
+            return;
+        }
+
         try {
-            const response = await fetch("http://localhost:3001/api/users/profile", {
-                credentials: "include",
+            const response = await axios.get(`${API_BASE_URL}/api/users/me`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
 
-            if (response.ok) {
-                const result = await response.json();
-                if (result.success) {
-                    setCurrentUser(result.data.user);
-                    return true;
-                }
+            if (response.data.success) {
+                setCurrentUser(response.data.data.user);
+            } else {
+                clearAuth();
             }
-
+        } catch (err) {
+            console.error("Failed to fetch current user:", err);
             clearAuth();
-            return false;
-        } catch (error) {
-            console.error("Auth verification error:", error);
-            clearAuth();
-            return false;
-        }
-    }, [clearAuth]);
-
-    const logout = useCallback(async () => {
-        try {
-            await fetch("http://localhost:3001/api/users/logout", {
-                method: "POST",
-                credentials: "include",
-            });
-        } catch (error) {
-            console.error("Logout API call failed:", error);
         } finally {
-            navigate("/login");
-            clearAuth();
+            setAuthLoading(false);
         }
-    }, [clearAuth, navigate]);
+    };
+
+    const logout = () => {
+        clearAuth();
+        navigate("/login");
+    };
 
     useEffect(() => {
-        verifyAuth().finally(() => {
-            setLoading(false);
-        });
-    }, [verifyAuth]);
+        fetchCurrentUser();
+    }, []);
+
+    useEffect(() => {
+        console.log(currentUser)
+    }, [currentUser]);
 
     const value = {
         currentUser,
         setCurrentUser,
         login,
         logout,
-        loading,
-        verifyAuth,
-        authError,
-        clearAuthError: () => setAuthError(""),
+        authLoading,
+        clearAuth,
+        fetchCurrentUser,
     };
 
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

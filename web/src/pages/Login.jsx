@@ -8,10 +8,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, verifyAuth, authError, clearAuthError } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   const from = location.state?.from?.pathname || "/dashboard";
   const inboundError = location.state?.error;
@@ -21,7 +21,6 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    clearAuthError();
 
     if (!email || !password) {
       setError("Please enter both email and password");
@@ -33,20 +32,12 @@ export default function Login() {
       const result = await login(email, password);
 
       if (result.success) {
-        await verifyAuth();
-
-        navigate("/loading", {
-          replace: true,
-          state: {
-            mode: "signin",
-            next: from,
-          },
-        });
+        navigate(from, { replace: true });
       } else {
         setError(result.message);
       }
-    } catch (error) {
-      console.error("Login submission error:", error);
+    } catch (err) {
+      console.error("Login submission error:", err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -56,20 +47,18 @@ export default function Login() {
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
     if (error) setError("");
-    if (authError) clearAuthError();
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
     if (error) setError("");
-    if (authError) clearAuthError();
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const displayError = authError || error || inboundError;
+  const displayError = error || inboundError;
 
   return (
     /* -------------- Main Container -------------- */
