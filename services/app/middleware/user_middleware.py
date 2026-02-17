@@ -1,41 +1,30 @@
-from fastapi import Request, HTTPException
-from functools import wraps
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.utils.jwt_handler import decode_token
+from app.database import users_collection
 
-def auth_required(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        # Find the Request object in args or kwargs
-        request: Request = kwargs.get("request") or next((a for a in args if isinstance(a, Request)), None)
-        if not request:
-            raise Exception("Request object not found")
+security = HTTPBearer()
 
-        token = request.headers.get("Authorization")
-        if not token:
-            raise HTTPException(status_code=401, detail="Unauthorized")
-        
-        try:
-            token = token.replace("Bearer ", "")
-            payload = decode_token(token)
-            request.state.user_id = payload.get("user_id")
-        except Exception as e:
-            raise HTTPException(status_code=401, detail=str(e))
+async def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
+    token = credentials.credentials
+    try:
+        payload = decode_token(token)
+        user_id = payload.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user_id
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
-        return await func(*args, **kwargs)
 
-    return wrapper
+async def get_current_user(user_id: int = Depends(get_current_user_id)):
+    user = await users_collection.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
-def admin_required(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        request: Request = kwargs.get("request") or next((a for a in args if isinstance(a, Request)), None)
-        if not request:
-            raise Exception("Request object not found")
 
-        user = getattr(request.state, "user", None)
-        if not user or user.get("role") != "admin":
-            raise HTTPException(status_code=403, detail="Admin role required")
-
-        return await func(*args, **kwargs)
-    
-    return wrapper
+async def admin_required(user: dict = Depends(get_current_user)):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin role required")
+    return user

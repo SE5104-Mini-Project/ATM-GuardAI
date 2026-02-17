@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.user_routes import router as user_routes
+from app.routes.camera_routes import router as camera_routes
 from app.config import settings
 
 app = FastAPI(
@@ -18,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(user_routes)
+app.include_router(camera_routes)
 
 @app.get("/")
 async def home():

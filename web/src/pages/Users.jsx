@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { UserContext } from "../context/UserContext";
 import Header from "../components/Header";
 
 const roleOptions = [
@@ -16,9 +17,18 @@ const statusOptions = [
 
 export default function Users() {
   const { currentUser } = useContext(AuthContext);
-  const [users, setUsers] = useState([]);
+  const {
+    users,
+    userLoading,
+    fetchUsers,
+    updateUser,
+    deleteUser,
+    addUser,
+    setError,
+    error
+  } = useContext(UserContext);
+
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showAddUser, setShowAddUser] = useState(false);
   const [showEditUser, setShowEditUser] = useState(false);
@@ -148,99 +158,22 @@ export default function Users() {
     ),
   };
 
-  /* ---------- API Functions ---------- */
-  const API_BASE = "http://localhost:3001/api";
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/users`, {
-        credentials: "include",
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        setUsers(result.data.users || []);
-      } else {
-        setError("Failed to fetch users");
-      }
-    } catch (err) {
-      setError("Error connecting to server");
-      console.error("Error fetching users:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createUser = async (userData) => {
-    try {
-      const response = await fetch(`${API_BASE}/users/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(userData),
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUsers();
-        return { success: true, data: result.data };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error creating user", err };
-    }
-  };
-
-  const updateUser = async (userId, userData) => {
-    try {
-      const response = await fetch(`${API_BASE}/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(userData),
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUsers();
-        return { success: true, data: result.data };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error updating user", err };
-    }
-  };
-
-  const deleteUser = async (userId) => {
-    try {
-      const response = await fetch(`${API_BASE}/users/${userId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUsers();
-        return { success: true };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (err) {
-      return { success: false, message: "Error deleting user", err };
-    }
-  };
-
   /* ---------- Effects ---------- */
   useEffect(() => {
-    fetchUsers();
+    const loadUsers = async () => {
+      setLoading(true);
+      await fetchUsers();
+      setLoading(false);
+    };
+    loadUsers();
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      setError(error);
+      setTimeout(() => setError(""), 5000);
+    }
+  }, [error]);
 
   /* ---------- Filters ---------- */
   const [statusFilter, setStatusFilter] = useState("all");
@@ -254,7 +187,7 @@ export default function Users() {
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user._id.toLowerCase().includes(searchQuery.toLowerCase());
+      (user.id || user._id || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesStatus && matchesRole && matchesSearch;
   });
@@ -325,16 +258,18 @@ export default function Users() {
   /* ---------- User Management Functions ---------- */
   const handleAddUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.password) {
-      alert("Please fill in all required fields");
+      setError("Please fill in all required fields");
+      setTimeout(() => setError(""), 5000);
       return;
     }
 
     if (newUser.password.length < 6) {
-      alert("Password must be at least 6 characters long");
+      setError("Password must be at least 6 characters long");
+      setTimeout(() => setError(""), 5000);
       return;
     }
 
-    const result = await createUser(newUser);
+    const result = await addUser(newUser);
 
     if (result.success) {
       setShowAddUser(false);
@@ -355,11 +290,13 @@ export default function Users() {
 
   const handleEditUser = async () => {
     if (!editingUser.name || !editingUser.email) {
-      alert("Please fill in all required fields");
+      setError("Please fill in all required fields");
+      setTimeout(() => setError(""), 5000);
       return;
     }
 
-    const result = await updateUser(editingUser._id, {
+    const userId = editingUser.id || editingUser._id;
+    const result = await updateUser(userId, {
       name: editingUser.name,
       role: editingUser.role,
       status: editingUser.status,
@@ -410,7 +347,8 @@ export default function Users() {
 
   const openEditModal = (user) => {
     setEditingUser({
-      _id: user._id,
+      id: user.id || user._id,
+      _id: user._id || user.id,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -442,8 +380,16 @@ export default function Users() {
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   };
 
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setRoleFilter("all");
+  };
+
   return (
-    <div className="px-3 sm:px-6 pt-6 pb-10 text-slate-900 dark:text-white dark:bg-gray-900">
+    <div
+      className="px-3 sm:px-6 pt-6 pb-10 text-slate-900 dark:text-white dark:bg-gray-900"
+    >
       {/* Header */}
       <Header title={"User Management"} />
 
@@ -562,19 +508,19 @@ export default function Users() {
             )}
 
             <button
-              onClick={fetchUsers}
-              disabled={loading}
+              onClick={() => fetchUsers()}
+              disabled={userLoading}
               className="inline-flex items-center gap-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 hover:shadow-md transition-all disabled:opacity-50"
             >
               {Icon.refresh}
-              {loading ? "Loading..." : "Refresh"}
+              {userLoading ? "Loading..." : "Refresh"}
             </button>
           </div>
         </div>
       </div>
 
       {/* Loading State */}
-      {loading && (
+      {(loading || userLoading) && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Loading users...</p>
@@ -582,7 +528,7 @@ export default function Users() {
       )}
 
       {/* Users Table */}
-      {!loading && (
+      {!loading && !userLoading && (
         <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -610,7 +556,7 @@ export default function Users() {
               <tbody className="bg-gray-50 dark:bg-gray-800 space-y-3">
                 {filteredUsers.map((user) => (
                   <tr
-                    key={user._id}
+                    key={user.id || user._id}
                     className="group bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:shadow-sm transition-all duration-200"
                   >
                     <td className="px-6 py-5 whitespace-nowrap relative">
@@ -621,7 +567,8 @@ export default function Users() {
                               .split(" ")
                               .map((n) => n[0])
                               .join("")
-                              .toUpperCase()}
+                              .toUpperCase()
+                              .substring(0, 2)}
                           </span>
                         </div>
                         <div className="ml-4">
@@ -634,7 +581,7 @@ export default function Users() {
                           </div>
 
                           <span className="inline-block mt-1 text-[11px] bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300 px-2 py-0.5 rounded-md font-mono">
-                            {user._id}
+                            {user.id || user._id}
                           </span>
                         </div>
                       </div>
@@ -657,13 +604,15 @@ export default function Users() {
                           <button
                             onClick={() => openEditModal(user)}
                             className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 transition"
+                            title="Edit user"
                           >
                             {Icon.edit}
                           </button>
 
                           <button
-                            onClick={() => handleDeleteUser(user._id)}
+                            onClick={() => handleDeleteUser(user.id || user._id)}
                             className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition"
+                            title="Delete user"
                           >
                             {Icon.delete}
                           </button>
@@ -701,11 +650,7 @@ export default function Users() {
                 Try adjusting your search or filter criteria
               </p>
               <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setStatusFilter("all");
-                  setRoleFilter("all");
-                }}
+                onClick={clearFilters}
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
               >
                 Clear all filters

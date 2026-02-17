@@ -2,4 +2,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.config import settings
 
 client = AsyncIOMotorClient(settings.MONGO_URI)
-db = client.get_database()
+
+db = client[settings.MONGO_DB_NAME]
+users_collection = db["users"]

@@ -1,11 +1,10 @@
-from fastapi import HTTPException, Depends
 from app.database import db
-from app.models.counter import get_next_user_id
+from app.models.counter_model import get_next_id
 from app.utils.hash import hash_password, verify_password
 from app.utils.jwt_handler import create_token
 from datetime import datetime
-from typing import Optional
 import re
+
 
 class UserController:
 
@@ -25,7 +24,7 @@ class UserController:
         if existing_user:
             return {"success": False, "message": "User already exists with this email"}
 
-        user_id = await get_next_user_id()
+        user_id = await get_next_id("user")
         now = datetime.utcnow()
 
         user = {
@@ -41,7 +40,6 @@ class UserController:
         }
 
         await db.users.insert_one(user)
-
         token = create_token(user_id)
 
         return {
@@ -56,7 +54,7 @@ class UserController:
                     "status": "Active",
                     "createdAt": now
                 },
-                "token": token 
+                "token": token
             }
         }
 
@@ -75,7 +73,6 @@ class UserController:
             return {"success": False, "message": "Your account is not active. Please contact administrator."}
 
         token = create_token(user["_id"])
-
         await db.users.update_one({"_id": user["_id"]}, {"$set": {"lastLogin": datetime.utcnow()}})
 
         user_data = {k: v for k, v in user.items() if k != "password"}
@@ -93,6 +90,40 @@ class UserController:
         user = await db.users.find_one({"_id": user_id})
         if not user:
             return {"success": False, "message": "User not found"}
-
         user_data = {k: v for k, v in user.items() if k != "password"}
         return {"success": True, "data": {"user": user_data}}
+
+    async def get_users(self, skip: int = 0, limit: int = 100):
+        cursor = db.users.find().skip(skip).limit(limit)
+        users = []
+        async for user in cursor:
+            user_data = {k: v for k, v in user.items() if k != "password"}
+            users.append(user_data)
+        return {"success": True, "data": {"users": users}}
+
+    async def get_user(self, user_id: str):
+        user = await db.users.find_one({"_id": user_id})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        user_data = {k: v for k, v in user.items() if k != "password"}
+        return {"success": True, "data": {"user": user_data}}
+
+    async def update_user(self, user_id: str, payload: dict):
+        if "password" in payload:
+            payload["password"] = hash_password(payload["password"])
+
+        payload["updatedAt"] = datetime.utcnow()
+
+        result = await db.users.update_one({"_id": user_id}, {"$set": payload})
+        if result.matched_count == 0:
+            return {"success": False, "message": "User not found"}
+
+        updated_user = await db.users.find_one({"_id": user_id})
+        user_data = {k: v for k, v in updated_user.items() if k != "password"}
+        return {"success": True, "message": "User updated successfully", "data": {"user": user_data}}
+
+    async def delete_user(self, user_id: str):
+        result = await db.users.delete_one({"_id": user_id})
+        if result.deleted_count == 0:
+            return {"success": False, "message": "User not found"}
+        return {"success": True, "message": "User deleted successfully"}

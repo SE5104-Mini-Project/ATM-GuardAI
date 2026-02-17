@@ -18,23 +18,19 @@ export function AuthProvider({ children }) {
         Cookies.remove("token");
     };
 
+    // Login method
     const login = async (email, password) => {
         try {
             const response = await axios.post(
                 `${API_BASE_URL}/api/users/login`,
                 { email, password },
-                {
-                    withCredentials: true,
-                    headers: { "Content-Type": "application/json" },
-                }
+                { headers: { "Content-Type": "application/json" } }
             );
 
             if (response.data.success) {
                 const { user, token } = response.data.data;
                 setCurrentUser(user);
-
                 Cookies.set("token", token, { expires: 7 });
-
                 navigate("/dashboard");
                 return { success: true, user };
             } else {
@@ -46,6 +42,31 @@ export function AuthProvider({ children }) {
         }
     };
 
+    // Register method
+    const register = async (name, email, password, role = "user") => {
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/api/users/register`,
+                { name, email, password, role },
+                { headers: { "Content-Type": "application/json" } }
+            );
+
+            if (response.data.success) {
+                const { user, token } = response.data.data;
+                setCurrentUser(user);
+                Cookies.set("token", token, { expires: 7 });
+                navigate("/dashboard");
+                return { success: true, user };
+            } else {
+                return { success: false, message: response.data.message || "Registration failed." };
+            }
+        } catch (error) {
+            console.error("Registration error:", error);
+            return { success: false, message: error.response?.data?.message || "Network error." };
+        }
+    };
+
+    // Fetch current user
     const fetchCurrentUser = async () => {
         const token = Cookies.get("token");
         if (!token) {
@@ -71,6 +92,7 @@ export function AuthProvider({ children }) {
         }
     };
 
+    // Logout method
     const logout = () => {
         clearAuth();
         navigate("/login");
@@ -80,14 +102,11 @@ export function AuthProvider({ children }) {
         fetchCurrentUser();
     }, []);
 
-    useEffect(() => {
-        console.log(currentUser)
-    }, [currentUser]);
-
     const value = {
         currentUser,
         setCurrentUser,
         login,
+        register,
         logout,
         authLoading,
         clearAuth,
