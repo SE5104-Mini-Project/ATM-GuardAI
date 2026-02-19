@@ -1,6 +1,6 @@
 from datetime import datetime
 import validators
-from app.database import db
+from app.database import cameras_collection
 from app.models.counter_model import get_next_id
 
 
@@ -12,8 +12,8 @@ class CameraController:
                 return {"success": False, "message": "Invalid stream URL format"}
 
         camera_id = await get_next_id("camera")
-        auto_increment = int(camera_id.split("_")[1])  
-        
+        auto_increment = int(camera_id.split("_")[1])
+
         now = datetime.utcnow()
 
         camera = {
@@ -36,27 +36,18 @@ class CameraController:
             "updatedAt": now,
         }
 
-        await db.cameras.insert_one(camera)
-
+        await cameras_collection.insert_one(camera)
         return {"success": True, "message": "Camera created successfully", "data": camera}
 
-    async def get_cameras(self, skip: int, limit: int, filters: dict):
-        cursor = db.cameras.find(filters).skip(skip).limit(limit)
-        cameras = [cam async for cam in cursor]
-        total = await db.cameras.count_documents(filters)
-
-        return {
-            "success": True,
-            "data": cameras,
-            "pagination": {
-                "skip": skip,
-                "limit": limit,
-                "total": total
-            }
-        }
+    async def get_cameras(self):
+        cameras = []
+        async for camera in cameras_collection.find({}):
+            camera["_id"] = str(camera["_id"])
+            cameras.append(camera)
+        return {"cameras": cameras}
 
     async def get_camera(self, camera_id: str):
-        camera = await db.cameras.find_one({"_id": camera_id})
+        camera = await cameras_collection.find_one({"_id": camera_id})
         if not camera:
             return {"success": False, "message": "Camera not found"}
         return {"success": True, "data": camera}
@@ -76,12 +67,12 @@ class CameraController:
             payload.pop("latitude", None)
             payload.pop("longitude", None)
 
-        result = await db.cameras.update_one({"_id": camera_id}, {"$set": payload})
+        result = await cameras_collection.update_one({"_id": camera_id}, {"$set": payload})
 
         if result.matched_count == 0:
             return {"success": False, "message": "Camera not found"}
 
-        updated = await db.cameras.find_one({"_id": camera_id})
+        updated = await cameras_collection.find_one({"_id": camera_id})
         return {"success": True, "message": "Camera updated", "data": updated}
 
     async def update_status(self, camera_id: str, status: str):
@@ -93,32 +84,31 @@ class CameraController:
         if status == "online":
             update["lastAvailableTime"] = datetime.utcnow()
 
-        result = await db.cameras.update_one({"_id": camera_id}, {"$set": update})
+        result = await cameras_collection.update_one({"_id": camera_id}, {"$set": update})
 
         if result.matched_count == 0:
             return {"success": False, "message": "Camera not found"}
 
-        updated = await db.cameras.find_one({"_id": camera_id})
+        updated = await cameras_collection.find_one({"_id": camera_id})
         return {"success": True, "message": "Status updated", "data": updated}
 
     async def delete_camera(self, camera_id: str):
-        result = await db.cameras.delete_one({"_id": camera_id})
+        result = await cameras_collection.delete_one({"_id": camera_id})
         if result.deleted_count == 0:
             return {"success": False, "message": "Camera not found"}
-
         return {"success": True, "message": "Camera deleted"}
 
     async def get_stats(self):
-        total = await db.cameras.count_documents({})
-        online = await db.cameras.count_documents({"status": "online"})
-        offline = await db.cameras.count_documents({"status": "offline"})
+        total = await cameras_collection.count_documents({})
+        online = await cameras_collection.count_documents({"status": "online"})
+        offline = await cameras_collection.count_documents({"status": "offline"})
 
-        by_province = await db.cameras.aggregate([
+        by_province = await cameras_collection.aggregate([
             {"$group": {"_id": "$province", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}}
         ]).to_list(None)
 
-        by_bank = await db.cameras.aggregate([
+        by_bank = await cameras_collection.aggregate([
             {"$group": {"_id": "$bankName", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}}
         ]).to_list(None)
@@ -133,3 +123,4 @@ class CameraController:
                 "byBank": by_bank
             }
         }
+    

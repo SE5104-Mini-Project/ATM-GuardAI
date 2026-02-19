@@ -5,3 +5,5 @@ client = AsyncIOMotorClient(settings.MONGO_URI)
 
 db = client[settings.MONGO_DB_NAME]
 users_collection = db["users"]
+cameras_collection = db["cameras"]
+counter_collection = db["counters"]

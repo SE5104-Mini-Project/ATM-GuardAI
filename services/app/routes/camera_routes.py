@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from app.schemas.camera_schema import CameraCreateSchema, CameraUpdateSchema, CameraStatusUpdateSchema
 from app.controllers.camera_controller import CameraController
-from app.middleware.user_middleware import admin_required 
+from app.middleware.user_middleware import get_current_user, admin_required
 
 router = APIRouter(prefix="/api/cameras", tags=["Cameras"])
 controller = CameraController()
@@ -11,42 +11,15 @@ async def create_camera(payload: CameraCreateSchema):
     return await controller.create_camera(payload)
 
 @router.get("/")
-async def list_cameras(
-    skip: int = 0,
-    limit: int = 20,
-    status: str = None,
-    branch: str = None,
-    district: str = None,
-    province: str = None,
-    search: str = None,
-):
-    filters = {}
-
-    if status:
-        filters["status"] = status
-    if branch:
-        filters["branch"] = {"$regex": branch, "$options": "i"}
-    if district:
-        filters["district"] = {"$regex": district, "$options": "i"}
-    if province:
-        filters["province"] = {"$regex": province, "$options": "i"}
-    if search:
-        filters["$or"] = [
-            {"name": {"$regex": search, "$options": "i"}},
-            {"bankName": {"$regex": search, "$options": "i"}},
-            {"branch": {"$regex": search, "$options": "i"}},
-            {"address": {"$regex": search, "$options": "i"}},
-            {"streamUrl": {"$regex": search, "$options": "i"}},
-        ]
-
-    return await controller.get_cameras(skip, limit, filters)
+async def list_cameras(user: dict = Depends(get_current_user)):
+    return await controller.get_cameras()
 
 @router.get("/stats")
-async def camera_stats():
+async def camera_stats(user: dict = Depends(get_current_user)):
     return await controller.get_stats()
 
 @router.get("/{camera_id}")
-async def get_camera(camera_id: str):
+async def get_camera(camera_id: str, user: dict = Depends(get_current_user)):
     return await controller.get_camera(camera_id)
 
 @router.put("/{camera_id}")

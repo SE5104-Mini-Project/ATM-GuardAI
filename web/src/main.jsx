@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { UserProvider } from "./context/UserContext";
+import { CameraProvider } from "./context/CameraContext.jsx";
 import "./index.css";
 import App from "./App.jsx";
 
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>
         <UserProvider>
-          <App />
+          <CameraProvider>
+            <App />
+          </CameraProvider>
         </UserProvider>
       </AuthProvider>
     </BrowserRouter>

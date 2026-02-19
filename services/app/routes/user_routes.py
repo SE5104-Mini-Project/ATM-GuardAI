@@ -3,12 +3,12 @@ from app.schemas.user_schema import RegisterSchema, LoginSchema
 from app.controllers.user_controller import UserController
 from app.middleware.user_middleware import get_current_user, admin_required
 
-router = APIRouter( prefix="/api/users", tags=["Users"])
+router = APIRouter(prefix="/api/users", tags=["Users"])
 
 controller = UserController()
 
 @router.post("/register")
-async def register(payload: RegisterSchema):
+async def register(payload: RegisterSchema, user: dict = Depends(admin_required)):
     return await controller.register(payload)
 
 @router.post("/login")
