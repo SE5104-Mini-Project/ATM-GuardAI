@@ -32,7 +32,7 @@ It detects suspicious activities in real-time and instantly alerts security pers
 
 <p align="center">
   <a href="https://www.linkedin.com/posts/activity-7432323055974244352-S2dN?utm_source=share&utm_medium=member_desktop&rcm=ACoAAE51YIEBrTCtX1BSo373XMSL-9dyXkfWh1o">
-    <img src="https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg" width="700">
+   <img width="688" height="351" alt="image" src="https://github.com/user-attachments/assets/311d6e0a-5530-46de-b6f4-d802d5cb4bb4" />
   </a>
 </p>
 
